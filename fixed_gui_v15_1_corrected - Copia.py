@@ -68,15 +68,6 @@ except ImportError as e:
 class EnhancedCertificateDialogV15_1_Corrected:
     """Dialog certificato completo v15.1 CORRECTED con TUTTI i campi necessari"""
     
-    # Mappa descrizioni per Tipo Dipendenza - DEFINITO COME ATTRIBUTO DI CLASSE
-    _dependency_descriptions = {
-        'Worst-Of': "🔻 WORST-OF: Il peggiore tra tutti determina il payoff (MASSIMO RISCHIO). Performance = MIN(asset1, asset2, asset3, ...) - Basta che uno crolli!",
-        'Best-Of': "🔺 BEST-OF: Il migliore tra tutti determina il payoff (MINIMO RISCHIO). Performance = MAX(asset1, asset2, asset3, ...) - Uno solo deve andare bene.",
-        'Average': "📈 AVERAGE/BASKET: Performance media ponderata (RISCHIO INTERMEDIO). Performance = MEDIA(asset1, asset2, asset3, ...) - Compensazione reciproca.",
-        'Single': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostante - Struttura complessa.", # Mappato a Rainbow
-        'Basket Custom': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostante - Struttura complessa." # Mappato a Rainbow
-    }
-
     def __init__(self, parent, title, existing_data=None):
         self.result = None
         self.existing_data = copy.deepcopy(existing_data) if existing_data else {}
@@ -423,15 +414,14 @@ class EnhancedCertificateDialogV15_1_Corrected:
         self.fields['underlying_dependency_type'].pack(side=tk.LEFT, padx=(5,0))
         self.fields['underlying_dependency_type'].bind("<<ComboboxSelected>>", self._update_dependency_description)
 
-        # Descrizione Tipo Dipendenza (Label)
-        self.dependency_description_label = ttk.Label(underlying_frame, text="", 
-                                                     font=("Arial", 9, "italic"), 
-                                                     foreground="gray", 
+        # Descrizione Tipo Dipendenza
+        self.dependency_description_label = ttk.Label(underlying_frame, text="",
+                                                     font=("Arial", 9, "italic"),
+                                                     foreground="gray",
                                                      wraplength=700) # A capo automatico
         self.dependency_description_label.pack(fill=tk.X, padx=10, pady=(0, 5))
-        # Aggiorna descrizione iniziale
-        self._update_dependency_description()    
 
+        
         # =======================================
         # CARICA DATI ESISTENTI v15.1
         # =======================================
@@ -713,15 +703,6 @@ class EnhancedCertificateDialogV15_1_Corrected:
 class SimpleCertificateGUIManagerV15_1_Corrected:
     """*** GUI MANAGER v15.1 CORRECTED *** - Con calc date integrata e correzioni complete"""
     
-    # Mappa descrizioni per Tipo Dipendenza - DEFINITO COME ATTRIBUTO DI CLASSE
-    _dependency_descriptions = {
-        'Worst-Of': "🔻 WORST-OF: Il peggiore tra tutti determina il payoff (MASSIMO RISCHIO). Performance = MIN(asset1, asset2, asset3, ...) - Basta che uno crolli!",
-        'Best-Of': "🔺 BEST-OF: Il migliore tra tutti determina il payoff (MINIMO RISCHIO). Performance = MAX(asset1, asset2, asset3, ...) - Uno solo deve andare bene.",
-        'Average': "📈 AVERAGE/BASKET: Performance media ponderata (RISCHIO INTERMEDIO). Performance = MEDIA(asset1, asset2, asset3, ...) - Compensazione reciproca.",
-        'Single': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostante - Struttura complessa.", # Mappato a Rainbow
-        'Basket Custom': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostante - Struttura complessa." # Mappato a Rainbow
-    }
-
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Sistema Certificati v15.1 CORRECTED")
@@ -731,6 +712,16 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         self.certificates = {}
         self.cert_file = Path("certificates_v15_1_corrected.json")
         
+        # Mappa descrizioni per Tipo Dipendenza (SPOSTATO QUI)
+        self._dependency_descriptions = {
+            'Worst-Of': "🔻 WORST-OF: Il peggiore tra tutti determina il payoff (MASSIMO RISCHIO). Performance = MIN(asset1, asset2, asset3, ...) - Basta che uno crolli!",
+            'Best-Of': "🔺 BEST-OF: Il migliore tra tutti determina il payoff (MINIMO RISCHIO). Performance = MAX(asset1, asset2, asset3, ...) - Uno solo deve andare bene.",
+            'Average': "📈 AVERAGE/BASKET: Performance media ponderata (RISCHIO INTERMEDIO). Performance = MEDIA(asset1, asset2, asset3, ...) - Compensazione reciproca.",
+            'Single': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostante - Struttura complessa.", # Mappato a Rainbow
+            'Basket Custom': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostante - Struttura complessa." # Mappato a Rainbow
+        }
+
+
         # Enhanced manager per calc date
         if ENHANCED_MANAGER_AVAILABLE:
             try:
@@ -1172,20 +1163,20 @@ Livello Iniziale: {format_percentage(cert_data.get('dynamic_barrier_start_level'
 Step Down Rate: {format_percentage(cert_data.get('step_down_rate', 0), decimals=3)}
 Livello Finale: {format_percentage(cert_data.get('dynamic_barrier_end_level', 0))}
 Mesi di Ritardo Osservazione: {cert_data.get('observation_delay_months', 'N/A')}
-''' if cert_data.get('dynamic_barrier_feature') else ''}
+""" if cert_data.get('dynamic_barrier_feature') else ''}
 
 SOTTOSTANTI:
 Tickers Sottostanti (Yahoo): {cert_data.get('yahoo_ticker', 'N/A')}
 Nomi/Desc Sottostanti: {cert_data.get('underlying_names', 'N/A')}
 Valute Sottostanti: {cert_data.get('underlying_currencies', 'N/A')}
 Tipo Dipendenza Sottostanti: {cert_data.get('underlying_dependency_type', 'N/A')}
-"""
+"""  # <-- Questo chiude la prima parte della stringa 'details'
         # Aggiungi descrizione della dipendenza se disponibile (usa self._dependency_descriptions)
         dependency_type = cert_data.get('underlying_dependency_type')
         if dependency_type and dependency_type in self._dependency_descriptions:
             details += f"Descrizione Dipendenza: {self._dependency_descriptions[dependency_type]}\n"
         
-        details += f"""
+        details += f""" # <-- Questo apre e aggiunge la seconda parte della stringa 'details'
 Valuta Certificato: {cert_data.get('currency', 'N/A')}
 
 DATI AVANZATI:
