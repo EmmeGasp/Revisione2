@@ -1,3 +1,10 @@
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classi GUI: EnhancedCertificateDialogV15_1_Corrected
+# - Import e compatibilità con RealCertificateConfig, EnhancedCertificateManagerV15
+# - Gestione completa campi certificato, conversione, validazione, dialog avanzato
+# ==========================================================
+
 # ========================================
 # Fixed GUI Manager v15.1 CORRECTED - Versione Funzionante
 # Timestamp: 2025-06-21 18:00:00 (Aggiornato)

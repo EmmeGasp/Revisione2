@@ -1,3 +1,10 @@
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classe principale: AdvancedExcelExporter (export avanzato Excel con grafici, dashboard, analisi)
+# - Funzioni di integrazione con sistema esistente
+# - Funzione di test: test_advanced_excel_export
+# ==========================================================
+
 # ========================================
 # EXCEL ENHANCEMENT - PIANO DETTAGLIATO
 # Ricreazione funzionalità avanzate del file originale

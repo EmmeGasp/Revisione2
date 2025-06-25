@@ -1,3 +1,10 @@
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classi principali: MarketData, CertificateSpecs, UnifiedValidator, ConsolidatedDataImporter,
+#   CertificateBase, BarrierCertificate, BlackScholesModel, MonteCarloEngine, DateUtils
+# - Funzioni/metodi per pricing, simulazione Monte Carlo, validazione dati, utilità date
+# ==========================================================
+
 # ========================================
 # File: structural_cleanup.py
 # Timestamp: 2025-06-17 18:32:00

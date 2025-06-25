@@ -1,3 +1,10 @@
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Funzione principale: cleanup_test_portfolios
+# - Setup logging, import, e piano di test integrazione
+# - (Il file serve per test end-to-end del sistema portafogli/certificati)
+# ==========================================================
+
 # ========================================
 # TEST INTEGRAZIONE COMPLETA v15.0
 # Sistema Certificati Finanziari - Test End-to-End

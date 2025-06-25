@@ -1,3 +1,9 @@
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classi principali: RiskMetrics, UnifiedRiskAnalyzer, UnifiedStressTestEngine, UnifiedComplianceChecker, UnifiedRiskDashboard
+# - Funzioni di analisi rischio, stress test, compliance, dashboard, reportistica
+# - Funzione di test: test_consolidated_risk_system
+# ==========================================================
 # ========================================
 # RISK SYSTEM CONSOLIDATION - SISTEMA RISCHI UNIFICATO
 # Sistema Certificati Finanziari - Risk Management Consolidato
@@ -809,13 +815,7 @@ class UnifiedStressTestEngine:
             # Summary statistics
             valid_scenarios = [s for s in scenario_results.values() if 'error' not in s]
             if valid_scenarios:
-                pnl_values = [s['pnl_pct'] for s in valid_scenarios]
-                
-                results['summary'] = {
-                    'base_price': base_price,
-                    'scenarios_tested': len(valid_scenarios),
-                    'worst_case_loss_pct': worst_case_loss,
-                    'best_case_gain_pct': best_case_gain,
+                pnl_values = [s['pnl_pct'] for s in valid_scenari
                     'average_pnl_pct': np.mean(pnl_values),
                     'volatility_pnl_pct': np.std(pnl_values),
                     'scenarios_with_loss': len([p for p in pnl_values if p < 0]),

@@ -1,3 +1,10 @@
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classi GUI: EnhancedCertificateDialog
+# - Gestione tipi certificato, parametri richiesti, descrizioni
+# - Dialog per inserimento/modifica certificati con interfaccia grafica
+# ==========================================================
+
 # ========================================
 # SIMPLE GUI MANAGER - Interface Funzionante
 # GUI semplice che funziona con il sistema esistente

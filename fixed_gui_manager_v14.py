@@ -1,3 +1,10 @@
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classe principale: SimpleCertificateGUIManagerV15_1_Corrected
+# - Metodi per gestione GUI certificati: caricamento, salvataggio, visualizzazione dettagli, analisi
+# - Funzioni di supporto per conversione campi, compatibilità v15.1
+# ==========================================================
+
 # ========================================
 # Fixed GUI Manager v15.1 CORRECTED - Versione Funzionante
 # Timestamp: 2025-06-18 16:10:00

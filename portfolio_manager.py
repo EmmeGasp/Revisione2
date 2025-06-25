@@ -24,6 +24,14 @@ INTEGRAZIONE:
 ✅ GUI integration ready
 """
 
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - @dataclass: PortfolioConfig, PortfolioMetrics
+# - Classe principale: PortfolioManager (gestione portafogli, posizioni, analytics, reporting)
+# - Classe: PortfolioGUIManager (integrazione GUI)
+# - Funzioni di test/demo: test_portfolio_system
+# ==========================================================
+
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta

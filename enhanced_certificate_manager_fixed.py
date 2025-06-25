@@ -1,3 +1,11 @@
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classi: EnhancedCertificateConfig, InLifeCertificateState, YahooFinanceDataProvider, DateCalculationUtils
+# - Classe principale: EnhancedCertificateManagerV15 (gestione certificati avanzata)
+# - Classi GUI: CalculoDateAutoDialogV15, PreviewDialog
+# - Funzioni di test e integrazione con GUI v14
+# ==========================================================
+
 # ========================================
 # ENHANCED CERTIFICATE MANAGER - VERSIONE CORRETTA v15
 # Tutte le correzioni integrate: yahoo_ticker, calcolo date, dimensioni finestre

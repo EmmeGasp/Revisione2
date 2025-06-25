@@ -1,0 +1,30 @@
+// diario_chat_certificati.txt
+
+# Diario attività progetto "Gestione Certificati Finanziari"
+
+## Data ultimo aggiornamento: 24 giugno 2025
+
+### Contesto
+- Progetto personale per la gestione e valutazione di certificati finanziari, singoli o in portafoglio.
+- File principale: `fixed_gui_v15_1_corrected.py` (gestione GUI e logica principale).
+- Moduli ausiliari per analisi, gestione parametri, portafoglio, ecc.
+- Struttura modulare, con alcune difficoltà storiche di gestione delle modifiche e delle dipendenze.
+
+### Stato attuale
+- Gestione parametri certificato: **praticamente ultimata**.
+- Prossimo step: **testare inserimento e gestione di più certificati** tramite GUI.
+- Interesse a usare **dati reali** (es. da certificatiederivati.it) per testare la correttezza e la robustezza della struttura.
+
+### Prossimi passi suggeriti
+1. Scegliere alcuni certificati reali e raccogliere i dati principali (ISIN, barriera, sottostanti, scadenza, ecc.).
+2. Inserire questi dati tramite la GUI e verificare la corretta gestione di tutti i campi.
+3. Testare salvataggio, caricamento, modifica e cancellazione di più certificati.
+4. **(Da pianificare più avanti)**: Confrontare i risultati (calcoli, visualizzazione) con quelli pubblicati sui siti di riferimento, dopo la riconfigurazione della struttura modulare.
+5. Annotare eventuali anomalie o problemi riscontrati.
+
+### Note operative
+- La chat con Copilot **non è persistente**: ogni sessione è indipendente.
+- Salvare questo file e aggiornarlo a ogni sessione.
+- All’inizio di una nuova chat, incollare il contenuto aggiornato per fornire il contesto.
+
+---
