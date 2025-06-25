@@ -1,3 +1,12 @@
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classi: CertificateConfigManager, CertificateTemplates, EnhancedCertificateSystem
+# - Gestione configurazioni certificati senza database (JSON)
+# - Template per diversi tipi di certificati
+# - Funzioni: creazione, salvataggio, caricamento, portfolio management, integrazione con sistema reale
+# - Esempio pratico: setup_user_certificates, test_enhanced_system
+# ==========================================================
+
 # ========================================
 # CERTIFICATE MANAGER - GESTIONE SENZA DATABASE
 # Sistema per gestire multiple configurazioni certificate
@@ -409,8 +418,7 @@ def setup_user_certificates():
     system.config_manager.create_portfolio_config(
         'PORTFOLIO_PRINCIPALE',
         ['DE000VG6DRR5', 'XS2675104231'],
-        [0.60, 0.40],  # 60% cash collect, 40% express
-        'Portfolio principale con focus banche italiane'
+        [0.60, 0.40]  # 60% cash collect, 40% express
     )
     
     print("✅ Setup completato!")

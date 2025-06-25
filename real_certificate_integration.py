@@ -1,3 +1,10 @@
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classi principali: RealCertificateConfig, UnderlyingEvaluationEngine, RealCertificateImporter, EnhancedExcelExporter, IntegratedCertificateSystem
+# - Funzioni: importazione certificati reali, conversione, integrazione, export Excel avanzato, gestione portfolio multi-certificato
+# - Esempi pratici: create_de000vg6drr5_certificate, test_integrated_system
+# ==========================================================
+
 # ========================================
 # File Reale_certificate_integration.py ver 14.11
 # Timestamp: 2025-06-16 00:09:01
@@ -1587,107 +1594,3 @@ class IntegratedCertificateSystem:
             'portfolio_stress': portfolio_stress,
             'portfolio_compliance': portfolio_compliance
         }
-
-# ========================================
-# TESTING INTEGRATO
-# ========================================
-
-def test_integrated_system():
-    """Test completo sistema integrato"""
-    
-    print("\n🧪 TEST SISTEMA INTEGRATO")
-    print("="*50)
-    
-    try:
-        # Test 1: Import certificato DE000VG6DRR5
-        print("1. Test import DE000VG6DRR5...")
-        certificate = create_de000vg6drr5_certificate()
-        assert certificate.specs.isin == "DE000VG6DRR5"
-        print("   ✅ Import DE000VG6DRR5 OK")
-        
-        # Test 2: Sistema integrato
-        print("2. Test sistema integrato...")
-        system = IntegratedCertificateSystem()
-        assert system.importer is not None
-        assert system.excel_exporter is not None
-        print("   ✅ Sistema integrato OK")
-        
-        # Test 3: Enhanced Excel export
-        print("3. Test Excel avanzato...")
-        
-        # Mock analysis results
-        analysis_results = {
-            'fair_value': {'fair_value': 1025.0, 'expected_return': 0.075},
-            'risk_metrics': {'var_95': -0.12, 'volatility': 0.25, 'sharpe_ratio': 0.85}
-        }
-        
-        excel_file = system.excel_exporter.create_comprehensive_certificate_report(
-            certificate, analysis_results
-        )
-        
-        if excel_file:
-            print(f"   ✅ Excel avanzato creato: {excel_file}")
-        else:
-            print("   ⚠️  Excel avanzato fallback a versione semplice")
-        
-        # Test 4: Real certificate importer
-        print("4. Test real certificate importer...")
-        
-        # Config semplificato per test
-        test_config = RealCertificateConfig(
-            isin="TEST12345678",
-            name="Test Certificate",
-            certificate_type="cash_collect",
-            issuer="Test Bank",
-            underlying_assets=["TEST1", "TEST2"],
-            issue_date=datetime.now(),
-            maturity_date=datetime.now() + timedelta(days=365),
-            notional=1000.0,
-            coupon_rates=[0.05, 0.05],
-            coupon_dates=[
-                datetime.now() + timedelta(days=180),
-                datetime.now() + timedelta(days=365)
-            ],
-            current_spots=[100.0, 200.0],
-            volatilities=[0.20, 0.25]
-        )
-        
-        test_cert = system.importer.import_certificate(test_config)
-        assert test_cert.specs.isin == "TEST12345678"
-        print("   ✅ Real certificate importer OK")
-        
-        print("\n🎉 TUTTI I TEST INTEGRATI PASSATI!")
-        return True
-        
-    except Exception as e:
-        print(f"\n❌ Test integrato fallito: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-
-if __name__ == "__main__":
-    print("REAL CERTIFICATE INTEGRATION SYSTEM")
-    print("Sistema per integrare certificati reali nel framework")
-    print("="*60)
-    
-    # Test sistema
-    success = test_integrated_system()
-    
-    if success:
-        print("\n✅ SISTEMA INTEGRATO PRONTO!")
-        print("\nFUNZIONALITÀ DISPONIBILI:")
-        print("🏦 Import certificati reali (DE000VG6DRR5 e altri)")
-        print("📊 Excel reports avanzati (dashboard + grafici)")
-        print("⚠️  Risk analysis completo")
-        print("🧪 Stress testing")
-        print("✅ Compliance checking") 
-        print("📈 Portfolio management")
-        
-        print(f"\n📋 ESEMPIO PRATICO:")
-        print("# Usa il tuo certificato DE000VG6DRR5")
-        print("certificate = create_de000vg6drr5_certificate()")
-        print("system = IntegratedCertificateSystem()")
-        print("cert, results = system.process_real_certificate(config)")
-    
-    else:
-        print("\n❌ ERRORI NEL SISTEMA INTEGRATO")
