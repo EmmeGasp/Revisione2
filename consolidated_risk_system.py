@@ -815,7 +815,13 @@ class UnifiedStressTestEngine:
             # Summary statistics
             valid_scenarios = [s for s in scenario_results.values() if 'error' not in s]
             if valid_scenarios:
-                pnl_values = [s['pnl_pct'] for s in valid_scenari
+                pnl_values = [s['pnl_pct'] for s in valid_scenarios]
+                
+                results['summary'] = {
+                    'base_price': base_price,
+                    'scenarios_tested': len(valid_scenarios),
+                    'worst_case_loss_pct': worst_case_loss,
+                    'best_case_gain_pct': best_case_gain,
                     'average_pnl_pct': np.mean(pnl_values),
                     'volatility_pnl_pct': np.std(pnl_values),
                     'scenarios_with_loss': len([p for p in pnl_values if p < 0]),
@@ -1976,4 +1982,3 @@ if __name__ == "__main__":
         
     else:
         print("\n❌ ERRORI NEL RISK SYSTEM CONSOLIDATION - VERIFICARE LOG")
-                    

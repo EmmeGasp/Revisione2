@@ -81,7 +81,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
         'Best-Of': "🔺 BEST-OF: Il migliore tra tutti determina il payoff (MINIMO RISCHIO). Performance = MAX(asset1, asset2, asset3, ...) - Uno solo deve andare bene.",
         'Average': "📈 AVERAGE/BASKET: Performance media ponderata (RISCHIO INTERMEDIO). Performance = MEDIA(asset1, asset2, asset3, ...) - Compensazione reciproca.",
         'Single': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostante - Struttura complessa.", # Mappato a Rainbow
-        'Basket Custom': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostante - Struttura complessa." # Mappato a Rainbow
+        'Basket Custom': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostanti - Struttura complessa." # Mappato a Rainbow
     }
 
     def __init__(self, parent, title, existing_data=None):
@@ -325,6 +325,13 @@ class EnhancedCertificateDialogV15_1_Corrected:
         self.fields['airbag_level'] = ttk.Entry(airbag_control_frame, width=10)
         self.fields['airbag_level'].pack(side=tk.LEFT, padx=(5, 0))
 
+        # --- Campo note airbag ---
+        self.airbag_notes_label = ttk.Label(airbag_control_frame, text="Note Airbag:", width=12)
+        self.airbag_notes_label.pack(side=tk.LEFT, padx=(20, 0))
+        self.fields['airbag_notes'] = tk.Text(airbag_control_frame, width=30, height=2, wrap=tk.WORD)
+        self.fields['airbag_notes'].pack(side=tk.LEFT, padx=(5, 0))
+        # --- Fine campo note airbag ---
+
         # Inizializza lo stato del campo Livello Airbag
         self._toggle_airbag_level_field()
 
@@ -369,6 +376,14 @@ class EnhancedCertificateDialogV15_1_Corrected:
         # --- NUOVA SEZIONE: Parametri Barriera Dinamica (inizialmente nascosta, ora dentro barriers_frame) ---
         self.dynamic_barrier_params_frame = ttk.LabelFrame(barriers_frame, text="⚙️ Parametri Barriera Dinamica", padding=15)
         # Non packare qui, sarà gestito da _on_capital_barrier_type_changed
+
+        # Livello Iniziale (dynamic_barrier_start_level) -- *** AGGIUNTO ***
+        db_row1_frame = ttk.Frame(self.dynamic_barrier_params_frame)
+        db_row1_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(db_row1_frame, text="Livello Iniziale (%):", width=25).pack(side=tk.LEFT)
+        self.fields['dynamic_barrier_start_level'] = ttk.Entry(db_row1_frame, width=10)
+        self.fields['dynamic_barrier_start_level'].pack(side=tk.LEFT, padx=(5, 20))
+
         # Step Down Rate
         db_row2_frame = ttk.Frame(self.dynamic_barrier_params_frame)
         db_row2_frame.pack(fill=tk.X, pady=5)
@@ -513,6 +528,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
             'memory_feature': 'memory_feature',
             'airbag_feature': 'airbag_feature',
             'airbag_level': 'airbag_level',
+            'airbag_notes': 'airbag_notes',
             'coupon_barrier': 'coupon_barrier',
             'coupon_barrier_type': 'coupon_barrier_type',
             'capital_barrier': 'capital_barrier',
@@ -529,42 +545,73 @@ class EnhancedCertificateDialogV15_1_Corrected:
             'observation_delay_months': 'observation_delay_months' # Nuovo
         }
         
-        # Carica tutti i campi
+        # Carica PRIMA airbag_feature, POI airbag_level, POI airbag_notes
+        # Carica airbag_feature prima di tutto il resto
+        if 'airbag_feature' in self.fields and 'airbag_feature' in field_mapping and field_mapping['airbag_feature'] in self.existing_data:
+            value = self.existing_data[field_mapping['airbag_feature']]
+            value = str(value)
+            try:
+                self.fields['airbag_feature'].set(value)
+            except Exception as e:
+                print(f"⚠️ Errore caricamento campo airbag_feature: {e}")
+
+        # Poi carica airbag_level
+        if 'airbag_level' in self.fields and 'airbag_level' in field_mapping and field_mapping['airbag_level'] in self.existing_data:
+            value = self.existing_data[field_mapping['airbag_level']]
+            if isinstance(value, (int, float)):
+                value_to_display = value * 100 if value <= 1.0 and value != 0 else value
+                value = f"{value_to_display:.2f}"
+            try:
+                self.fields['airbag_level'].delete(0, tk.END)
+                self.fields['airbag_level'].insert(0, str(value))
+            except Exception as e:
+                print(f"⚠️ Errore caricamento campo airbag_level: {e}")
+
+        # Poi carica airbag_notes
+        if 'airbag_notes' in self.fields and 'airbag_notes' in field_mapping and field_mapping['airbag_notes'] in self.existing_data:
+            value = self.existing_data[field_mapping['airbag_notes']]
+            try:
+                self.fields['airbag_notes'].delete('1.0', tk.END)
+                self.fields['airbag_notes'].insert('1.0', str(value))
+            except Exception as e:
+                print(f"⚠️ Errore caricamento campo airbag_notes: {e}")
+
+        # Carica tutti gli altri campi (escludendo quelli già gestiti sopra)
         for field_name, data_key in field_mapping.items():
+            if field_name in ['airbag_feature', 'airbag_level', 'airbag_notes']:
+                continue
             if field_name in self.fields and data_key in self.existing_data:
                 value = self.existing_data[data_key]
                 
                 # Conversioni speciali
-                if field_name == 'memory_feature' or field_name == 'airbag_feature':
+                if field_name == 'memory_feature':
                     value = str(value)
                 elif field_name == 'observation_delay_months' and isinstance(value, (int, float)):
-                    value = str(int(value)) # Display as integer                    
-                elif field_name in ['coupon_rate', 'coupon_barrier', 'capital_barrier', 'airbag_level', 'dynamic_barrier_end_level', 'step_down_rate'] and isinstance(value, (int, float)):
-                    value_to_display = value * 100 if value <= 1.0 and value !=0 else value # Converti a percentuale se decimale e non zero
+                    value = str(int(value))
+                elif field_name in ['coupon_rate', 'coupon_barrier', 'capital_barrier', 'dynamic_barrier_end_level', 'step_down_rate'] and isinstance(value, (int, float)):
+                    value_to_display = value * 100 if value <= 1.0 and value !=0 else value
                     if field_name == 'coupon_rate':
-                        value = f"{value_to_display:.3f}" # Assicura tre decimali per tasso cedola
+                        value = f"{value_to_display:.3f}"
                     else:
-                        value = f"{value_to_display:.2f}" # Assicura due decimali per altri
+                        value = f"{value_to_display:.2f}"
                 elif field_name == 'capital_barrier_type' and self.existing_data.get('dynamic_barrier_feature', False):
-                    value = 'dynamic' # Override if dynamic_barrier_feature was true
-                
+                    value = 'dynamic'
                 try:
                     if hasattr(self.fields[field_name], 'set'):
                         self.fields[field_name].set(str(value))
-                        # Bind the event handler for dynamic barrier fields if they are comboboxes
                     else:
                         self.fields[field_name].delete(0, tk.END)
                         self.fields[field_name].insert(0, str(value))
                 except Exception as e:
                     print(f"⚠️ Errore caricamento campo {field_name}: {e}")
-        
+
         # *** CARICAMENTO SPECIALE RISK-FREE RATE ***
         self.fields['risk_free_rate'].delete(0, tk.END)
         self.fields['risk_free_rate'].insert(0, f"{risk_free_percentage:.2f}")
         
-        self._toggle_airbag_level_field() # Aggiorna visibilità airbag
-        self._on_capital_barrier_type_changed() # Call new method to set initial visibility of dynamic barrier fields
-        self._update_dependency_description() # Aggiorna descrizione dipendenza iniziale
+        self._toggle_airbag_level_field()
+        self._on_capital_barrier_type_changed()
+        self._update_dependency_description()
 
         print(f"✅ Dati esistenti caricati, Risk-Free Rate: {risk_free_percentage:.2f}%")
     
@@ -590,14 +637,18 @@ class EnhancedCertificateDialogV15_1_Corrected:
         
         # Step 1: Estrai tutti i valori grezzi (stringhe) dai campi della GUI
         for field_name, widget in self.fields.items():
+            if field_name == 'airbag_notes':
+                value = widget.get('1.0', tk.END).strip()
+                # Salva anche stringa vuota per coerenza
+                raw_values[field_name] = value
+                continue
             if hasattr(widget, 'get'):
                 raw_values[field_name] = widget.get().strip()
         
         # Step 2: Processa e converti i valori in base alla logica e alle condizioni
         for field_name, value in raw_values.items():
-            if not value: # Salta i campi vuoti; verranno gestiti dalla logica di pop successiva se non dinamici
+            if not value and field_name != 'airbag_notes':
                 continue
-
             try:
                 # Conversioni speciali
                 if field_name == 'risk_free_rate':
@@ -641,7 +692,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
         if result_data.get('capital_barrier_type') == 'dynamic':
             # Usa il valore della Barriera Capitale come livello iniziale per la barriera dinamica
             if 'capital_barrier' in result_data:
-                 result_data['dynamic_barrier_start_level'] = result_data['capital_barrier']
+                result_data['dynamic_barrier_start_level'] = result_data['capital_barrier']
             result_data['dynamic_barrier_feature'] = True
         else:
             result_data['dynamic_barrier_feature'] = False
@@ -678,10 +729,15 @@ class EnhancedCertificateDialogV15_1_Corrected:
             if airbag_enabled:
                 self.fields['airbag_level'].config(state=tk.NORMAL)
                 self.airbag_level_label.config(state=tk.NORMAL)
+                self.fields['airbag_notes'].config(state=tk.NORMAL)
+                self.airbag_notes_label.config(state=tk.NORMAL)
             else:
                 self.fields['airbag_level'].config(state=tk.DISABLED)
                 self.airbag_level_label.config(state=tk.DISABLED)
-                self.fields['airbag_level'].delete(0, tk.END) # Opzionale: pulisci il campo se disabilitato
+                self.fields['airbag_level'].delete(0, tk.END)
+                self.fields['airbag_notes'].config(state=tk.DISABLED)
+                self.airbag_notes_label.config(state=tk.DISABLED)
+                self.fields['airbag_notes'].delete('1.0', tk.END)
 
     def _on_capital_barrier_type_changed(self, event=None):
         """Abilita/disabilita i campi della barriera dinamica in base alla selezione del tipo di barriera capitale."""
@@ -691,17 +747,24 @@ class EnhancedCertificateDialogV15_1_Corrected:
 
             if is_dynamic:
                 self.dynamic_barrier_params_frame.pack(fill='x', padx=10, pady=5)
-                # Enable all entry fields within this frame
-                for field_name in ['dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']:
+                # --- Mostra e precompila Livello Iniziale con valore Barriera Capitale ---
+                if 'dynamic_barrier_start_level' in self.fields and 'capital_barrier' in self.fields:
+                    capital_barrier_val = self.fields['capital_barrier'].get().strip()
+                    self.fields['dynamic_barrier_start_level'].config(state=tk.NORMAL)
+                    self.fields['dynamic_barrier_start_level'].delete(0, tk.END)
+                    if capital_barrier_val:
+                        self.fields['dynamic_barrier_start_level'].insert(0, capital_barrier_val)
+                # Abilita anche gli altri campi dinamici
+                for field_name in ['step_down_rate', 'dynamic_barrier_end_level']:
                     if field_name in self.fields:
                         self.fields[field_name].config(state=tk.NORMAL)
             else:
                 self.dynamic_barrier_params_frame.pack_forget()
-                # Disable and clear all entry fields within this frame
+                # Disabilita e svuota tutti i campi dinamici
                 for field_name in ['dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']:
                     if field_name in self.fields:
                         self.fields[field_name].config(state=tk.DISABLED)
-                        self.fields[field_name].delete(0, tk.END) # Clear content when disabled
+                        self.fields[field_name].delete(0, tk.END)
 
     def _update_dependency_description(self, event=None):
         """Aggiorna la descrizione del tipo di dipendenza sottostante."""
@@ -920,8 +983,20 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         try:
             if self.enhanced_manager:
                 # Usa enhanced manager
-                cert_data = self.certificates[cert_id]
-                
+                cert_data = copy.deepcopy(self.certificates[cert_id])
+                # --- AGGIUNTA: assicurati che i parametri dinamici siano coerenti ---
+                if cert_data.get('capital_barrier_type') == 'dynamic' or cert_data.get('dynamic_barrier_feature'):
+                    # Se mancano i parametri dinamici, prova a recuperarli da capital_barrier ecc.
+                    if 'dynamic_barrier_start_level' not in cert_data and 'capital_barrier' in cert_data:
+                        cert_data['dynamic_barrier_start_level'] = cert_data['capital_barrier']
+                    if 'step_down_rate' not in cert_data:
+                        cert_data['step_down_rate'] = 0.0
+                    if 'dynamic_barrier_end_level' not in cert_data:
+                        cert_data['dynamic_barrier_end_level'] = 0.0
+                    if 'observation_delay_months' not in cert_data:
+                        cert_data['observation_delay_months'] = 0
+                # --- FINE AGGIUNTA ---
+
                 # Apri dialog calc date v15
                 dialog = CalculoDateAutoDialogV15(
                     self.root, 
@@ -1129,7 +1204,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         if isinstance(risk_free_rate, (int, float)):
             if risk_free_rate <= 1.0:  # Formato decimale
                 rf_display = f"{risk_free_rate * 100:.2f}%"
-            else:  # Già percentuale
+            else:
                 rf_display = f"{risk_free_rate:.2f}%"
         else:
             rf_display = str(risk_free_rate)
@@ -1328,6 +1403,7 @@ Autocall Levels: {len(cert_data.get('autocall_levels', []))} livelli
             return
         
         cert_id = self.tree.item(selection[0])['values'][0]
+
         
         if messagebox.askyesno("Conferma Eliminazione", 
                              f"Eliminare definitivamente il certificato {cert_id}?"):
@@ -1362,6 +1438,8 @@ Autocall Levels: {len(cert_data.get('autocall_levels', []))} livelli
 # ========================================
 # MAIN EXECUTION
 # ========================================
+
+
 
 if __name__ == "__main__":
     print("🚀 === SISTEMA CERTIFICATI v15.1 CORRECTED - AVVIO ===")
