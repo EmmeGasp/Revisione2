@@ -1,10 +1,18 @@
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classi principali: ExpressCertificate, PhoenixCertificate, UnifiedCertificateFactory, UnifiedCertificateAnalyzer
+# - Dataclass: Barrier, CouponSchedule
+# - Funzioni: creazione certificati di esempio, test_unified_certificates
+# - Unificazione logica Express/Phoenix, factory/analyzer, metodi di pricing e risk
+# ==========================================================
+
 # ========================================
 # File: unifed_certificates.py 
 # Sistema Certificati Finanziari - Certificati consolidati
 # Timestamp: 2025-06-16 12:01:00
 # Modifica del metodo ExpressCertificate.calculate_express_payoffs
 # per implementare la logica dei prezzi che tenga conto
-# di tutte le opizioni disponibili per questa tipologia di certificato
+# di tutte le opioni disponibili per questa tipologia di certificato
 # ========================================
 
 """
