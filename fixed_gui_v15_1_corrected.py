@@ -224,19 +224,34 @@ class EnhancedCertificateDialogV15_1_Corrected:
         # Row 2: Emittente e Tipo
         row2_frame = ttk.Frame(base_frame)
         row2_frame.pack(fill=tk.X, pady=5)
-        
+
         ttk.Label(row2_frame, text="Emittente:", width=15).pack(side=tk.LEFT)
-        self.fields['issuer'] = ttk.Combobox(row2_frame, width=18, 
-                                           values=['Vontobel', 'BNP Paribas', 'Société Générale', 
-                                                  'Goldman Sachs', 'Morgan Stanley', 'Altro'])
+        self.fields['issuer'] = ttk.Combobox(
+            row2_frame, width=18,
+            values=[
+                'Vontobel', 'BNP Paribas', 'Société Générale',
+                'Goldman Sachs', 'Morgan Stanley', 'Unicredit', 'Intesa Sanpaolo', 'Altro'
+            ]
+        )
         self.fields['issuer'].pack(side=tk.LEFT, padx=(5, 20))
-        
+
         # *** NUOVO v15.1 *** - Campo Tipo Certificato
         ttk.Label(row2_frame, text="Tipo:", width=15).pack(side=tk.LEFT)
-        self.fields['certificate_type'] = ttk.Combobox(row2_frame, width=18,
-                                                     values=['express', 'cash_collect', 'phoenix', 'barrier_reverse_convertible'])
+        self.fields['certificate_type'] = ttk.Combobox(
+            row2_frame, width=18,
+            values=[
+                'express', 'cash_collect', 'phoenix', 'barrier_reverse_convertible', 'digitale'
+            ]
+        )
         self.fields['certificate_type'].pack(side=tk.LEFT, padx=(5, 0))
-        
+        # Nota ACEPI accanto al tipo certificato
+        ttk.Label(
+            row2_frame,
+            text="(Usa classificazione ACEPI se possibile)",
+            font=('Arial', 8, 'italic'),
+            foreground='gray'
+        ).pack(side=tk.LEFT, padx=(10, 0))
+
         # Row 3: Date
         row3_frame = ttk.Frame(base_frame)
         row3_frame.pack(fill=tk.X, pady=5)
@@ -318,7 +333,11 @@ class EnhancedCertificateDialogV15_1_Corrected:
         self.fields['airbag_feature'] = ttk.Combobox(airbag_control_frame, width=12,
                                                    values=['True', 'False'])
         self.fields['airbag_feature'].pack(side=tk.LEFT, padx=(5, 20))
-        self.fields['airbag_feature'].bind("<<ComboboxSelected>>", self._toggle_airbag_level_field)
+        # Usa il bind con clear_on_disable=True SOLO per l'interazione utente
+        self.fields['airbag_feature'].bind(
+            "<<ComboboxSelected>>",
+            lambda event: self._toggle_airbag_level_field(event, clear_on_disable=True)
+        )
 
         self.airbag_level_label = ttk.Label(airbag_control_frame, text="Livello Airbag (%):", width=15)
         self.airbag_level_label.pack(side=tk.LEFT)
@@ -416,11 +435,23 @@ class EnhancedCertificateDialogV15_1_Corrected:
         # Tickers Yahoo Sottostanti
         ticker_frame = ttk.Frame(underlying_frame)
         ticker_frame.pack(fill=tk.X, pady=5)
-        
         ttk.Label(ticker_frame, text="Tickers Sottostanti (Yahoo, virgola sep.):", width=35).pack(side=tk.LEFT)
-        self.fields['yahoo_ticker'] = ttk.Entry(ticker_frame, width=40) # Larghezza aumentata
+        self.fields['yahoo_ticker'] = ttk.Entry(ticker_frame, width=40)
         self.fields['yahoo_ticker'].pack(side=tk.LEFT, padx=(5, 20))
-        
+
+        # Prezzi iniziali/strike/prezzi di riferimento
+        strike_frame = ttk.Frame(underlying_frame)
+        strike_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(strike_frame, text="Prezzi Iniziali/Strike (virgola sep.):", width=35).pack(side=tk.LEFT)
+        self.fields['prezzi_iniziali_sottostanti'] = ttk.Entry(strike_frame, width=40)
+        self.fields['prezzi_iniziali_sottostanti'].pack(side=tk.LEFT, padx=(5, 5))
+        # Indicazione formato inserimento
+        ttk.Label(
+            strike_frame,
+            text="(es: 1.234,56 oppure 1234.56 - usa ',' per decimali, '.' per migliaia)",
+            font=('Arial', 8), foreground='gray'
+        ).pack(side=tk.LEFT, padx=(5, 0))
+
         # Nomi/Descrizioni Sottostanti
         desc_frame = ttk.Frame(underlying_frame)
         desc_frame.pack(fill=tk.X, pady=5)
@@ -542,7 +573,9 @@ class EnhancedCertificateDialogV15_1_Corrected:
             'dynamic_barrier_start_level': 'dynamic_barrier_start_level', # Nuovo
             'step_down_rate': 'step_down_rate', # Nuovo
             'dynamic_barrier_end_level': 'dynamic_barrier_end_level', # Nuovo
-            'observation_delay_months': 'observation_delay_months' # Nuovo
+            'observation_delay_months': 'observation_delay_months', # Nuovo
+            'prezzi_iniziali_sottostanti': 'prezzi_iniziali_sottostanti', # Nuovo campo
+            'note_barriere': 'note_barriere', # Nuovo campo
         }
         
         # Carica PRIMA airbag_feature, POI airbag_level, POI airbag_notes
@@ -555,9 +588,12 @@ class EnhancedCertificateDialogV15_1_Corrected:
             except Exception as e:
                 print(f"⚠️ Errore caricamento campo airbag_feature: {e}")
 
+        self._toggle_airbag_level_field()  # Solo abilitazione/disabilitazione, non svuota
+
         # Poi carica airbag_level
         if 'airbag_level' in self.fields and 'airbag_level' in field_mapping and field_mapping['airbag_level'] in self.existing_data:
             value = self.existing_data[field_mapping['airbag_level']]
+            print(type(self.fields['airbag_level']))
             if isinstance(value, (int, float)):
                 value_to_display = value * 100 if value <= 1.0 and value != 0 else value
                 value = f"{value_to_display:.2f}"
@@ -570,11 +606,17 @@ class EnhancedCertificateDialogV15_1_Corrected:
         # Poi carica airbag_notes
         if 'airbag_notes' in self.fields and 'airbag_notes' in field_mapping and field_mapping['airbag_notes'] in self.existing_data:
             value = self.existing_data[field_mapping['airbag_notes']]
+            print(type(self.fields['airbag_notes']))
             try:
                 self.fields['airbag_notes'].delete('1.0', tk.END)
                 self.fields['airbag_notes'].insert('1.0', str(value))
             except Exception as e:
                 print(f"⚠️ Errore caricamento campo airbag_notes: {e}")
+
+        # Dopo il caricamento, se la feature è False, svuota i campi e disabilita
+        airbag_feature_val = self.fields['airbag_feature'].get().lower()
+        if airbag_feature_val == 'false':
+            self._toggle_airbag_level_field(clear_on_disable=True)
 
         # Carica tutti gli altri campi (escludendo quelli già gestiti sopra)
         for field_name, data_key in field_mapping.items():
@@ -608,7 +650,23 @@ class EnhancedCertificateDialogV15_1_Corrected:
         # *** CARICAMENTO SPECIALE RISK-FREE RATE ***
         self.fields['risk_free_rate'].delete(0, tk.END)
         self.fields['risk_free_rate'].insert(0, f"{risk_free_percentage:.2f}")
-        
+
+        # *** CARICAMENTO SPECIALE AIRBAG LEVEL (solo se il campo è abilitato) ***
+        airbag_level = self.existing_data.get('airbag_level', None)
+        if airbag_level is not None and 'airbag_level' in self.fields:
+            # Assicurati che il campo sia abilitato prima di inserire il valore
+            self.fields['airbag_level'].config(state=tk.NORMAL)
+            try:
+                if isinstance(airbag_level, (int, float)) and airbag_level <= 1.0 and airbag_level != 0:
+                    airbag_level_display = airbag_level * 100
+                else:
+                    airbag_level_display = airbag_level
+                self.fields['airbag_level'].delete(0, tk.END)
+                self.fields['airbag_level'].insert(0, f"{airbag_level_display:.2f}")
+            except Exception as e:
+                print(f"⚠️ Errore caricamento speciale airbag_level: {e}")
+
+        # Aggiorna stato finale dei campi airbag
         self._toggle_airbag_level_field()
         self._on_capital_barrier_type_changed()
         self._update_dependency_description()
@@ -637,9 +695,8 @@ class EnhancedCertificateDialogV15_1_Corrected:
         
         # Step 1: Estrai tutti i valori grezzi (stringhe) dai campi della GUI
         for field_name, widget in self.fields.items():
-            if field_name == 'airbag_notes':
+            if field_name in ['airbag_notes', 'note_barriere']:
                 value = widget.get('1.0', tk.END).strip()
-                # Salva anche stringa vuota per coerenza
                 raw_values[field_name] = value
                 continue
             if hasattr(widget, 'get'):
@@ -647,7 +704,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
         
         # Step 2: Processa e converti i valori in base alla logica e alle condizioni
         for field_name, value in raw_values.items():
-            if not value and field_name != 'airbag_notes':
+            if not value and field_name not in ['airbag_notes', 'note_barriere']:
                 continue
             try:
                 # Conversioni speciali
@@ -722,9 +779,9 @@ class EnhancedCertificateDialogV15_1_Corrected:
         self.dialog_closed = True
         self.dialog.destroy()
 
-    def _toggle_airbag_level_field(self, event=None):
-        """Abilita/disabilita il campo Livello Airbag in base alla selezione di Airbag Feature."""
-        if hasattr(self, 'fields') and 'airbag_feature' in self.fields and 'airbag_level' in self.fields:
+    def _toggle_airbag_level_field(self, event=None, clear_on_disable=False):
+        """Abilita/disabilita il campo Livello Airbag e Note Airbag in base alla selezione di Airbag Feature."""
+        if hasattr(self, 'fields') and 'airbag_feature' in self.fields and 'airbag_level' in self.fields and 'airbag_notes' in self.fields:
             airbag_enabled = self.fields['airbag_feature'].get().lower() == 'true'
             if airbag_enabled:
                 self.fields['airbag_level'].config(state=tk.NORMAL)
@@ -734,9 +791,10 @@ class EnhancedCertificateDialogV15_1_Corrected:
             else:
                 self.fields['airbag_level'].config(state=tk.DISABLED)
                 self.airbag_level_label.config(state=tk.DISABLED)
-                self.fields['airbag_level'].delete(0, tk.END)
                 self.fields['airbag_notes'].config(state=tk.DISABLED)
                 self.airbag_notes_label.config(state=tk.DISABLED)
+                # Pulizia sempre dei campi airbag se disabilitato
+                self.fields['airbag_level'].delete(0, tk.END)
                 self.fields['airbag_notes'].delete('1.0', tk.END)
 
     def _on_capital_barrier_type_changed(self, event=None):
@@ -789,7 +847,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         'Best-Of': "🔺 BEST-OF: Il migliore tra tutti determina il payoff (MINIMO RISCHIO). Performance = MAX(asset1, asset2, asset3, ...) - Uno solo deve andare bene.",
         'Average': "📈 AVERAGE/BASKET: Performance media ponderata (RISCHIO INTERMEDIO). Performance = MEDIA(asset1, asset2, asset3, ...) - Compensazione reciproca.",
         'Single': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostante - Struttura complessa.", # Mappato a Rainbow
-        'Basket Custom': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostante - Struttura complessa." # Mappato a Rainbow
+        'Basket Custom': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostanti - Struttura complessa." # Mappato a Rainbow
     }
 
     def __init__(self):
@@ -1218,6 +1276,37 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
                     return f"{value:.{decimals}f}%"
             return str(value)
         
+        # --- AIRBAG: mostra N/A se disattivato, mostra note se presenti ---
+        airbag_feature = cert_data.get('airbag_feature', 'N/A')
+        if airbag_feature is True or (isinstance(airbag_feature, str) and airbag_feature.lower() == 'true'):
+            airbag_level_str = format_percentage(cert_data.get('airbag_level', 0))
+            airbag_notes = cert_data.get('airbag_notes', '').strip()
+        else:
+            airbag_level_str = "N/A"
+            airbag_notes = ""
+
+        prezzi_iniziali = cert_data.get('prezzi_iniziali_sottostanti', 'N/A')
+        note_barriere = cert_data.get('note_barriere', '').strip()
+
+        # Formatta prezzi_iniziali per visualizzazione con separatore migliaia
+        def format_prezzi_iniziali(val):
+            if not val or val == 'N/A':
+                return 'N/A'
+            try:
+                # Supporta lista di valori separati da virgola
+                parts = [x.strip() for x in str(val).split(',')]
+                formatted = []
+                for p in parts:
+                    # Sostituisci eventuali punti con niente (per chi inserisce 1.234,56)
+                    p_clean = p.replace('.', '').replace(' ', '').replace("'", "")
+                    # Sostituisci virgola con punto per float
+                    p_clean = p_clean.replace(',', '.')
+                    num = float(p_clean)
+                    formatted.append(f"{num:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'))
+                return ', '.join(formatted)
+            except Exception:
+                return val
+
         details = f"""DETTAGLI CERTIFICATO v15.1 CORRECTED
 {'='*60}
 
@@ -1240,13 +1329,21 @@ Frequenza Cedola: {cert_data.get('coupon_frequency', 'N/A')}
 
 CARATTERISTICHE:
 Effetto Memoria: {cert_data.get('memory_feature', 'N/A')}
-Airbag: {cert_data.get('airbag_feature', 'N/A')}
-Livello Airbag: {format_percentage(cert_data.get('airbag_level', 0))}
+Airbag: {airbag_feature}
+Livello Airbag: {airbag_level_str}
+"""
+        if airbag_notes:
+            details += f"Note Airbag: {airbag_notes}\n"
 
+        details += f"""
 BARRIERE:
 Barriera Cedola: {format_percentage(cert_data.get('coupon_barrier', 0))} ({cert_data.get('coupon_barrier_type', 'N/A')})
 Barriera Capitale: {format_percentage(cert_data.get('capital_barrier', 0))} ({cert_data.get('capital_barrier_type', 'N/A')})
+"""
+        if note_barriere:
+            details += f"Note Barriere: {note_barriere}\n"
 
+        details += f"""
 BARRIERE DINAMICHE:
 Abilitata: {cert_data.get('dynamic_barrier_feature', 'N/A')}{' (Livello Iniziale = Barriera Capitale)' if cert_data.get('dynamic_barrier_feature') else ''}
 {f'''
@@ -1258,6 +1355,7 @@ Mesi di Ritardo Osservazione: {cert_data.get('observation_delay_months', 'N/A')}
 
 SOTTOSTANTI:
 Tickers Sottostanti (Yahoo): {cert_data.get('yahoo_ticker', 'N/A')}
+Prezzi Iniziali/Strike: {format_prezzi_iniziali(prezzi_iniziali)}
 Nomi/Desc Sottostanti: {cert_data.get('underlying_names', 'N/A')}
 Valute Sottostanti: {cert_data.get('underlying_currencies', 'N/A')}
 Tipo Dipendenza Sottostanti: {cert_data.get('underlying_dependency_type', 'N/A')}
@@ -1274,8 +1372,6 @@ DATI AVANZATI:
 Date Cedole: {len(cert_data.get('coupon_dates', []))} date
 Autocall Levels: {len(cert_data.get('autocall_levels', []))} livelli
 """
-        
-        # Mostra dettagli
         self.details_text.delete(1.0, tk.END)
         self.details_text.insert(1.0, details)
     
