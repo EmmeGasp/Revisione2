@@ -25,6 +25,31 @@ INTEGRAZIONE:
 """
 
 # ==========================================================
+# NOME FILE: portfolio_manager.py
+# SCOPO: Gestione dei portafogli multi-certificato, analytics e dashboard
+# AUTORE: Mario Rossi
+# DATA CREAZIONE: 2024-06-22
+# ULTIMA MODIFICA: 2024-06-22
+# VERSIONE: 1.0
+# ==========================================================
+#
+# DESCRIZIONE:
+# Questo modulo implementa la logica per la creazione, gestione, analisi e reporting
+# di portafogli composti da certificati finanziari. Include classi per la gestione
+# delle posizioni, metriche aggregate, ottimizzazione e integrazione con la GUI.
+#
+# PRINCIPALI CLASSI/FUNZIONI:
+# - PortfolioManager: Gestione CRUD portafogli, posizioni, metriche e reporting
+# - PortfolioGUIManager: Integrazione GUI per dashboard e operazioni utente
+#
+# DIPENDENZE:
+# - pandas, numpy, tkinter, moduli interni (structural_cleanup, unified_certificates, ecc.)
+#
+# NOTE:
+# - Da completare la serializzazione completa delle posizioni
+# ==========================================================
+
+# ==========================================================
 # RIEPILOGO CONTENUTO FILE:
 # - @dataclass: PortfolioConfig, PortfolioMetrics
 # - Classe principale: PortfolioManager (gestione portafogli, posizioni, analytics, reporting)
@@ -187,11 +212,11 @@ class PortfolioMetrics:
 class PortfolioManager:
     """Portfolio Manager principale - gestione portafogli multi-certificato"""
     
-    def __init__(self, data_path: str = "D:/Doc/File python/"):
+    def __init__(self, data_path: str = "D:/Doc/File python/Finanza/Certificates/Revisione2/"):
         self.data_path = Path(data_path)
-        self.portfolios_file = Path("D:/Doc/File python/configs/enhanced_certificates.json")
-        self.positions_file = Path("D:/Doc/File python/configs/enhanced_certificates.json")
-        
+        # Percorsi corretti per i file di configurazione
+        self.portfolios_file = self.data_path / "configs/portfolios.json"
+        self.positions_file = self.data_path / "configs/positions.json"
         
         # Assicura directory
         self.portfolios_file.parent.mkdir(parents=True, exist_ok=True)
@@ -212,8 +237,77 @@ class PortfolioManager:
         self._load_portfolios()
         self._load_positions()
         
+        # Migrazione da vecchio formato (una tantum)
+        # self.migrate_from_old_enhanced_certificates()
+        
         self.logger.info("Portfolio Manager inizializzato")
     
+    def migrate_from_old_enhanced_certificates(self, old_path=None):
+        """
+        Migra i dati da enhanced_certificates.json (vecchio formato) a
+        portfolios.json e positions.json (nuovo formato).
+        """
+        if old_path is None:
+            old_path = self.data_path / "configs/enhanced_certificates.json"
+        if not Path(old_path).exists():
+            self.logger.info(f"Nessun file da migrare: {old_path}")
+            return False
+
+        with open(old_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        migrated_portfolios = {}
+        migrated_positions = {}
+
+        for portfolio_id, positions in data.items():
+            # Se positions è una lista, è un portafoglio
+            if isinstance(positions, list):
+                # Crea una configurazione minimale se non esiste già
+                migrated_portfolios[portfolio_id] = {
+                    "name": portfolio_id,
+                    "description": "",
+                    "portfolio_type": "custom",
+                    "base_currency": "EUR",
+                    "inception_date": "2024-01-01T00:00:00",
+                    "target_size": 100000.0,
+                    "constraints": {
+                        "max_single_position": 0.20,
+                        "max_issuer_exposure": 0.30,
+                        "max_sector_exposure": 0.40,
+                        "max_currency_exposure": 0.80,
+                        "min_diversification": 5,
+                        "max_correlation": 0.70,
+                        "min_duration": 0.5,
+                        "max_duration": 10.0,
+                        "target_return": 0.08,
+                        "max_volatility": 0.15,
+                        "max_var_95": 0.10
+                    },
+                    "rebalancing_frequency": "quarterly",
+                    "auto_rebalancing": False,
+                    "benchmark": None,
+                    "manager": "System",
+                    "risk_profile": "moderate"
+                }
+                migrated_positions[portfolio_id] = positions
+
+        # Salva i nuovi file solo se non esistono già
+        if not self.portfolios_file.exists():
+            with open(self.portfolios_file, "w", encoding="utf-8") as f:
+                json.dump(migrated_portfolios, f, indent=2, ensure_ascii=False)
+            self.logger.info(f"Migrati {len(migrated_portfolios)} portafogli in {self.portfolios_file}")
+        else:
+            self.logger.info(f"File {self.portfolios_file} già esistente, migrazione non sovrascrive.")
+
+        if not self.positions_file.exists():
+            with open(self.positions_file, "w", encoding="utf-8") as f:
+                json.dump(migrated_positions, f, indent=2, ensure_ascii=False)
+            self.logger.info(f"Migrate posizioni in {self.positions_file}")
+        else:
+            self.logger.info(f"File {self.positions_file} già esistente, migrazione non sovrascrive.")
+
+        return True
+
     # ========================================
     # PORTFOLIO CREATION & MANAGEMENT
     # ========================================
@@ -577,20 +671,20 @@ class PortfolioManager:
                 
             except Exception as e:
                 self.logger.warning(f"Errore calcolo metrics per {portfolio_id}: {e}")
-                # Aggiungi riga con errore
+                # Mostra "N/A" invece di "Errore"
                 row = {
                     'Portfolio ID': portfolio_id,
                     'Name': config.name,
                     'Type': config.portfolio_type.value,
                     'Positions': len(self.positions.get(portfolio_id, [])),
-                    'Market Value': 'ERROR',
-                    'Fair Value': 'ERROR',
-                    'Total Return': 'ERROR',
-                    'FV Gap': 'ERROR',
-                    'Volatility': 'ERROR',
-                    'VaR 95%': 'ERROR',
-                    'Sharpe Ratio': 'ERROR',
-                    'Last Updated': 'ERROR'
+                    'Market Value': 'N/A',
+                    'Fair Value': 'N/A',
+                    'Total Return': 'N/A',
+                    'FV Gap': 'N/A',
+                    'Volatility': 'N/A',
+                    'VaR 95%': 'N/A',
+                    'Sharpe Ratio': 'N/A',
+                    'Last Updated': 'N/A'
                 }
                 dashboard_data.append(row)
         
@@ -1019,72 +1113,53 @@ class PortfolioManager:
     
     def _load_portfolios(self) -> None:
         """Carica portafogli da file"""
-        
         if not self.portfolios_file.exists():
             self.logger.info("File portfolios non esistente, inizializzazione vuota")
+            self.portfolios = {}
             return
-        
         try:
             with open(self.portfolios_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            
-            # Deserializza configurazioni
             for portfolio_id, config_data in data.items():
                 config = self._deserialize_portfolio_config(config_data)
                 self.portfolios[portfolio_id] = config
-            
             self.logger.info(f"Caricati {len(self.portfolios)} portafogli")
-            
         except Exception as e:
             self.logger.error(f"Errore caricamento portfolios: {e}")
-    
+
     def _save_portfolios(self) -> None:
         """Salva portafogli su file"""
-        
         try:
-            # Serializza configurazioni
             data = {}
             for portfolio_id, config in self.portfolios.items():
                 data[portfolio_id] = self._serialize_portfolio_config(config)
-            
             with open(self.portfolios_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False, default=str)
-            
             self.logger.info(f"Salvati {len(self.portfolios)} portafogli")
-            
         except Exception as e:
             self.logger.error(f"Errore salvataggio portfolios: {e}")
-    
+
     def _load_positions(self) -> None:
         """Carica posizioni da file"""
-        
         if not self.positions_file.exists():
             self.logger.info("File positions non esistente, inizializzazione vuota")
+            self.positions = {}
             return
-        
         try:
             with open(self.positions_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            
-            # Deserializza posizioni (semplificato per ora)
             for portfolio_id, positions_data in data.items():
                 # Per ora skip deserializzazione completa delle posizioni
-                # In futuro: ricostruire oggetti PortfolioPosition completi
                 self.positions[portfolio_id] = []
-            
             self.logger.info(f"Caricati positions per {len(self.positions)} portafogli")
-            
         except Exception as e:
             self.logger.error(f"Errore caricamento positions: {e}")
-    
+
     def _save_positions(self) -> None:
         """Salva posizioni su file"""
-        
         try:
-            # Serializza posizioni (semplificato)
             data = {}
             for portfolio_id, positions in self.positions.items():
-                # Per ora salva solo IDs - in futuro serializzazione completa
                 data[portfolio_id] = [
                     {
                         'certificate_id': pos.certificate_id,
@@ -1095,15 +1170,12 @@ class PortfolioManager:
                     }
                     for pos in positions
                 ]
-            
             with open(self.positions_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False, default=str)
-            
             self.logger.info(f"Salvate positions per {len(self.positions)} portafogli")
-            
         except Exception as e:
             self.logger.error(f"Errore salvataggio positions: {e}")
-    
+
     def _serialize_portfolio_config(self, config: PortfolioConfig) -> Dict[str, Any]:
         """Serializza PortfolioConfig per JSON"""
         return {
@@ -1290,97 +1362,224 @@ class PortfolioGUIManager:
 
 
     def _create_new_portfolio_dialog(self):
-        """Placeholder for creating a new portfolio dialog."""
-        # Qui andrà la logica per aprire un dialog di creazione portfolio
-        # Esempio: new_portfolio_id = self.portfolio_manager.create_portfolio_dialog()
-        # if new_portfolio_id: self._refresh_portfolio_dashboard()
-        
-        messagebox.showinfo("Nuovo Portfolio", "Funzionalità 'Nuovo Portfolio' da implementare.")   
-        self.logger.info("Pulsante 'Nuovo Portfolio' cliccato.")
+        """Dialog per creazione nuovo portafoglio con selezione strumenti."""
+        dialog = tk.Toplevel(self.root_window)
+        dialog.title("Nuovo Portfolio")
+        dialog.geometry("700x600")
+        dialog.transient(self.root_window)
+        dialog.grab_set()
+
+        # Frame principale
+        main_frame = ttk.Frame(dialog, padding=15)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Nome portfolio
+        ttk.Label(main_frame, text="Nome Portfolio:", font=("Arial", 11, "bold")).pack(anchor=tk.W, pady=(0, 2))
+        nome_var = tk.StringVar()
+        nome_entry = ttk.Entry(main_frame, textvariable=nome_var, width=40)
+        nome_entry.pack(fill=tk.X, pady=(0, 10))
+
+        # Note descrittive
+        ttk.Label(main_frame, text="Note descrittive:", font=("Arial", 11)).pack(anchor=tk.W)
+        note_text = tk.Text(main_frame, height=3, width=60, wrap=tk.WORD)
+        note_text.pack(fill=tk.X, pady=(0, 10))
+
+        # Filtro tipologia strumento
+        ttk.Label(main_frame, text="Filtra per tipologia:", font=("Arial", 11)).pack(anchor=tk.W)
+        filter_var = tk.StringVar(value="Tutti")
+        tipi = ["Tutti"]
+        if self.certificates_data:
+            tipi += sorted(set(c.get('certificate_type', 'N/A') for c in self.certificates_data.values()))
+        filter_combo = ttk.Combobox(main_frame, values=tipi, textvariable=filter_var, state="readonly", width=20)
+        filter_combo.pack(anchor=tk.W, pady=(0, 5))
+
+        # Lista strumenti disponibili (multiselezione)
+        ttk.Label(main_frame, text="Seleziona strumenti da includere:", font=("Arial", 11, "bold")).pack(anchor=tk.W)
+        listbox = tk.Listbox(main_frame, selectmode=tk.MULTIPLE, width=80, height=15)
+        listbox.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+
+        # Funzione per aggiornare la lista in base al filtro
+        def update_listbox(*args):
+            listbox.delete(0, tk.END)
+            if not self.certificates_data:
+                return
+            selected_type = filter_var.get()
+            for isin, cert in self.certificates_data.items():
+                tipo = cert.get('certificate_type', 'N/A')
+                if selected_type == "Tutti" or tipo == selected_type:
+                    display = f"{isin} | {cert.get('name', '')} | {tipo}"
+                    listbox.insert(tk.END, display)
+        filter_combo.bind("<<ComboboxSelected>>", update_listbox)
+        update_listbox()
+
+        # Pulsanti
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X, pady=(10, 0))
+        def on_save():
+            nome = nome_var.get().strip()
+            note = note_text.get("1.0", tk.END).strip()
+            selected_indices = listbox.curselection()
+            if not nome:
+                messagebox.showerror("Errore", "Il nome del portfolio è obbligatorio.", parent=dialog)
+                nome_entry.focus()
+                return
+            if len(selected_indices) < 2:
+                messagebox.showwarning("Attenzione", "Devi selezionare almeno 2 strumenti finanziari per creare un portfolio.", parent=dialog)
+                return  # Non chiudere la maschera
+            # Ottieni gli ISIN selezionati
+            selected_isins = []
+            for idx in selected_indices:
+                display = listbox.get(idx)
+                isin = display.split('|')[0].strip()
+                selected_isins.append(isin)
+            # Crea PortfolioConfig minimale
+            config = PortfolioConfig(
+                name=nome,
+                description=note,
+                portfolio_type=PortfolioType.CUSTOM
+            )
+            portfolio_id = self.portfolio_manager.create_portfolio(config)
+            # Aggiungi le posizioni selezionate
+            for isin in selected_isins:
+                cert = self.certificates_data.get(isin)
+                if cert:
+                    # Per ora nominal_amount e entry_price fissi (da migliorare)
+                    self.portfolio_manager.add_position(
+                        portfolio_id=portfolio_id,
+                        certificate_id=isin,
+                        certificate=None,  # Da integrare con oggetto reale se disponibile
+                        nominal_amount=1000.0,
+                        entry_price=100.0
+                    )
+            messagebox.showinfo("Successo", f"Portfolio '{nome}' creato con {len(selected_isins)} strumenti.", parent=dialog)
+            dialog.destroy()
+            # Aggiorna dashboard
+            self._refresh_portfolio_dashboard()
+
+        def on_cancel():
+            dialog.destroy()
+
+        ttk.Button(button_frame, text="Salva Portfolio", command=on_save).pack(side=tk.RIGHT, padx=(5, 0))
+        ttk.Button(button_frame, text="Annulla", command=on_cancel).pack(side=tk.RIGHT)
+
+        nome_entry.focus()
+
+    def _refresh_portfolio_dashboard(self):
+        """Aggiorna la dashboard dopo inserimento/eliminazione portafogli."""
+        dashboard_df = self.portfolio_manager.create_portfolio_dashboard()
+        self.portfolio_tree.delete(*self.portfolio_tree.get_children())
+        for index, row in dashboard_df.iterrows():
+            self.portfolio_tree.insert("", tk.END, values=list(row))
 
     def _edit_selected_portfolio(self):
-        """Placeholder for editing a portfolio dialog."""
-        messagebox.showinfo("Portfolio Action", "Edit Portfolio functionality here.")
+        """Placeholder per modifica portfolio selezionato."""
+        messagebox.showinfo("Modifica Portfolio", "Funzionalità di modifica portfolio da implementare.")
 
     def _analyze_selected_portfolio(self):
-        """Placeholder for analyzing a portfolio."""
+        """Placeholder per analisi portfolio selezionato."""
         selected_item = self.portfolio_tree.selection()
         if not selected_item:
-               messagebox.showwarning("Attenzione", "Seleziona un portfolio da modificare.")
-               return
-        
-        portfolio_id = self.portfolio_tree.item(selected_item[0])['values'][0] # Assumendo che l'ID sia la prima colonna
-        messagebox.showinfo("Analizza portfolio", f"Funzionalità 'Analizza Portfolio {portfolio_id}' da implementare.")
-        self.logger.info(f"Pulsante 'Modifica Portfolio {portfolio_id}' cliccato.")
-        
-        #messagebox.showinfo("Portfolio Action", "Analyze Portfolio functionality here.")
-    
-    def _delete_selected_portfolio(self):
-        """Placeholder for deleting a selected portfolio."""
-        selected_item = self.portfolio_tree.selection()
-        if not selected_item:
-               messagebox.showwarning("Attenzione", "Seleziona un portfolio da eliminare.")
-               return
+            messagebox.showwarning("Attenzione", "Seleziona un portfolio da analizzare.")
+            return
         portfolio_id = self.portfolio_tree.item(selected_item[0])['values'][0]
-        messagebox.showinfo("Elimina Portfolio", f"Funzionalità 'Elimina Portfolio {portfolio_id}' da implementare.")
-        self.logger.info(f"Pulsante 'Elimina Portfolio {portfolio_id}' cliccato.")
+        messagebox.showinfo("Analisi Portfolio", f"Analisi per il portfolio '{portfolio_id}' da implementare.")
+
+    def _delete_selected_portfolio(self):
+        """Elimina realmente il portfolio selezionato dalla dashboard."""
+        selected_item = self.portfolio_tree.selection()
+        if not selected_item:
+            messagebox.showwarning("Attenzione", "Seleziona un portfolio da eliminare.")
+            return
+        portfolio_id = self.portfolio_tree.item(selected_item[0])['values'][0]
+        nome_portfolio = self.portfolio_tree.item(selected_item[0])['values'][1]
+        if not messagebox.askyesno("Conferma Eliminazione",
+                                   f"Eliminare definitivamente il portfolio '{nome_portfolio}' ({portfolio_id})?\nL'operazione non è reversibile."):
+            return
+
+        try:
+            # Rimuovi dal manager
+            if portfolio_id in self.portfolio_manager.portfolios:
+                del self.portfolio_manager.portfolios[portfolio_id]
+            if portfolio_id in self.portfolio_manager.positions:
+                del self.portfolio_manager.positions[portfolio_id]
+            if portfolio_id in self.portfolio_manager.analytics:
+                del self.portfolio_manager.analytics[portfolio_id]
+            self.portfolio_manager._save_portfolios()
+            self.portfolio_manager._save_positions()
+            # Aggiorna la dashboard (Treeview)
+            self.portfolio_tree.delete(selected_item[0])
+            messagebox.showinfo("Eliminato", f"Portfolio '{nome_portfolio}' eliminato con successo.")
+            self.logger.info(f"Portfolio '{portfolio_id}' eliminato.")
+        except Exception as e:
+            messagebox.showerror("Errore", f"Errore durante l'eliminazione del portfolio:\n{e}")
+            self.logger.error(f"Errore eliminazione portfolio {portfolio_id}: {e}")
 
     def _on_portfolio_selected_in_dashboard(self, event=None):
         """Gestisce la selezione di un portfolio nella tabella del dashboard."""
         selected_item = self.portfolio_tree.selection()
-        if selected_item:        
-           portfolio_id = self.portfolio_tree.item(selected_item[0])['values'][0]
-           self.logger.info(f"Portfolio '{portfolio_id}' selezionato nel dashboard.")
-           # Qui potresti abilitare/disabilitare pulsanti o mostrare dettagli
-    
+        if selected_item:
+            portfolio_id = self.portfolio_tree.item(selected_item[0])['values'][0]
+            self.logger.info(f"Portfolio '{portfolio_id}' selezionato nel dashboard.")
+            # Qui puoi aggiungere logica per abilitare/disabilitare pulsanti o mostrare dettagli
 
-# ========================================
-# TESTING E DEMO
-# ========================================
+# Sposta qui la funzione di test e il blocco main, fuori da qualsiasi classe
 
 def test_portfolio_system():
     """Test completo del sistema portfolio"""
-    
     print("🚀 TESTING PORTFOLIO MANAGEMENT SYSTEM")
     print("=" * 60)
-    
-    # Inizializza
+    # Test creazione portafoglio
     pm = PortfolioManager()
     
-    # Crea portfolio di esempio
     config = PortfolioConfig(
         name="Test Portfolio",
-        description="Portfolio di test per validazione sistema",
+        description="Portfolio di test per verifica sistema",
         portfolio_type=PortfolioType.BALANCED,
-        target_size=1000000.0
+        base_currency="EUR",
+        target_size=100000.0,
+        constraints=PortfolioConstraints(
+            max_single_position=0.10,
+            max_issuer_exposure=0.25,
+            target_return=0.05,
+            max_volatility=0.10
+        )
     )
     
     portfolio_id = pm.create_portfolio(config)
     print(f"✅ Portfolio creato: {portfolio_id}")
     
-    # Simula aggiunta posizioni (usando mock certificates)
+    # Test aggiunta posizioni
     try:
-        from unified_certificates import ExpressCertificate
-        from structural_cleanup import CertificateSpecs
-        
-        # Mock certificate
-        mock_specs = CertificateSpecs(
-            name="Test Express Certificate",
-            isin="TEST123456789",
-            underlying="MOCK/INDEX",
-            issue_date=datetime(2024, 1, 1),
-            maturity_date=datetime(2027, 1, 1),
-            strike=100.0,
-            certificate_type="express"
-        )
-        
-        # Crea mock certificate (semplificato)
-        # In realtà dovrebbe essere creato attraverso il sistema esistente
-        
-        print("✅ Test posizioni skippato - richiede integrazione certificati reali")
-        
+        pm.add_position(portfolio_id, "IT0005431236", None, 10000, 95.0)
+        pm.add_position(portfolio_id, "IT0005431244", None, 15000, 97.5)
+        pm.add_position(portfolio_id, "IT0005431251", None, 20000, 92.0)
+        print("✅ Posizioni aggiunte con successo")
     except Exception as e:
-        print(f"⚠️  Test posizioni skippato: {e}")
+        print(f"⚠️  Test aggiunta posizioni fallito: {e}")
+    
+    # Test rimozione posizione
+    try:
+        pm.remove_position(portfolio_id, "IT0005431244")
+        print("✅ Posizione rimossa con successo")
+    except Exception as e:
+        print(f"⚠️  Test rimozione posizione fallito: {e}")
+    
+    # Test aggiornamento prezzi
+    try:
+        pm.update_position_prices(portfolio_id, {
+            "IT0005431236": 96.0,
+            "IT0005431251": 93.5
+        })
+        print("✅ Prezzi aggiornati con successo")
+    except Exception as e:
+        print(f"⚠️  Test aggiornamento prezzi fallito: {e}")
+    
+    # Test calcolo metriche
+    try:
+        metrics = pm.calculate_portfolio_metrics(portfolio_id)
+        print(f"✅ Metriche calcolate: Market Value €{metrics.total_market_value:,.0f}")
+    except Exception as e:
+        print(f"⚠️  Test calcolo metriche fallito: {e}")
     
     # Test dashboard
     dashboard = pm.create_portfolio_dashboard()
@@ -1398,9 +1597,7 @@ if __name__ == "__main__":
     print("PORTFOLIO MANAGEMENT SYSTEM v15.0")
     print("Sistema Certificati Finanziari - Gestione Portafogli")
     print("=" * 60)
-    
     success = test_portfolio_system()
-    
     if success:
         print("\n✅ Portfolio Management System pronto per integrazione!")
         print("\nFUNZIONALITÀ DISPONIBILI:")

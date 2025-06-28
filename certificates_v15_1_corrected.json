@@ -15,7 +15,7 @@
     "memory_feature": false,
     "airbag_feature": false,
     "airbag_level": 0.72,
-    "airbag_notes": "po",
+    "airbag_notes": "",
     "coupon_barrier": 0.0,
     "coupon_barrier_type": "european",
     "capital_barrier": 1.0,
@@ -24,14 +24,12 @@
     "step_down_rate": 0.005,
     "dynamic_barrier_end_level": 0.73,
     "observation_delay_months": 6,
+    "note_barriere": "Prova di nota barriera",
     "yahoo_ticker": "DBK.DE,GLE.PA,UCG.MI,BIMI.MI",
     "underlying_names": "Deutsche Bank AG, Società Generale, Unicredit, Banco BPM",
     "underlying_currencies": "Eur, Eur,Eur,Eur",
     "underlying_dependency_type": "Worst-Of",
-    "dynamic_barrier_feature": true,
-    "coupon_dates": [],
-    "coupon_rates": [],
-    "autocall_levels": []
+    "dynamic_barrier_feature": true
   },
   "XS3031184206": {
     "isin": "XS3031184206",
@@ -154,6 +152,12 @@
     "yahoo_ticker": "^GSPC, ^STOXX50E, ^N225",
     "underlying_names": "S&P 500, EURO STOXX 50, NIKKEI 225",
     "underlying_dependency_type": "Single",
-    "dynamic_barrier_feature": false
+    "dynamic_barrier_feature": false,
+    "coupon_dates": [],
+    "coupon_rates": [],
+    "autocall_levels": [],
+    "dynamic_barrier_start_level": null,
+    "step_down_rate": null,
+    "dynamic_barrier_end_level": null
   }
 }

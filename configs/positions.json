@@ -1,0 +1,16 @@
+{
+  "PF_TEST_PORTFOLIO_20250627": [
+    {
+      "certificate_id": "IT0005431236",
+      "nominal_amount": 10000,
+      "entry_price": 95.0,
+      "entry_date": "2025-06-27T20:36:48.428765"
+    },
+    {
+      "certificate_id": "IT0005431251",
+      "nominal_amount": 20000,
+      "entry_price": 92.0,
+      "entry_date": "2025-06-27T20:36:48.429970"
+    }
+  ]
+}

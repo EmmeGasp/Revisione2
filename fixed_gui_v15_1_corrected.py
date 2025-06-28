@@ -1,4 +1,31 @@
 # ==========================================================
+# NOME FILE: fixed_gui_v15_1_corrected.py
+# SCOPO: Gestione GUI avanzata per inserimento, modifica e visualizzazione certificati finanziari v15.1
+# AUTORE: Team di sviluppo
+# DATA CREAZIONE: 2024-06-22
+# ULTIMA MODIFICA: 2024-06-22
+# VERSIONE: 1.0
+# ==========================================================
+#
+# DESCRIZIONE:
+# Modulo principale per la gestione grafica (Tkinter) dei certificati finanziari.
+# Permette inserimento, modifica, validazione e visualizzazione dettagliata dei certificati,
+# con supporto a tutti i nuovi campi v15.1, gestione barriere dinamiche, note, e integrazione
+# con sistemi di calcolo date e portfolio manager.
+#
+# PRINCIPALI CLASSI/FUNZIONI:
+# - EnhancedCertificateDialogV15_1_Corrected: Dialog avanzato per inserimento/modifica certificato
+# - SimpleCertificateGUIManagerV15_1_Corrected: Gestione GUI principale e interazione utente
+#
+# DIPENDENZE:
+# - tkinter, json, pathlib, moduli interni (real_certificate_integration, enhanced_certificate_manager_fixed, ecc.)
+#
+# NOTE:
+# - Il file include fix per compatibilità RealCertificateConfig e gestione risk-free rate.
+# - La struttura è pronta per estensioni future e integrazione con portfolio manager.
+# ==========================================================
+
+# ==========================================================
 # RIEPILOGO CONTENUTO FILE:
 # - Classi GUI: EnhancedCertificateDialogV15_1_Corrected
 # - Import e compatibilità con RealCertificateConfig, EnhancedCertificateManagerV15
@@ -425,6 +452,14 @@ class EnhancedCertificateDialogV15_1_Corrected:
         self.fields['observation_delay_months'].pack(side=tk.LEFT, padx=(5, 0))
         # --- Fine NUOVA SEZIONE ---
 
+        # --- CAMPO NOTE BARRIERE ---
+        note_barriere_frame = ttk.Frame(barriers_frame)
+        note_barriere_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(note_barriere_frame, text="Note Barriere:", width=15).pack(side=tk.LEFT)
+        self.fields['note_barriere'] = tk.Text(note_barriere_frame, width=60, height=2, wrap=tk.WORD)
+        self.fields['note_barriere'].pack(side=tk.LEFT, padx=(5, 0))
+        # --- FINE CAMPO NOTE BARRIERE ---
+
         # =======================================
         # SEZIONE 5: SOTTOSTANTI
         # =======================================
@@ -641,6 +676,9 @@ class EnhancedCertificateDialogV15_1_Corrected:
                 try:
                     if hasattr(self.fields[field_name], 'set'):
                         self.fields[field_name].set(str(value))
+                    elif field_name == 'note_barriere':
+                        self.fields['note_barriere'].delete('1.0', tk.END)
+                        self.fields['note_barriere'].insert('1.0', str(value))
                     else:
                         self.fields[field_name].delete(0, tk.END)
                         self.fields[field_name].insert(0, str(value))
