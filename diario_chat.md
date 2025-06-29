@@ -8,10 +8,12 @@
 - **Tipologia certificato**: Aggiunta la voce "digitale" e nota ACEPI accanto al campo tipo.
 - **Formato prezzi**: Indicazione chiara del formato accanto al campo prezzi iniziali/strike.
 - **Visualizzazione prezzi**: I prezzi vengono visualizzati con separatore migliaia e decimali in modo leggibile.
+- **Gestione tipologie di portafoglio**:  
+  - **TODO**: Implementare la gestione completa delle tipologie di portafoglio (inserisci, modifica, elimina) tramite apposita interfaccia. Attualmente la scelta è possibile solo tra quelle predefinite; la gestione dinamica sarà sviluppata in seguito.
 - **TODO**: 
   - Verificare che il campo "Note Barriere" sia sempre presente e ben visibile sia in inserimento che in visualizzazione dettagli (attualmente da ricontrollare la posizione e la gestione).
   - Migliorare la gestione di casi particolari di barriere variabili/complesse.
-  - Prossimo step: lavorare sull’integrazione e gestione dei portafogli.
+  - Prossimo step: lavorare sull’integrazione e gestione dei portafogli, in particolare la **modifica dei portafogli censiti**.
 
 ---
 

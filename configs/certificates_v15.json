@@ -12,7 +12,7 @@
     "coupon_rate": 0.0067,
     "coupon_frequency": "Mensile",
     "currency": "EUR",
-    "memory_feature": false,
+    "memory_feature": true,
     "airbag_feature": false,
     "airbag_level": 0.72,
     "airbag_notes": "",

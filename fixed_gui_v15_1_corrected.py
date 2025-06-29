@@ -895,7 +895,8 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         
         # Variabili
         self.certificates = {}
-        self.cert_file = Path("certificates_v15_1_corrected.json")
+        # Modifica: nuovo path e nome file
+        self.cert_file = Path("configs/certificates_v15.json")
         
         # Enhanced manager per calc date
         if ENHANCED_MANAGER_AVAILABLE:

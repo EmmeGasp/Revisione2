@@ -97,10 +97,13 @@ from real_certificate_integration import (
 class PortfolioType(Enum):
     """Tipi di portafoglio"""
     CONSERVATIVE = "conservative"
-    BALANCED = "balanced" 
+    BALANCED = "balanced"
     AGGRESSIVE = "aggressive"
     INCOME_FOCUSED = "income_focused"
     CAPITAL_PROTECTION = "capital_protection"
+    GROWTH = "growth"
+    INCOME = "income"
+    ABSOLUTE_RETURN = "absolute_return"
     CUSTOM = "custom"
 
 class RebalancingFrequency(Enum):
@@ -212,11 +215,12 @@ class PortfolioMetrics:
 class PortfolioManager:
     """Portfolio Manager principale - gestione portafogli multi-certificato"""
     
-    def __init__(self, data_path: str = "D:/Doc/File python/Finanza/Certificates/Revisione2/"):
-        self.data_path = Path(data_path)
-        # Percorsi corretti per i file di configurazione
-        self.portfolios_file = self.data_path / "configs/portfolios.json"
-        self.positions_file = self.data_path / "configs/positions.json"
+    def __init__(self, base_dir: str = "D:/Doc/File python/Finanza/Certificates/Revisione2/"):
+        # base_dir deve essere la directory "configs", NON la directory superiore
+        self.base_dir = Path(base_dir)
+        # Rimuovi eventuale aggiunta di "configs" qui sotto
+        self.portfolios_file = self.base_dir / "portfolios.json"
+        self.positions_file = self.base_dir / "positions.json"
         
         # Assicura directory
         self.portfolios_file.parent.mkdir(parents=True, exist_ok=True)
@@ -229,7 +233,7 @@ class PortfolioManager:
         # Integrazione sistema esistente
         self.certificate_importer = RealCertificateImporter()
         self.risk_analyzer = UnifiedRiskAnalyzer()
-        self.excel_exporter = EnhancedExcelExporter(str(self.data_path))
+        self.excel_exporter = EnhancedExcelExporter(str(self.base_dir))
         
         self.logger = logging.getLogger(f"{__name__}.PortfolioManager")
         
@@ -248,7 +252,7 @@ class PortfolioManager:
         portfolios.json e positions.json (nuovo formato).
         """
         if old_path is None:
-            old_path = self.data_path / "configs/enhanced_certificates.json"
+            old_path = self.base_dir / "configs/enhanced_certificates.json"
         if not Path(old_path).exists():
             self.logger.info(f"Nessun file da migrare: {old_path}")
             return False
@@ -599,7 +603,7 @@ class PortfolioManager:
         """Genera report Excel completo del portafoglio"""
         
         if output_path is None:
-            output_path = str(self.data_path)
+            output_path = str(self.base_dir)
         
         config = self.portfolios[portfolio_id]
         metrics = self.calculate_portfolio_metrics(portfolio_id)
@@ -644,50 +648,68 @@ class PortfolioManager:
             raise
     
     def create_portfolio_dashboard(self) -> pd.DataFrame:
-        """Crea dashboard di tutti i portafogli"""
-        
+        """Crea dashboard di tutti i portafogli con valori coerenti e robusti."""
         dashboard_data = []
-        
         for portfolio_id, config in self.portfolios.items():
             try:
-                metrics = self.calculate_portfolio_metrics(portfolio_id)
+                # Calcola metriche, se possibile
+                try:
+                    metrics = self.calculate_portfolio_metrics(portfolio_id)
+                    has_analysis = metrics and getattr(metrics, "total_market_value", 0) > 0
+                except Exception:
+                    metrics = None
+                    has_analysis = False
+
+                # Numero posizioni reale
                 positions_count = len(self.positions.get(portfolio_id, []))
-                
+
+                # Ultima Analisi: solo se esiste e market value > 0
+                ultima_analisi = "N/A"
+                if has_analysis and hasattr(metrics, "timestamp"):
+                    ultima_analisi = metrics.timestamp.strftime('%Y-%m-%d %H:%M')
+
+                # Helper per formattare valori numerici o None
+                def fmt(val, perc=False, euro=False):
+                    if val is None:
+                        return "N/A"
+                    if isinstance(val, (int, float)):
+                        if euro:
+                            return f"€{val:,.0f}"
+                        return f"{val:.2f}%" if perc else f"{val:.2f}"
+                    return "N/A"
+
                 row = {
                     'Portfolio ID': portfolio_id,
-                    'Name': config.name,
-                    'Type': config.portfolio_type.value,
+                    'Name': getattr(config, "name", ""),
+                    'Type': getattr(config, "portfolio_type", "custom").value if hasattr(config, "portfolio_type") else str(getattr(config, "portfolio_type", "custom")),
                     'Positions': positions_count,
-                    'Market Value': f"€{metrics.total_market_value:,.0f}",
-                    'Fair Value': f"€{metrics.total_fair_value:,.0f}",
-                    'Total Return': f"{metrics.total_return_pct:.2%}",
-                    'FV Gap': f"{metrics.fair_value_gap:.2%}",
-                    'Volatility': f"{metrics.portfolio_volatility:.2%}",
-                    'VaR 95%': f"{metrics.portfolio_var_95:.2%}",
-                    'Sharpe Ratio': f"{metrics.sharpe_ratio:.2f}",
-                    'Last Updated': metrics.timestamp.strftime('%Y-%m-%d %H:%M')
+                    'Ultima Analisi': ultima_analisi,
+                    'Market Value': fmt(getattr(metrics, "total_market_value", None), euro=True) if has_analysis else "N/A",
+                    'Fair Value': fmt(getattr(metrics, "total_fair_value", None), euro=True) if has_analysis else "N/A",
+                    'Total\nReturn': fmt(getattr(metrics, "total_return_pct", None), perc=True) if has_analysis else "N/A",
+                    'FV\nGap': fmt(getattr(metrics, "fair_value_gap", None), perc=True) if has_analysis else "N/A",
+                    'Volatility': fmt(getattr(metrics, "portfolio_volatility", None), perc=True) if has_analysis else "N/A",
+                    'VaR\n95%': fmt(getattr(metrics, "portfolio_var_95", None), perc=True) if has_analysis else "N/A",
+                    'Sharpe\nRatio': fmt(getattr(metrics, "sharpe_ratio", None)) if has_analysis else "N/A"
                 }
                 dashboard_data.append(row)
-                
             except Exception as e:
-                self.logger.warning(f"Errore calcolo metrics per {portfolio_id}: {e}")
-                # Mostra "N/A" invece di "Errore"
+                self.logger.warning(f"Errore dashboard per {portfolio_id}: {e}")
                 row = {
                     'Portfolio ID': portfolio_id,
-                    'Name': config.name,
-                    'Type': config.portfolio_type.value,
+                    'Name': getattr(config, "name", ""),
+                    'Type': getattr(config, "portfolio_type", "custom").value if hasattr(config, "portfolio_type") else str(getattr(config, "portfolio_type", "custom")),
                     'Positions': len(self.positions.get(portfolio_id, [])),
+                    'Ultima Analisi': 'N/A',
                     'Market Value': 'N/A',
                     'Fair Value': 'N/A',
-                    'Total Return': 'N/A',
-                    'FV Gap': 'N/A',
+                    'Total\nReturn': 'N/A',
+                    'FV\nGap': 'N/A',
                     'Volatility': 'N/A',
-                    'VaR 95%': 'N/A',
-                    'Sharpe Ratio': 'N/A',
-                    'Last Updated': 'N/A'
+                    'VaR\n95%': 'N/A',
+                    'Sharpe\nRatio': 'N/A'
                 }
                 dashboard_data.append(row)
-        
         return pd.DataFrame(dashboard_data)
     
     # ========================================
@@ -1149,8 +1171,8 @@ class PortfolioManager:
             with open(self.positions_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             for portfolio_id, positions_data in data.items():
-                # Per ora skip deserializzazione completa delle posizioni
-                self.positions[portfolio_id] = []
+                # Carica come lista di dict (basta per il conteggio)
+                self.positions[portfolio_id] = positions_data
             self.logger.info(f"Caricati positions per {len(self.positions)} portafogli")
         except Exception as e:
             self.logger.error(f"Errore caricamento positions: {e}")
@@ -1298,25 +1320,43 @@ class PortfolioGUIManager:
         table_frame.pack(fill=tk.BOTH, expand=True)
 
         # Treeview to display the DataFrame
-        columns = list(dashboard_df.columns)
-        tree = ttk.Treeview(table_frame, columns=columns, show="headings")
-
-        # Define column headings and widths
+        columns = [
+            "Portfolio ID", "Name", "Type", "Positions", "Ultima Analisi",
+            "Market Value", "Fair Value", "Total\nReturn", "FV\nGap",
+            "Volatility", "VaR\n95%", "Sharpe\nRatio"
+        ]
+        self.tree = ttk.Treeview(table_frame, columns=columns, show="headings")
+        col_widths = {
+            "Portfolio ID": 140,
+            "Name": 160,
+            "Type": 90,
+            "Positions": 80,
+            "Ultima Analisi": 110,
+            "Market Value": 110,
+            "Fair Value": 110,
+            "Total\nReturn": 70,
+            "FV\nGap": 70,
+            "Volatility": 70,
+            "VaR\n95%": 70,
+            "Sharpe\nRatio": 80
+        }
         for col in columns:
-            tree.heading(col, text=col)
-            # Simple auto-width based on column name length, can be improved
-            tree.column(col, width=max(100, len(col) * 10))
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=col_widths.get(col, 100), anchor="center")
+        # Migliora la leggibilità delle intestazioni (padding verticale)
+        style = ttk.Style()
+        style.configure("Treeview.Heading", font=("Arial", 10, "bold"), padding=[0, 10])
 
         # Add data to the Treeview
         for index, row in dashboard_df.iterrows():
-            tree.insert("", tk.END, values=list(row))
+            self.tree.insert("", tk.END, values=list(row))
 
         # Add a scrollbar
-        scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=tree.yview)
-        tree.configure(yscrollcommand=scrollbar.set)
+        scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
 
         # Pack the Treeview and scrollbar
-        tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # --- Inizio Sezione Pulsanti Riorganizzata ---
@@ -1342,7 +1382,7 @@ class PortfolioGUIManager:
         # --- Fine Sezione Pulsanti Riorganizzata ---
             
         # Memorizza il riferimento al treeview per interazioni future
-        self.portfolio_tree = tree
+        self.portfolio_tree = self.tree
         self.portfolio_tree.bind("<<TreeviewSelect>>", self._on_portfolio_selected_in_dashboard)
 
 
@@ -1362,14 +1402,13 @@ class PortfolioGUIManager:
 
 
     def _create_new_portfolio_dialog(self):
-        """Dialog per creazione nuovo portafoglio con selezione strumenti."""
+        """Dialog per creazione nuovo portafoglio con selezione strumenti e tipo."""
         dialog = tk.Toplevel(self.root_window)
         dialog.title("Nuovo Portfolio")
-        dialog.geometry("700x600")
+        dialog.geometry("700x700")
         dialog.transient(self.root_window)
         dialog.grab_set()
 
-        # Frame principale
         main_frame = ttk.Frame(dialog, padding=15)
         main_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -1379,6 +1418,33 @@ class PortfolioGUIManager:
         nome_entry = ttk.Entry(main_frame, textvariable=nome_var, width=40)
         nome_entry.pack(fill=tk.X, pady=(0, 10))
 
+        # Tipo portafoglio
+        ttk.Label(main_frame, text="Tipo di Portafoglio:", font=("Arial", 11, "bold")).pack(anchor=tk.W, pady=(0, 2))
+        tipo_var = tk.StringVar(value="custom")
+        tipi = [e.value for e in PortfolioType]
+        tipo_combo = ttk.Combobox(main_frame, values=tipi, textvariable=tipo_var, state="readonly", width=30)
+        tipo_combo.pack(anchor=tk.W, pady=(0, 2))
+
+        # Descrizione tipo portafoglio
+        tipo_descrizioni = {
+            "conservative": "Basso rischio, alta liquidità, protezione capitale.",
+            "balanced": "Equilibrio tra rischio e rendimento, diversificazione ampia.",
+            "aggressive": "Alto rischio, focus su crescita e rendimento.",
+            "income_focused": "Obiettivo principale: generare reddito periodico.",
+            "capital_protection": "Massima protezione del capitale investito.",
+            "growth": "Focus su crescita del capitale nel lungo periodo.",
+            "income": "Portafoglio orientato a flussi cedolari.",
+            "absolute_return": "Obiettivo: rendimento positivo indipendente dal mercato.",
+            "custom": "Configurazione personalizzata dall’utente."
+        }
+        tipo_descr_label = ttk.Label(main_frame, text=tipo_descrizioni.get(tipo_var.get(), ""), font=("Arial", 9, "italic"), foreground="gray", wraplength=600)
+        tipo_descr_label.pack(anchor=tk.W, pady=(0, 10))
+
+        def update_descr(*args):
+            tipo_descr_label.config(text=tipo_descrizioni.get(tipo_var.get(), ""))
+        tipo_combo.bind("<<ComboboxSelected>>", update_descr)
+        update_descr()
+
         # Note descrittive
         ttk.Label(main_frame, text="Note descrittive:", font=("Arial", 11)).pack(anchor=tk.W)
         note_text = tk.Text(main_frame, height=3, width=60, wrap=tk.WORD)
@@ -1387,10 +1453,10 @@ class PortfolioGUIManager:
         # Filtro tipologia strumento
         ttk.Label(main_frame, text="Filtra per tipologia:", font=("Arial", 11)).pack(anchor=tk.W)
         filter_var = tk.StringVar(value="Tutti")
-        tipi = ["Tutti"]
+        tipi_cert = ["Tutti"]
         if self.certificates_data:
-            tipi += sorted(set(c.get('certificate_type', 'N/A') for c in self.certificates_data.values()))
-        filter_combo = ttk.Combobox(main_frame, values=tipi, textvariable=filter_var, state="readonly", width=20)
+            tipi_cert += sorted(set(c.get('certificate_type', 'N/A') for c in self.certificates_data.values()))
+        filter_combo = ttk.Combobox(main_frame, values=tipi_cert, textvariable=filter_var, state="readonly", width=20)
         filter_combo.pack(anchor=tk.W, pady=(0, 5))
 
         # Lista strumenti disponibili (multiselezione)
@@ -1398,7 +1464,6 @@ class PortfolioGUIManager:
         listbox = tk.Listbox(main_frame, selectmode=tk.MULTIPLE, width=80, height=15)
         listbox.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
-        # Funzione per aggiornare la lista in base al filtro
         def update_listbox(*args):
             listbox.delete(0, tk.END)
             if not self.certificates_data:
@@ -1419,41 +1484,39 @@ class PortfolioGUIManager:
             nome = nome_var.get().strip()
             note = note_text.get("1.0", tk.END).strip()
             selected_indices = listbox.curselection()
+            tipo_sel = tipo_var.get()
             if not nome:
                 messagebox.showerror("Errore", "Il nome del portfolio è obbligatorio.", parent=dialog)
                 nome_entry.focus()
                 return
             if len(selected_indices) < 2:
                 messagebox.showwarning("Attenzione", "Devi selezionare almeno 2 strumenti finanziari per creare un portfolio.", parent=dialog)
-                return  # Non chiudere la maschera
+                return
             # Ottieni gli ISIN selezionati
             selected_isins = []
             for idx in selected_indices:
                 display = listbox.get(idx)
                 isin = display.split('|')[0].strip()
                 selected_isins.append(isin)
-            # Crea PortfolioConfig minimale
+            # Crea PortfolioConfig con tipo scelto
             config = PortfolioConfig(
                 name=nome,
                 description=note,
-                portfolio_type=PortfolioType.CUSTOM
+                portfolio_type=PortfolioType(tipo_sel)
             )
             portfolio_id = self.portfolio_manager.create_portfolio(config)
-            # Aggiungi le posizioni selezionate
             for isin in selected_isins:
                 cert = self.certificates_data.get(isin)
                 if cert:
-                    # Per ora nominal_amount e entry_price fissi (da migliorare)
                     self.portfolio_manager.add_position(
                         portfolio_id=portfolio_id,
                         certificate_id=isin,
-                        certificate=None,  # Da integrare con oggetto reale se disponibile
+                        certificate=None,
                         nominal_amount=1000.0,
                         entry_price=100.0
                     )
             messagebox.showinfo("Successo", f"Portfolio '{nome}' creato con {len(selected_isins)} strumenti.", parent=dialog)
             dialog.destroy()
-            # Aggiorna dashboard
             self._refresh_portfolio_dashboard()
 
         def on_cancel():
