@@ -1,0 +1,31 @@
+Mappa dei campi (fixed_gui_v15_1_corrected.py)
+       field_mapping = {
+            'isin': 'isin',
+            'name': 'name', 
+            'issuer': 'issuer',
+            'certificate_type': 'certificate_type',
+            'issue_date': 'issue_date',
+            'maturity_date': 'maturity_date',
+            'notional': 'notional',
+            'coupon_rate': 'coupon_rate',
+            'coupon_frequency': 'coupon_frequency',
+            'memory_feature': 'memory_feature',
+            'airbag_feature': 'airbag_feature',
+            'airbag_level': 'airbag_level',
+            'airbag_notes': 'airbag_notes',
+            'coupon_barrier': 'coupon_barrier',
+            'coupon_barrier_type': 'coupon_barrier_type',
+            'capital_barrier': 'capital_barrier',
+            'capital_barrier_type': 'capital_barrier_type',
+            'certificate_instrument_ticker': 'certificate_instrument_ticker', # Nuovo
+            'underlying_currencies': 'underlying_currencies', # Aggiunto per caricamento
+            'underlying_names': 'underlying_names', # Nuovo
+            'underlying_dependency_type': 'underlying_dependency_type', # Nuovo
+            'yahoo_ticker': 'yahoo_ticker',
+            'currency': 'currency',
+            'dynamic_barrier_start_level': 'dynamic_barrier_start_level', # Nuovo
+            'step_down_rate': 'step_down_rate', # Nuovo
+            'dynamic_barrier_end_level': 'dynamic_barrier_end_level', # Nuovo
+            'observation_delay_months': 'observation_delay_months', # Nuovo
+            'prezzi_iniziali_sottostanti': 'prezzi_iniziali_sottostanti', # Nuovo campo
+            'note_barriere': 'note_barriere', # Nuovo campo

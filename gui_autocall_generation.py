@@ -351,3 +351,9 @@ def test_autocall_generation():
 if __name__ == "__main__":
     """Test standalone"""
     test_autocall_generation()
+
+# ==========================================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classi: AutocallLevelsGenerator, CertificateDataValidator
+# - Funzioni: patch_save_certificates_method, test_autocall_generation
+# ==========================================================

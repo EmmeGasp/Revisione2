@@ -1266,11 +1266,12 @@ class PortfolioManager:
 class PortfolioGUIManager:
     """Manager GUI per portafogli - integrazione con fixed_gui_manager"""
     
-    def __init__(self, portfolio_manager: PortfolioManager, root_window=None, certificates_data=None):
+    def __init__(self, portfolio_manager: PortfolioManager, root_window=None, certificates_data=None, enhanced_manager=None):
         self.portfolio_manager = portfolio_manager
         self.logger = logging.getLogger(f"{__name__}.PortfolioGUIManager")
-        self.root_window = root_window # Store the root window
-        self.certificates_data = certificates_data # Store certificates data
+        self.root_window = root_window
+        self.certificates_data = certificates_data
+        self.enhanced_manager = enhanced_manager  # Passa EnhancedCertificateManagerV15 qui
     
     def create_portfolio_creation_dialog(self) -> Optional[str]:
         """Crea dialog per creazione nuovo portafoglio"""
@@ -1535,17 +1536,159 @@ class PortfolioGUIManager:
             self.portfolio_tree.insert("", tk.END, values=list(row))
 
     def _edit_selected_portfolio(self):
-        """Placeholder per modifica portfolio selezionato."""
-        messagebox.showinfo("Modifica Portfolio", "Funzionalità di modifica portfolio da implementare.")
-
-    def _analyze_selected_portfolio(self):
-        """Placeholder per analisi portfolio selezionato."""
+        """Modifica il portfolio selezionato: denominazione, tipo, note, composizione."""
         selected_item = self.portfolio_tree.selection()
         if not selected_item:
-            messagebox.showwarning("Attenzione", "Seleziona un portfolio da analizzare.")
+            messagebox.showwarning("Attenzione", "Seleziona un portfolio da modificare.")
             return
         portfolio_id = self.portfolio_tree.item(selected_item[0])['values'][0]
-        messagebox.showinfo("Analisi Portfolio", f"Analisi per il portfolio '{portfolio_id}' da implementare.")
+        config = self.portfolio_manager.portfolios.get(portfolio_id)
+        if not config:
+            messagebox.showerror("Errore", "Portfolio non trovato.")
+            return
+
+        # Recupera dati attuali
+        nome_attuale = getattr(config, "name", "")
+        tipo_attuale = getattr(config, "portfolio_type", "custom")
+        note_attuali = getattr(config, "description", "")
+        composizione_attuale = [pos['certificate_id'] if isinstance(pos, dict) else pos.certificate_id
+                                for pos in self.portfolio_manager.positions.get(portfolio_id, [])]
+
+        # --- Dialog di modifica ---
+        dialog = tk.Toplevel(self.root_window)
+        dialog.title(f"Modifica Portfolio: {nome_attuale}")
+        dialog.geometry("700x600")
+        dialog.transient(self.root_window)
+        dialog.grab_set()
+
+        main_frame = ttk.Frame(dialog, padding=15)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Denominazione
+        ttk.Label(main_frame, text="Denominazione:", font=("Arial", 11, "bold")).pack(anchor=tk.W)
+        nome_var = tk.StringVar(value=nome_attuale)
+        ttk.Entry(main_frame, textvariable=nome_var, width=40).pack(fill=tk.X, pady=(0, 10))
+
+        # Tipo portafoglio + descrizione dinamica
+        ttk.Label(main_frame, text="Tipo di Portafoglio:", font=("Arial", 11, "bold")).pack(anchor=tk.W, pady=(0, 2))
+        tipo_var = tk.StringVar(value=tipo_attuale.value if hasattr(tipo_attuale, "value") else str(tipo_attuale))
+        tipi = [e.value for e in PortfolioType]
+        tipo_combo = ttk.Combobox(main_frame, values=tipi, textvariable=tipo_var, state="readonly", width=30)
+        tipo_combo.pack(anchor=tk.W, pady=(0, 2))
+
+        # Descrizione dinamica tipo portafoglio
+        tipo_descrizioni = {
+            "conservative": "Basso rischio, alta liquidità, protezione capitale.",
+            "balanced": "Equilibrio tra rischio e rendimento, diversificazione ampia.",
+            "aggressive": "Alto rischio, focus su crescita e rendimento.",
+            "income_focused": "Obiettivo principale: generare reddito periodico.",
+            "capital_protection": "Massima protezione del capitale investito.",
+            "growth": "Focus su crescita del capitale nel lungo periodo.",
+            "income": "Portafoglio orientato a flussi cedolari.",
+            "absolute_return": "Obiettivo: rendimento positivo indipendente dal mercato.",
+            "custom": "Configurazione personalizzata dall’utente."
+        }
+        tipo_descr_label = ttk.Label(main_frame, text=tipo_descrizioni.get(tipo_var.get(), ""), font=("Arial", 9, "italic"), foreground="gray", wraplength=600)
+        tipo_descr_label.pack(anchor=tk.W, pady=(0, 10))
+
+        def update_descr(*args):
+            tipo_descr_label.config(text=tipo_descrizioni.get(tipo_var.get(), ""))
+        tipo_combo.bind("<<ComboboxSelected>>", update_descr)
+        update_descr()
+
+        # Note
+        ttk.Label(main_frame, text="Note:", font=("Arial", 11)).pack(anchor=tk.W)
+        note_text = tk.Text(main_frame, height=3, width=60, wrap=tk.WORD)
+        note_text.insert("1.0", note_attuali)
+        note_text.pack(fill=tk.X, pady=(0, 10))
+
+        # Composizione (multiselezione) - mostra sempre tutti i certificati disponibili
+        ttk.Label(main_frame, text="Composizione (ISIN):", font=("Arial", 11, "bold")).pack(anchor=tk.W)
+        listbox = tk.Listbox(main_frame, selectmode=tk.MULTIPLE, width=80, height=12)
+        listbox.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        all_isins = []
+        if self.certificates_data:
+            # Supporta sia dict che lista di certificati
+            certs = self.certificates_data.items() if isinstance(self.certificates_data, dict) else [(c.get('isin', ''), c) for c in self.certificates_data]
+            for isin, cert in certs:
+                display = f"{isin} | {cert.get('name', '')} | {cert.get('certificate_type', '')}"
+                listbox.insert(tk.END, display)
+                all_isins.append(isin)
+        # Seleziona quelli già presenti
+        for idx, isin in enumerate(all_isins):
+            if isin in composizione_attuale:
+                listbox.selection_set(idx)
+
+        # Pulsanti
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X, pady=(10, 0))
+
+        def on_save():
+            nuovo_nome = nome_var.get().strip()
+            nuovo_tipo = tipo_var.get()
+            nuove_note = note_text.get("1.0", tk.END).strip()
+            selected_indices = listbox.curselection()
+            nuova_composizione = [all_isins[idx] for idx in selected_indices]
+
+            if not nuovo_nome:
+                messagebox.showerror("Errore", "Il nome del portfolio è obbligatorio.", parent=dialog)
+                return
+            if len(nuova_composizione) < 2:
+                messagebox.showwarning("Attenzione", "Devi selezionare almeno 2 strumenti finanziari.", parent=dialog)
+                return
+
+            composizione_modificata = set(nuova_composizione) != set(composizione_attuale)
+            metrics = self.portfolio_manager.analytics.get(portfolio_id)
+            analisi_presenti = metrics and getattr(metrics, "total_market_value", 0) > 0
+
+            if composizione_modificata and analisi_presenti:
+                if not messagebox.askyesno(
+                    "Attenzione: Modifica Distruttiva",
+                    "Modificando la composizione perderai TUTTI i dati di analisi associati a questo portafoglio.\n"
+                    "Questa operazione è IRREVERSIBILE.\nProcedere?",
+                    parent=dialog
+                ):
+                    return
+                self.portfolio_manager.analytics[portfolio_id] = None
+
+            config.name = nuovo_nome
+            config.portfolio_type = PortfolioType(nuovo_tipo)
+            config.description = nuove_note
+
+            if composizione_modificata:
+                new_positions = []
+                for isin in nuova_composizione:
+                    cert = None
+                    if self.certificates_data:
+                        if isinstance(self.certificates_data, dict):
+                            cert = self.certificates_data.get(isin)
+                        else:
+                            for c in self.certificates_data:
+                                if c.get('isin', '') == isin:
+                                    cert = c
+                                    break
+                    pos = {
+                        'certificate_id': isin,
+                        'nominal_amount': 1000.0,
+                        'entry_price': 100.0,
+                        'entry_date': datetime.now().isoformat()
+                    }
+                    new_positions.append(pos)
+                self.portfolio_manager.positions[portfolio_id] = new_positions
+
+            self.portfolio_manager._save_portfolios()
+            self.portfolio_manager._save_positions()
+            self._refresh_portfolio_dashboard()
+            dialog.destroy()
+            messagebox.showinfo("Modifica completata", "Portafoglio modificato con successo.")
+
+        def on_cancel():
+            dialog.destroy()
+
+        ttk.Button(button_frame, text="Salva", command=on_save).pack(side=tk.RIGHT, padx=(5, 0))
+        ttk.Button(button_frame, text="Annulla", command=on_cancel).pack(side=tk.RIGHT)
+
+        dialog.focus_set()
 
     def _delete_selected_portfolio(self):
         """Elimina realmente il portfolio selezionato dalla dashboard."""
@@ -1577,6 +1720,39 @@ class PortfolioGUIManager:
             messagebox.showerror("Errore", f"Errore durante l'eliminazione del portfolio:\n{e}")
             self.logger.error(f"Errore eliminazione portfolio {portfolio_id}: {e}")
 
+    def _analyze_selected_portfolio(self):
+        """Analizza il certificato selezionato nel portafoglio tramite EnhancedCertificateManager."""
+        selected_item = self.portfolio_tree.selection()
+        if not selected_item:
+            messagebox.showwarning("Attenzione", "Seleziona un portfolio da analizzare.")
+            return
+        portfolio_id = self.portfolio_tree.item(selected_item[0])['values'][0]
+        positions = self.portfolio_manager.positions.get(portfolio_id, [])
+        if not positions:
+            messagebox.showinfo("Analisi Portfolio", "Nessun certificato presente nel portafoglio selezionato.")
+            return
+        cert_id = positions[0]['certificate_id'] if isinstance(positions[0], dict) else positions[0].certificate_id
+
+        enhanced_config = self.enhanced_manager.configurations.get(cert_id)
+        if not enhanced_config:
+            messagebox.showerror("Errore", f"Certificato {cert_id} non trovato nell'archivio avanzato.")
+            return
+
+        stato = getattr(enhanced_config, 'status', 'unknown')
+        stato_descr = {
+            "new": "Nuovo (mai valutato, nessun evento)",
+            "in_life": "In corso (in-life)",
+            "matured": "Scaduto (maturity raggiunta)",
+            "autocalled": "Autocall anticipato"
+        }.get(stato, stato)
+
+        info = f"ISIN: {cert_id}\nNome: {getattr(enhanced_config.base_config, 'name', '')}\nTipo: {getattr(enhanced_config.base_config, 'certificate_type', '')}\n"
+        info += f"Stato: {stato_descr}\n"
+        info += f"Valuation Date: {enhanced_config.in_life_state.valuation_date.strftime('%Y-%m-%d')}\n"
+        info += f"Memory Coupons: {len(enhanced_config.in_life_state.memory_coupons_due)}\n"
+        info += f"Ultimo prezzo spot: {getattr(enhanced_config.base_config, 'current_spots', None)}"
+        messagebox.showinfo("Analisi Certificato", info)
+
     def _on_portfolio_selected_in_dashboard(self, event=None):
         """Gestisce la selezione di un portfolio nella tabella del dashboard."""
         selected_item = self.portfolio_tree.selection()
@@ -1584,90 +1760,7 @@ class PortfolioGUIManager:
             portfolio_id = self.portfolio_tree.item(selected_item[0])['values'][0]
             self.logger.info(f"Portfolio '{portfolio_id}' selezionato nel dashboard.")
             # Qui puoi aggiungere logica per abilitare/disabilitare pulsanti o mostrare dettagli
-
-# Sposta qui la funzione di test e il blocco main, fuori da qualsiasi classe
-
-def test_portfolio_system():
-    """Test completo del sistema portfolio"""
-    print("🚀 TESTING PORTFOLIO MANAGEMENT SYSTEM")
-    print("=" * 60)
-    # Test creazione portafoglio
-    pm = PortfolioManager()
-    
-    config = PortfolioConfig(
-        name="Test Portfolio",
-        description="Portfolio di test per verifica sistema",
-        portfolio_type=PortfolioType.BALANCED,
-        base_currency="EUR",
-        target_size=100000.0,
-        constraints=PortfolioConstraints(
-            max_single_position=0.10,
-            max_issuer_exposure=0.25,
-            target_return=0.05,
-            max_volatility=0.10
-        )
-    )
-    
-    portfolio_id = pm.create_portfolio(config)
-    print(f"✅ Portfolio creato: {portfolio_id}")
-    
-    # Test aggiunta posizioni
-    try:
-        pm.add_position(portfolio_id, "IT0005431236", None, 10000, 95.0)
-        pm.add_position(portfolio_id, "IT0005431244", None, 15000, 97.5)
-        pm.add_position(portfolio_id, "IT0005431251", None, 20000, 92.0)
-        print("✅ Posizioni aggiunte con successo")
-    except Exception as e:
-        print(f"⚠️  Test aggiunta posizioni fallito: {e}")
-    
-    # Test rimozione posizione
-    try:
-        pm.remove_position(portfolio_id, "IT0005431244")
-        print("✅ Posizione rimossa con successo")
-    except Exception as e:
-        print(f"⚠️  Test rimozione posizione fallito: {e}")
-    
-    # Test aggiornamento prezzi
-    try:
-        pm.update_position_prices(portfolio_id, {
-            "IT0005431236": 96.0,
-            "IT0005431251": 93.5
-        })
-        print("✅ Prezzi aggiornati con successo")
-    except Exception as e:
-        print(f"⚠️  Test aggiornamento prezzi fallito: {e}")
-    
-    # Test calcolo metriche
-    try:
-        metrics = pm.calculate_portfolio_metrics(portfolio_id)
-        print(f"✅ Metriche calcolate: Market Value €{metrics.total_market_value:,.0f}")
-    except Exception as e:
-        print(f"⚠️  Test calcolo metriche fallito: {e}")
-    
-    # Test dashboard
-    dashboard = pm.create_portfolio_dashboard()
-    print(f"✅ Dashboard creato: {len(dashboard)} righe")
-    
-    # Test metriche portfolio vuoto
-    metrics = pm.calculate_portfolio_metrics(portfolio_id)
-    print(f"✅ Metriche calcolate: Market Value €{metrics.total_market_value:,.0f}")
-    
-    print("\n🎯 Portfolio Management System funzionante!")
-    return True
-
-if __name__ == "__main__":
-    """Test standalone del sistema"""
-    print("PORTFOLIO MANAGEMENT SYSTEM v15.0")
-    print("Sistema Certificati Finanziari - Gestione Portafogli")
-    print("=" * 60)
-    success = test_portfolio_system()
-    if success:
-        print("\n✅ Portfolio Management System pronto per integrazione!")
-        print("\nFUNZIONALITÀ DISPONIBILI:")
-        print("📁 Creazione e gestione portafogli multipli")
-        print("📊 Analytics e metriche aggregate")
-        print("🎯 Ottimizzazione e rebalancing")
-        print("📋 Reporting Excel avanzato")
-        print("🔧 Integrazione con sistema certificati esistente")
-    else:
-        print("\n❌ Errori nel testing - verificare implementazione")
+        if selected_item:
+            portfolio_id = self.portfolio_tree.item(selected_item[0])['values'][0]
+            self.logger.info(f"Portfolio '{portfolio_id}' selezionato nel dashboard.")
+            # Qui puoi aggiungere logica per abilitare/disabilitare pulsanti o mostrare dettagli

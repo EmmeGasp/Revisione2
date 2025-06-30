@@ -1,0 +1,28 @@
+Consigli pratici forniti da chatGPT (GitHub copilot in Vscode) per gestire al meglio il contesto:
+
+Valutazione e consigli pratici
+1. Gestire un punto alla volta è la strategia migliore
+
+Affrontare una modifica per volta riduce drasticamente il rischio di introdurre bug difficili da tracciare.
+Permette di testare e validare ogni step, facilitando il rollback in caso di problemi.
+2. Evita modifiche "a cascata" su più file/sistemi contemporaneamente
+
+Anche se le modifiche sono collegate, è meglio procedere per step atomici:
+Modifica → Test → Conferma → Solo dopo passa al punto successivo.
+Se una modifica rompe qualcosa, è molto più facile capire dove intervenire.
+3. Mantieni sempre una snapshot funzionante
+
+Prima di ogni modifica importante, assicurati di avere una versione stabile (backup, commit, copia manuale).
+Così puoi sempre tornare indietro se qualcosa va storto.
+4. Documenta ogni step
+
+Anche solo con un commento, un changelog o un diario (come stai già facendo).
+Questo aiuta sia te che eventuali collaboratori (o l’AI!) a capire il perché di certe scelte.
+5. Non avere fretta di "chiudere il cerchio"
+
+Se una modifica apre nuove questioni, annotale ma non affrontarle subito:
+Prima chiudi il task corrente, poi affronta il nuovo punto.
+6. Testa subito ogni modifica
+
+Anche solo con un test manuale rapido o una funzione di test dedicata.
+Così eviti di accumulare errori che si manifestano solo dopo molte modifiche.

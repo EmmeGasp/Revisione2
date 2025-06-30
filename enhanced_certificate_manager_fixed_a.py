@@ -542,7 +542,7 @@ class DateCalculationUtils:
 class EnhancedCertificateManagerV15:
     """*** VERSIONE CORRETTA v15 *** - Manager completo con tutte le correzioni"""
     
-    def __init__(self, config_dir="D:/Doc/File python/Finanza/Certificates/Revisione2/configs"):
+    def __init__(self, config_dir="D:/Doc/File python/configs/"):
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(exist_ok=True)
         
@@ -551,8 +551,8 @@ class EnhancedCertificateManagerV15:
         self.portfolio_configs = {}
         
         # Files
-        self.config_file = self.config_dir / "certificates_v15.json"
-        self.portfolio_file = self.config_dir / "portfolios_v15.json"
+        self.config_file = self.config_dir / "enhanced_certificates_v15.json"
+        self.portfolio_file = self.config_dir / "enhanced_portfolios_v15.json"
         
         # Fallback ai file precedenti
         if not self.config_file.exists():

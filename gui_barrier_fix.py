@@ -793,6 +793,12 @@ class EnhancedCertificateDialog(tk.Toplevel):
         self.geometry(f'{width}x{height}+{x}+{y}')
 
 # ========================================
+# RIEPILOGO CONTENUTO FILE:
+# - Classi: BarrierLogicManager, SmartBarrierFrame, EnhancedCertificateDialog
+# - Funzioni: test_barrier_fix
+# ========================================
+
+# ========================================
 # TESTING
 # ========================================
 

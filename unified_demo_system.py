@@ -1,10 +1,6 @@
 # ==========================================================
 # RIEPILOGO CONTENUTO FILE:
-# - Import consolidati da structural_cleanup
-# - Istruzioni di applicazione e integrazione sistema demo
-# - (Il file integra: MarketData, CertificateSpecs, UnifiedValidator, ConsolidatedDataImporter,
-#   CertificateBase, BarrierCertificate, BlackScholesModel, MonteCarloEngine, DateUtils, ecc.)
-# - Pronto per demo, testing avanzato, integrazione Excel, dashboard e reporting
+# - (Da completare: elenco classi e funzioni una volta che il file sarà popolato)
 # ==========================================================
 
 # ========================================
@@ -1015,6 +1011,10 @@ if __name__ == "__main__":
         print("  - structural_cleanup.py")
         print("  - unified_certificates.py") 
         print("  - consolidated_risk_system.py")
+        
+    except Exception as e:
+        print(f"❌ ERRORE GENERALE: {e}")
+        logger.error(f"Errore sistema principale: {e}")
         
     except Exception as e:
         print(f"❌ ERRORE GENERALE: {e}")

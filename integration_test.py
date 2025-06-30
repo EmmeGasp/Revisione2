@@ -1,8 +1,6 @@
 # ==========================================================
 # RIEPILOGO CONTENUTO FILE:
-# - Funzione principale: cleanup_test_portfolios
-# - Setup logging, import, e piano di test integrazione
-# - (Il file serve per test end-to-end del sistema portafogli/certificati)
+# - Funzioni: cleanup_test_portfolios, test_portfolio_manager_integration, test_barrier_fix_integration, test_existing_system_compatibility, test_workflow_end_to_end, test_performance_stability, test_data_validation_consistency, run_integration_tests
 # ==========================================================
 
 # ========================================
@@ -711,5 +709,7 @@ if __name__ == "__main__":
     # Esegui test
     success = run_integration_tests()
     
+    # Exit code
+    sys.exit(0 if success else 1)
     # Exit code
     sys.exit(0 if success else 1)

@@ -1,9 +1,6 @@
 # ==========================================================
 # RIEPILOGO CONTENUTO FILE:
-# - Classi principali: ExpressCertificate, PhoenixCertificate, UnifiedCertificateFactory, UnifiedCertificateAnalyzer
-# - Dataclass: Barrier, CouponSchedule
-# - Funzioni: creazione certificati di esempio, test_unified_certificates
-# - Unificazione logica Express/Phoenix, factory/analyzer, metodi di pricing e risk
+# - (Da completare: elenco classi e funzioni una volta che il file sarà popolato)
 # ==========================================================
 
 # ========================================
@@ -1244,7 +1241,7 @@ def test_unified_certificates():
             'bear_market': {
                 'spot_prices': [9.0, 12.0, 2.3],
                 'volatilities': [0.35, 0.40, 0.45],
-                'correlations': express_cert.parametri_mercato['correlazioni'],
+                'correlazioni': express_cert.parametri_mercato['correlazioni'],
                 'risk_free_rate': 0.02,
                 'dividends': [0.02, 0.03, 0.01]
             }

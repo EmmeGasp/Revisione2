@@ -1,10 +1,7 @@
 # ==========================================================
 # RIEPILOGO CONTENUTO FILE:
 # - Classi: CertificateConfigManager, CertificateTemplates, EnhancedCertificateSystem
-# - Gestione configurazioni certificati senza database (JSON)
-# - Template per diversi tipi di certificati
-# - Funzioni: creazione, salvataggio, caricamento, portfolio management, integrazione con sistema reale
-# - Esempio pratico: setup_user_certificates, test_enhanced_system
+# - Funzioni: setup_user_certificates, test_enhanced_system
 # ==========================================================
 
 # ========================================
@@ -41,7 +38,7 @@ from real_certificate_integration import (
 class CertificateConfigManager:
     """Gestore configurazioni certificati senza database"""
     
-    def __init__(self, config_dir="D:/Doc/File python/configs/"):
+    def __init__(self, config_dir="D:/Doc/File python/configs/"): #DA VERIFICARE
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(exist_ok=True)
         
@@ -263,7 +260,7 @@ class EnhancedCertificateSystem:
     """Sistema certificati con gestione configurazioni integrate"""
     
     def __init__(self, excel_output_path="D:/Doc/File python/", 
-                 config_dir="D:/Doc/File python/configs/"):
+                 config_dir="D:/Doc/File python/configs/"): #DA VERIFICARE
         
         self.config_manager = CertificateConfigManager(config_dir)
         self.integrated_system = IntegratedCertificateSystem(excel_output_path)
@@ -473,3 +470,4 @@ if __name__ == "__main__":
         print("3. system.create_and_process_portfolio('PORTFOLIO_PRINCIPALE')  # Portfolio")
     else:
         print("\n❌ ERRORI NEL SISTEMA ENHANCED")
+ 

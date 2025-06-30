@@ -1,8 +1,7 @@
 # ==========================================================
 # RIEPILOGO CONTENUTO FILE:
-# - Classe principale: SimpleCertificateGUIManagerV15_1_Corrected
-# - Metodi per gestione GUI certificati: caricamento, salvataggio, visualizzazione dettagli, analisi
-# - Funzioni di supporto per conversione campi, compatibilità v15.1
+# - Classi: EnhancedCertificateDialogV15_1_Corrected, SimpleCertificateGUIManagerV15_1_Corrected
+# - Funzioni/metodi: gestione GUI certificati, caricamento, salvataggio, visualizzazione dettagli, analisi
 # ==========================================================
 
 # ========================================
@@ -1086,3 +1085,4 @@ if __name__ == "__main__":
         # Fallback
         messagebox.showerror("Errore Sistema", 
                            f"Errore critico avvio Sistema v15.1 CORRECTED:\n{e}\n\nContattare supporto tecnico")
+                           #f"Errore critico avvio Sistema v15.1 CORRECTED:\n{e}\n\nContattare supporto tecnico")

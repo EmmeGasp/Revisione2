@@ -76,8 +76,8 @@ try:
     # Import enhanced manager per calc date
     try:
         from enhanced_certificate_manager_fixed import (
-            EnhancedCertificateManagerV15, 
-            CalculoDateAutoDialogV15,
+            EnhancedCertificateManagerV15,
+            CalculoDateAutoDialogV15,  # <-- RIMUOVI questa riga se la classe non esiste più in quel file
             DateCalculationUtils
         )
         print("✅ Import enhanced manager v15 OK")
@@ -94,6 +94,10 @@ except ImportError as e:
     class IntegratedCertificateSystem:
         pass
     ENHANCED_MANAGER_AVAILABLE = False
+
+# Importa moduli di analisi e reportistica
+from consolidated_risk_system import UnifiedRiskAnalyzer
+from excel_enhancement_plan import AdvancedExcelExporter
 
 # ========================================
 # ENHANCED CERTIFICATE DIALOG v15.1 CORRECTED - FORM COMPLETO
@@ -755,14 +759,12 @@ class EnhancedCertificateDialogV15_1_Corrected:
                 elif field_name in ['coupon_barrier', 'capital_barrier', 'airbag_level']:
                     perc_value = float(value)
                     result_data[field_name] = perc_value / 100.0 if perc_value > 1 else perc_value
-                elif field_name in ['step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months']:
+                elif field_name in ['step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months'] and raw_values.get('capital_barrier_type') == 'dynamic':
                     # Processa questi campi SOLO se il tipo di barriera capitale è 'dynamic'
-                    if raw_values.get('capital_barrier_type') == 'dynamic':
-                        if field_name == 'observation_delay_months':
-                            result_data[field_name] = int(value)
-                        else:
-                            result_data[field_name] = float(value) / 100.0
-                    # Altrimenti, non aggiungere questi campi a result_data; verranno rimossi dalla logica di pop successiva
+                    if field_name == 'observation_delay_months':
+                        result_data[field_name] = int(value)
+                    else:
+                        result_data[field_name] = float(value) / 100.0
                 elif field_name in ['memory_feature', 'airbag_feature']:
                     result_data[field_name] = value.lower() == 'true'
                 elif field_name == 'notional':
@@ -958,7 +960,9 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
                       state="disabled").pack(side=tk.LEFT, padx=(0, 5))
         
         ttk.Button(toolbar, text="📊 Analizza", 
-                  command=self._analyze_selected).pack(side=tk.LEFT, padx=(0, 5))
+                  command=self._analyze_selected_certificate).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(toolbar, text="📈 Esporta Analisi Excel", 
+                  command=self._export_analysis_excel).pack(side=tk.LEFT, padx=(0, 5))
         
         # Separator
         ttk.Separator(toolbar, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=10)
@@ -978,9 +982,8 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         
         # Pulsanti di sistema a destra
         system_buttons_frame = ttk.Frame(toolbar)
-        system_buttons_frame.pack(side=tk.RIGHT, padx=(20,0))
+        system_buttons_frame.pack(side=tk.RIGHT)
         ttk.Button(system_buttons_frame, text="🚪 Esci", command=self.close).pack(side=tk.LEFT)
-
 
         # Main content
         main_frame = ttk.Frame(self.root)
@@ -995,7 +998,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         paned.add(list_frame, weight=1)
         
         # Tree view
-        columns = ("ISIN", "Nome", "Tipo", "Emittente", "Risk-Free %", "Scadenza")
+        columns = ("ISIN", "Nome", "Tipo", "Emittente", "Risk-Free %", "Scadenza", "Stato")
         self.tree = ttk.Treeview(list_frame, columns=columns, show="headings", height=15)
         
         for col in columns:
@@ -1005,7 +1008,11 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
             elif col == "Nome":
                 self.tree.column(col, width=200)
             elif col == "Risk-Free %":
-                self.tree.column(col, width=100)
+                self.tree.column(col, width=70)  # Ridotto
+            elif col == "Scadenza":
+                self.tree.column(col, width=90)  # Ridotto
+            elif col == "Stato":
+                self.tree.column(col, width=65)  # Ridotto
             else:
                 self.tree.column(col, width=120)
         
@@ -1268,13 +1275,21 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
                 else:
                     rf_display = str(risk_free_rate)
                 
+                # Recupera stato se Enhanced, altrimenti "N/A"
+                status = "N/A"
+                if 'status' in cert_data:
+                    status = cert_data['status']
+                elif 'base_config' in cert_data and 'status' in cert_data:
+                    status = cert_data['status']
+                
                 self.tree.insert("", tk.END, values=(
                     cert_id,
                     cert_data.get('name', 'N/A'),
                     cert_data.get('certificate_type', 'N/A'),
                     cert_data.get('issuer', 'N/A'),
-                    rf_display,  # Risk-Free Rate formattato
-                    cert_data.get('maturity_date', 'N/A')
+                    rf_display,
+                    cert_data.get('maturity_date', 'N/A'),
+                    status
                 ))
         
         # Status update
@@ -1346,6 +1361,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
             except Exception:
                 return val
 
+        status = cert_data.get('status', 'N/A')
         details = f"""DETTAGLI CERTIFICATO v15.1 CORRECTED
 {'='*60}
 
@@ -1355,6 +1371,7 @@ Nome Certificato: {cert_data.get('name', 'N/A')}
 Ticker Strumento: {cert_data.get('certificate_instrument_ticker', 'N/A')}
 Tipo Certificato: {cert_data.get('certificate_type', 'N/A')}
 Emittente: {cert_data.get('issuer', 'N/A')}
+Stato: {status}
 
 DATE E PARAMETRI:
 Data Emissione: {cert_data.get('issue_date', 'N/A')}
@@ -1368,6 +1385,7 @@ Frequenza Cedola: {cert_data.get('coupon_frequency', 'N/A')}
 
 CARATTERISTICHE:
 Effetto Memoria: {cert_data.get('memory_feature', 'N/A')}
+
 Airbag: {airbag_feature}
 Livello Airbag: {airbag_level_str}
 """
@@ -1381,6 +1399,7 @@ Barriera Capitale: {format_percentage(cert_data.get('capital_barrier', 0))} ({ce
 """
         if note_barriere:
             details += f"Note Barriere: {note_barriere}\n"
+
 
         details += f"""
 BARRIERE DINAMICHE:
@@ -1548,27 +1567,84 @@ Autocall Levels: {len(cert_data.get('autocall_levels', []))} livelli
                 self.details_text.delete(1.0, tk.END)
                 messagebox.showinfo("Eliminato", f"Certificato {cert_id} eliminato")
     
-    def _analyze_selected(self):
-        """Analizza certificato selezionato"""
+    def _analyze_selected_certificate(self):
+        """Analizza il certificato selezionato con UnifiedRiskAnalyzer"""
         selection = self.tree.selection()
         if not selection:
             messagebox.showwarning("Attenzione", "Seleziona un certificato da analizzare")
             return
-        
         cert_id = self.tree.item(selection[0])['values'][0]
-        messagebox.showinfo("Analisi", f"Analisi per {cert_id} - Funzionalità in sviluppo v15.1")
-    
+        cert_data = self.certificates.get(cert_id)
+        if not cert_data:
+            messagebox.showerror("Errore", f"Certificato {cert_id} non trovato")
+            return
+
+        try:
+            from enhanced_certificate_manager_fixed import EnhancedCertificateManagerV15
+            manager = EnhancedCertificateManagerV15(
+                config_dir="D:/Doc/File python/Finanza/Certificates/Revisione2/configs"
+            )
+            # Correzione: passa sia cert_id che cert_data
+            real_config = manager.add_certificate_from_dict_v15(cert_id, cert_data)
+            from consolidated_risk_system import UnifiedRiskAnalyzer
+            analyzer = UnifiedRiskAnalyzer()
+            risk_metrics = analyzer.analyze_certificate_risk(real_config)
+            result_text = (
+                f"Analisi Rischio Certificato: {cert_id}\n"
+                f"VaR 95%: {risk_metrics.var_95:.2%}\n"
+                f"VaR 99%: {risk_metrics.var_99:.2%}\n"
+                f"Volatilità: {risk_metrics.volatility:.2%}\n"
+                f"Sharpe Ratio: {risk_metrics.sharpe_ratio:.2f}\n"
+                f"Sortino Ratio: {risk_metrics.sortino_ratio:.2f}\n"
+            )
+            messagebox.showinfo("Analisi Rischio", result_text)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            messagebox.showerror("Errore Analisi", f"Errore durante l'analisi:\n{e}")
+
+    def _export_analysis_excel(self):
+        """Esporta analisi avanzata in Excel"""
+        selection = self.tree.selection()
+        if not selection:
+            messagebox.showwarning("Attenzione", "Seleziona un certificato da esportare")
+            return
+        cert_id = self.tree.item(selection[0])['values'][0]
+        cert_data = self.certificates.get(cert_id)
+        if not cert_data:
+            messagebox.showerror("Errore", f"Certificato {cert_id} non trovato")
+            return
+
+        try:
+            from enhanced_certificate_manager_fixed import EnhancedCertificateManagerV15
+            manager = EnhancedCertificateManagerV15(
+                config_dir="D:/Doc/File python/Finanza/Certificates/Revisione2/configs"
+            )
+            # Correzione: passa sia cert_id che cert_data
+            real_config = manager.add_certificate_from_dict_v15(cert_id, cert_data)
+            from consolidated_risk_system import UnifiedRiskAnalyzer
+            analyzer = UnifiedRiskAnalyzer()
+            risk_metrics = analyzer.analyze_certificate_risk(real_config)
+            analysis_results = {'risk_metrics': risk_metrics.to_dict()}
+            from excel_enhancement_plan import AdvancedExcelExporter
+            exporter = AdvancedExcelExporter()
+            path = exporter.create_comprehensive_report(real_config, analysis_results)
+            messagebox.showinfo("Export Excel", f"Report Excel creato:\n{path}")
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            messagebox.showerror("Errore Export", f"Errore durante l'export:\n{e}")
+
     def close(self):
         """Chiusura applicazione"""
         if messagebox.askyesno("Chiusura", "Chiudere il Sistema Certificati v15.1 CORRECTED?"):
             print("🚪 Chiusura GUI Certificate Manager v15.1 CORRECTED")
             self.root.destroy()
-    
+
     def run(self):
         """Avvia GUI"""
         self.root.protocol("WM_DELETE_WINDOW", self.close)
         self.root.mainloop()
-
 
 # ========================================
 # MAIN EXECUTION
@@ -1595,7 +1671,5 @@ if __name__ == "__main__":
         print(f"❌ Errore avvio Sistema v15.1 CORRECTED: {e}")
         import traceback
         traceback.print_exc()
-        
-        # Fallback
         messagebox.showerror("Errore Sistema", 
-                           f"Errore critico avvio Sistema v15.1 CORRECTED:\n{e}\n\nContattare supporto tecnico")
+            f"Errore critico avvio Sistema v15.1 CORRECTED:\n{e}\n\nContattare supporto tecnico")

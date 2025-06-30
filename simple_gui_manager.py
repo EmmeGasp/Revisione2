@@ -1,9 +1,8 @@
 # ==========================================================
 # RIEPILOGO CONTENUTO FILE:
 # - Classi GUI: EnhancedCertificateDialog
-# - Gestione tipi certificato, parametri richiesti, descrizioni
-# - Dialog per inserimento/modifica certificati con interfaccia grafica
 # ==========================================================
+# - (Funzioni e metodi da elencare quando il file sarà popolato)
 
 # ========================================
 # SIMPLE GUI MANAGER - Interface Funzionante
@@ -1687,4 +1686,5 @@ def main():
         traceback.print_exc()
 
 if __name__ == "__main__":
+    main()
     main()

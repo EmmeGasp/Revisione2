@@ -1,0 +1,49 @@
+{
+  "IT0006767872": {
+    "base_config": {
+      "isin": "IT0006767872",
+      "name": "Autocallable Worst-of Reverse Convertible Certificate correlato a un paniere di azioni ordinarie",
+      "certificate_type": "express",
+      "issuer": "Marex",
+      "underlying_assets": [
+        "DBK.DE",
+        "GLE.PA",
+        "UCG.MI",
+        "BIMI.MI"
+      ],
+      "issue_date": "2025-03-08T00:00:00",
+      "maturity_date": "2030-02-28T00:00:00",
+      "notional": 1000.0,
+      "currency": "EUR",
+      "yahoo_ticker": "DBK.DE,GLE.PA,UCG.MI,BIMI.MI",
+      "coupon_rates": [],
+      "coupon_dates": [],
+      "autocall_levels": [],
+      "autocall_dates": null,
+      "barrier_levels": null,
+      "memory_feature": true,
+      "current_spots": null,
+      "volatilities": null,
+      "correlations": null,
+      "risk_free_rate": 0.035,
+      "dividend_yields": null
+    },
+    "in_life_state": {
+      "valuation_date": "2025-06-30T15:28:47.735871",
+      "paid_coupons": [],
+      "memory_coupons_due": [],
+      "is_active": true,
+      "was_autocalled": false
+    },
+    "metadata": {
+      "created_date": "2025-06-30T15:28:47.735872",
+      "last_updated": "2025-06-30T15:28:47.735873",
+      "data_source": "manual",
+      "validation_status": "pending",
+      "notes": "",
+      "version": "v15"
+    },
+    "status": "in_life",
+    "enhanced_version": "v15"
+  }
+}

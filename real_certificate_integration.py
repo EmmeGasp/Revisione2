@@ -1,8 +1,7 @@
 # ==========================================================
 # RIEPILOGO CONTENUTO FILE:
-# - Classi principali: RealCertificateConfig, UnderlyingEvaluationEngine, RealCertificateImporter, EnhancedExcelExporter, IntegratedCertificateSystem
-# - Funzioni: importazione certificati reali, conversione, integrazione, export Excel avanzato, gestione portfolio multi-certificato
-# - Esempi pratici: create_de000vg6drr5_certificate, test_integrated_system
+# - Classi: EnhancedExcelExporter, UnderlyingEvaluationEngine, RealCertificateImporter, IntegratedCertificateSystem
+# - Funzioni: create_de000vg6drr5_certificate
 # ==========================================================
 
 # ========================================

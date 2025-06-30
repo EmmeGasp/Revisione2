@@ -13,7 +13,8 @@
 - **TODO**: 
   - Verificare che il campo "Note Barriere" sia sempre presente e ben visibile sia in inserimento che in visualizzazione dettagli (attualmente da ricontrollare la posizione e la gestione).
   - Migliorare la gestione di casi particolari di barriere variabili/complesse.
-  - Prossimo step: lavorare sull’integrazione e gestione dei portafogli, in particolare la **modifica dei portafogli censiti**.
+  - **Prossimo passo: analisi dei certificati** (approfondire la funzionalità di analisi, visualizzazione avanzata e reportistica dei singoli certificati).
+- **Nota**: Serve davvero una gestione robusta dei campi opzionali e non previsti nei costruttori delle classi (es. titoli sottostanti, certificato, altri parametri): è necessario filtrare sempre i parametri in eccesso prima di creare oggetti, per evitare errori di tipo "unexpected keyword argument".
 
 ---
 

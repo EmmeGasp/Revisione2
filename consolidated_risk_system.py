@@ -1,8 +1,7 @@
 # ==========================================================
 # RIEPILOGO CONTENUTO FILE:
 # - Classi principali: RiskMetrics, UnifiedRiskAnalyzer, UnifiedStressTestEngine, UnifiedComplianceChecker, UnifiedRiskDashboard
-# - Funzioni di analisi rischio, stress test, compliance, dashboard, reportistica
-# - Funzione di test: test_consolidated_risk_system
+# - Funzioni: test_consolidated_risk_system
 # ==========================================================
 # ========================================
 # RISK SYSTEM CONSOLIDATION - SISTEMA RISCHI UNIFICATO
@@ -1817,6 +1816,7 @@ def test_consolidated_risk_system():
         print(f"   ✅ Express Risk Analysis - VaR 95%: {risk_express.var_95:.2%}")
         
         # Analisi risk Phoenix
+       
         risk_phoenix = risk_analyzer.analyze_certificate_risk(phoenix_cert, n_simulations=2000)
         print(f"   ✅ Phoenix Risk Analysis - VaR 95%: {risk_phoenix.var_95:.2%}")
         
