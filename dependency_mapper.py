@@ -1,4 +1,4 @@
-# d:\Doc\File python\Finanza\Certificates\Revisione2\dependency_mapper.py
+# dependency_mapper.py
 import os
 import ast
 import graphviz
@@ -11,14 +11,26 @@ def find_project_modules(directory):
     """
     project_modules = {}
     root_path = Path(directory).resolve()
+    # Nomi delle cartelle da escludere (match esatto, case-sensitive).
+    # Verranno ignorati tutti i file e le sottocartelle al loro interno.
+    # Nota: __pycache__ è lo standard Python per le cache dei bytecode.
+    excluded_dirs = {'src', 'venv', '.git', '__pycache__'}
+
     for path in root_path.rglob('*.py'):
         # Escludi i file che contengono 'backup' nel nome, in modo case-insensitive
         if 'backup' in path.name.lower():
             print(f"  -> File di backup escluso: {path.name}")
             continue
 
-        # Calcola il nome del modulo relativo alla root del progetto
+        # Controlla se una delle cartelle nel percorso è nell'elenco di esclusione
         relative_path = path.relative_to(root_path)
+        dir_parts = set(relative_path.parts[:-1])  # Ottieni solo le parti del percorso che sono directory
+
+        if not excluded_dirs.isdisjoint(dir_parts):
+            print(f"  -> File in cartella esclusa ({relative_path}): {path.name}")
+            continue
+
+        # Calcola il nome del modulo relativo alla root del progetto
         module_name = '.'.join(relative_path.with_suffix('').parts)
         project_modules[module_name] = path
     return project_modules

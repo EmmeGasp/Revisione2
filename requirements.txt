@@ -1,0 +1,4 @@
+# requirements.txt
+yfinance
+openpyxl
+pandas
