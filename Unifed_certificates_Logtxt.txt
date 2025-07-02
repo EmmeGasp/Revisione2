@@ -1,0 +1,105 @@
+Unifed_certificates.py
+PS D:\Doc\File python\Finanza\Certificates\Revisione2> & C:/Users/namad/AppData/Local/Programs/Python/Python313/python.exe "d:/Doc/File python/Finanza/Certificates/Revisione2/unified_certificates.py"
+CERTIFICATE UNIFICATION - Sistema Certificati Finanziari
+Versione Unificata - Express e Phoenix Consolidati
+============================================================
+============================================================
+TEST SISTEMA CERTIFICATI UNIFICATO
+============================================================
+1. Test Express Certificate...
+2025-07-01 17:10:10,854 - INFO - Date non ordinate - applicazione ordinamento automatico
+2025-07-01 17:10:10,854 - WARNING - Dati di mercato con problemi: ['Rilevate variazioni di prezzo estreme (>50%)']
+2025-07-01 17:10:10,854 - INFO - Parametri mercato Express configurati: 3 assets
+   ✅ Express creato: Express Certificate FTSE MIB
+2025-07-01 17:10:10,854 - INFO - Calcolo fair value per ExpressCertificate
+2025-07-01 17:10:10,854 - INFO - Simulazione Express: 2,000 percorsi, 892 steps
+2025-07-01 17:10:13,158 - INFO - Simulazione Express completata
+🎯 Express payoffs con evaluation type: worst_of
+2025-07-01 17:10:13,305 - INFO - Calcolo payoff Express...
+2025-07-01 17:10:15,035 - INFO - Payoff Express calcolati - Prob autocall: 38.90%
+   ✅ Fair Value Express: €810.30
+2. Test Phoenix Certificate...
+2025-07-01 17:10:15,036 - INFO - Date non ordinate - applicazione ordinamento automatico
+2025-07-01 17:10:15,036 - WARNING - Dati di mercato con problemi: ['Rilevate variazioni di prezzo estreme (>50%)']
+2025-07-01 17:10:15,036 - INFO - Parametri mercato Phoenix configurati: 3 assets
+   ✅ Phoenix creato: Phoenix Certificate US Tech
+2025-07-01 17:10:15,036 - INFO - Calcolo fair value per PhoenixCertificate
+2025-07-01 17:10:15,036 - INFO - Simulazione Phoenix: 2,000 percorsi, 6 anni
+2025-07-01 17:10:15,051 - INFO - Simulazione Phoenix completata
+🎯 Phoenix payoffs con evaluation type: worst_of
+2025-07-01 17:10:15,052 - INFO - Calcolo payoff Phoenix...
+2025-07-01 17:10:15,097 - INFO - Payoff Phoenix calcolati - Efficacia memoria: 6.13%
+   ✅ Fair Value Phoenix: €842.10
+3. Test Unified Factory...
+2025-07-01 17:10:15,097 - INFO - Creazione certificato tipo: barrier
+   ✅ Factory Barrier: BarrierCertificate
+4. Test Risk Metrics...
+2025-07-01 17:10:15,098 - INFO - Calcolo metriche di rischio
+2025-07-01 17:10:15,099 - INFO - Calcolo metriche di rischio
+   ✅ Express VaR 95%: -71.85%
+   ✅ Phoenix VaR 95%: -71.56%
+5. Test Scenario Analysis...
+2025-07-01 17:10:15,100 - INFO - Confronto 2 scenari
+2025-07-01 17:10:15,100 - INFO - Date non ordinate - applicazione ordinamento automatico
+2025-07-01 17:10:15,100 - WARNING - Dati di mercato con problemi: ['Rilevate variazioni di prezzo estreme (>50%)']
+2025-07-01 17:10:15,100 - INFO - Parametri mercato Express configurati: 3 assets
+2025-07-01 17:10:15,100 - INFO - Calcolo fair value per ExpressCertificate
+2025-07-01 17:10:15,100 - INFO - Simulazione Express: 5,000 percorsi, 892 steps
+2025-07-01 17:10:20,788 - INFO - Simulazione Express completata
+🎯 Express payoffs con evaluation type: worst_of
+2025-07-01 17:10:20,788 - INFO - Calcolo payoff Express...
+2025-07-01 17:10:25,048 - INFO - Payoff Express calcolati - Prob autocall: 38.62%
+2025-07-01 17:10:25,049 - INFO - Calcolo metriche di rischio
+2025-07-01 17:10:25,050 - ERROR - Errore scenario bear_market: ExpressCertificate.setup_market_parameters() got an unexpected keyword argument 'correlazioni'. Did you mean 'correlations'?
+   ✅ Scenari analizzati: 2
+      bull_market: FV €847.85, Return -15.22%
+6. Test Performance Reports...
+2025-07-01 17:10:25,051 - INFO - Calcolo fair value per ExpressCertificate
+2025-07-01 17:10:25,051 - INFO - Simulazione Express: 10,000 percorsi, 892 steps
+2025-07-01 17:10:36,436 - INFO - Simulazione Express completata
+🎯 Express payoffs con evaluation type: worst_of
+2025-07-01 17:10:36,436 - INFO - Calcolo payoff Express...
+2025-07-01 17:10:45,018 - INFO - Payoff Express calcolati - Prob autocall: 38.59%
+2025-07-01 17:10:45,019 - INFO - Calcolo metriche di rischio
+   ✅ Report Express generato
+2025-07-01 17:10:45,020 - INFO - Calcolo fair value per PhoenixCertificate
+2025-07-01 17:10:45,020 - INFO - Simulazione Phoenix: 10,000 percorsi, 6 anni
+2025-07-01 17:10:45,097 - INFO - Simulazione Phoenix completata
+🎯 Phoenix payoffs con evaluation type: worst_of
+2025-07-01 17:10:45,097 - INFO - Calcolo payoff Phoenix...
+2025-07-01 17:10:45,310 - INFO - Payoff Phoenix calcolati - Efficacia memoria: 6.25%
+2025-07-01 17:10:45,310 - INFO - Calcolo metriche di rischio
+   ✅ Report Phoenix generato
+
+============================================================
+RIEPILOGO TEST CERTIFICATE UNIFICATION
+============================================================
+🎉 TUTTI I TEST PASSATI - CERTIFICATE UNIFICATION COMPLETATO!
+
+✅ Unificazioni completate:
+   - ExpressCertificate (Parte 3 + Parte 5a)
+   - PhoenixCertificate (da Parte 5a)
+   - UnifiedCertificateFactory
+   - UnifiedCertificateAnalyzer
+   - Sistema pricing unificato
+   - Risk metrics consolidati
+
+🚀 PRONTO PER STEP 3: Risk System Consolidation
+
+🎯 CERTIFICATE UNIFICATION COMPLETATO CON SUCCESSO!
+
+CLASSI UNIFICATE DISPONIBILI:
+✅ ExpressCertificate - Completa (ex Parte 3 + 5a)
+✅ PhoenixCertificate - Completa (ex Parte 5a)
+✅ UnifiedCertificateFactory - Factory pattern
+✅ UnifiedCertificateAnalyzer - Analisi unificata
+✅ Barrier, CouponSchedule - Utilities
+
+📊 STATISTICHE:
+   Classi unificate: 2 (Express, Phoenix)
+   Factory methods: 3
+   Analyzer methods: 8
+   Test scenarios: 6
+
+⏭️  PROSSIMO STEP: Risk System Consolidation
+PS D:\Doc\File python\Finanza\Certificates\Revisione2> 

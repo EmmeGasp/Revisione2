@@ -1,4 +1,4 @@
-Mappa dei campi (fixed_gui_v15_1_corrected.py)
+Lista dei campi
        field_mapping = {
             'isin': 'isin',
             'name': 'name', 
@@ -29,3 +29,5 @@ Mappa dei campi (fixed_gui_v15_1_corrected.py)
             'observation_delay_months': 'observation_delay_months', # Nuovo
             'prezzi_iniziali_sottostanti': 'prezzi_iniziali_sottostanti', # Nuovo campo
             'note_barriere': 'note_barriere', # Nuovo campo
+        }
+ 

@@ -1,0 +1,138 @@
+enhanced_certificate_manaer_fixed.py log BIS
+PS D:\Doc\File python\Finanza\Certificates\Revisione2>  & 'c:\Users\namad\AppData\Local\Programs\Python\Python313\python.exe' 'c:\Users\namad\.vscode\extensions\ms-python.debugpy-2025.8.0-win32-x64\bundled\libs\debugpy\launcher' '1536' '--' 'D:\Doc\File python\Finanza\Certificates\Revisione2\enhanced_certificate_manager_fixed.py' 
+Backend tkagg is interactive backend. Turning interactive mode on.
+ENHANCED CERTIFICATE MANAGER - VERSIONE CORRETTA v15
+Sistema completo con tutte le correzioni integrate
+======================================================================
+
+🧪 TEST ENHANCED CERTIFICATE MANAGER v15
+============================================================
+1. Inizializzazione manager v15...
+2025-07-01 17:40:51,700 - INFO - EnhancedExcelExporter inizializzato
+2025-07-01 17:40:51,701 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-01 17:40:51,701 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-01 17:40:51,702 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-01 17:40:51,702 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-01 17:40:51,702 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-01 17:40:51,702 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-01 17:40:51,702 - INFO - UnifiedRiskDashboard inizializzato
+🚀 Sistema Certificati Integrato inizializzato
+📁 Output Excel: D:/Doc/File python/
+📂 Caricamento configurazioni v15: 1 certificati
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'underlying_assets', 'issue_date', 'maturity_date', 'notional', 'currency', 'yahoo_ticker', 'coupon_rates', 'coupon_dates', 'autocall_levels', 'autocall_dates', 'barrier_levels', 'memory_feature', 'current_spots', 'volatilities', 'correlations', 'risk_free_rate', 'dividend_yields']
+🔧 Campi esclusi v15.1: []
+✅ RealCertificateConfig creato (Enhanced Manager v15.1)
+📊 Campi utilizzati: 21
+   ✅ TEST123456789 caricato
+🚀 Enhanced Certificate Manager v15 inizializzato
+   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\configs
+   Certificati: 1
+   Portfolio: 0
+   Versione: v15 (CORRETTA)
+2. Test aggiunta certificato con yahoo_ticker...
+🆕 Aggiunta certificato v15: TEST123456789
+   Dati ricevuti: ['isin', 'name', 'certificate_type', 'issuer', 'yahoo_ticker', 'underlying_assets', 'issue_date', 'maturity_date', 'notional', 'currency', 'memory_feature', 'auto_update_market_data', 'current_spots', 'volatilities', 'risk_free_rate', 'coupon_rate', 'coupon_dates', 'barrier_levels']
+   📊 Yahoo ticker specificato: TEST.MI
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'yahoo_ticker', 'underlying_assets', 'issue_date', 'maturity_date', 'notional', 'currency', 'memory_feature', 'auto_update_market_data', 'current_spots', 'volatilities', 'risk_free_rate', 'coupon_rate', 'coupon_dates', 'barrier_levels']
+🔧 Campi esclusi v15.1: ['auto_update_market_data', 'coupon_rate']
+✅ RealCertificateConfig creato (Enhanced Manager v15.1)
+📊 Campi utilizzati: 16
+🔄 Backup creato: certificates_v15.backup_20250701_174051.json
+💾 Configurazioni v15 salvate: 1 certificati
+✅ Certificato enhanced TEST123456789 aggiunto (v15)
+   ✅ Yahoo ticker salvato: TEST.MI
+3. Test calcolo date robusto...
+📅 Calcolo date cedole v15 per TEST123456789
+   Frequency: Trimestrale
+   Period rate: 0.0250
+📅 Calcolo date robusto v15:
+   Start: 2024-01-15
+   End: 2029-01-15
+   Frequency: Trimestrale
+   Primo periodo: 2024-04-15
+   Data generata: 2024-04-15
+   Data generata: 2024-07-15
+   Data generata: 2024-10-15
+   Data generata: 2025-01-15
+   Data generata: 2025-04-15
+   Data generata: 2025-07-15
+   Data generata: 2025-10-15
+   Data generata: 2026-01-15
+   Data generata: 2026-04-15
+   Data generata: 2026-07-15
+   Data generata: 2026-10-15
+   Data generata: 2027-01-15
+   Data generata: 2027-04-15
+   Data generata: 2027-07-15
+   Data generata: 2027-10-15
+   Data generata: 2028-01-15
+   Data generata: 2028-04-15
+   Data generata: 2028-07-15
+   Data generata: 2028-10-15
+   Data generata: 2029-01-15
+   Data generata: 2029-04-15
+   Fermato: data supera end_date
+📊 Totale 20 date cedole generate (robusto v15)
+🔄 Backup creato: certificates_v15.backup_20250701_174051.json
+💾 Configurazioni v15 salvate: 1 certificati
+✅ Calcolate 20 date cedole
+   Tasso periodo: 2.50%
+   Tasso annuo equivalente: 10.00%
+   ✅ Generate 20 date cedole
+4. Test stato in-life...
+🔄 Backup creato: certificates_v15.backup_20250701_174051.json
+💾 Configurazioni v15 salvate: 1 certificati
+✅ Stato in-life aggiornato per TEST123456789 (v15)
+   Valuation Date: 2025-06-15
+   Paid Coupons: 2
+   Memory Coupons: 1
+   ✅ Stato in-life aggiornato
+5. Test lista dettagliata...
+   ✅ Lista dettagliata: 1 certificati
+6. Test save/load...
+🔄 Backup creato: certificates_v15.backup_20250701_174051.json
+💾 Configurazioni v15 salvate: 1 certificati
+2025-07-01 17:40:51,724 - INFO - EnhancedExcelExporter inizializzato
+2025-07-01 17:40:51,724 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-01 17:40:51,724 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-01 17:40:51,724 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-01 17:40:51,725 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-01 17:40:51,725 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-01 17:40:51,725 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-01 17:40:51,725 - INFO - UnifiedRiskDashboard inizializzato
+🚀 Sistema Certificati Integrato inizializzato
+📁 Output Excel: D:/Doc/File python/
+📂 Caricamento configurazioni v15: 1 certificati
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'underlying_assets', 'issue_date', 'maturity_date', 'notional', 'currency', 'yahoo_ticker', 'coupon_rates', 'coupon_dates', 'autocall_levels', 'autocall_dates', 'barrier_levels', 'memory_feature', 'current_spots', 'volatilities', 'correlations', 'risk_free_rate', 'dividend_yields']
+🔧 Campi esclusi v15.1: []
+✅ RealCertificateConfig creato (Enhanced Manager v15.1)
+📊 Campi utilizzati: 21
+   ✅ TEST123456789 caricato
+🚀 Enhanced Certificate Manager v15 inizializzato
+   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\configs
+   Certificati: 1
+   Portfolio: 0
+   Versione: v15 (CORRETTA)
+   ✅ Certificato caricato con yahoo_ticker: TEST.MI
+
+🎉 TUTTI I TEST v15 PASSATI!
+
+✅ ENHANCED CERTIFICATE MANAGER v15 PRONTO!
+
+CORREZIONI INTEGRATE:
+✅ yahoo_ticker opzionale supportato
+✅ Fix errore 'day out of range' nel calcolo date
+✅ Dimensioni finestre calcolo date corrette
+✅ Valori default caricati dal certificato selezionato
+✅ Gestione robusta errori Yahoo Finance
+✅ Validazione completa dati input
+✅ Backward compatibility con configurazioni esistenti
+
+🔗 INTEGRAZIONE CON GUI v14:
+# Sostituisci _auto_calculate_dates nel tuo GUI v14
+enhanced_manager = EnhancedCertificateManagerV15()
+# Usa CalculoDateAutoDialogV15 invece del dialog esistente
+PS D:\Doc\File python\Finanza\Certificates\Revisione2> 
