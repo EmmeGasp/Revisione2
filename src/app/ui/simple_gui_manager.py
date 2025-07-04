@@ -51,13 +51,13 @@ class SimpleCertificateGUI:
     def __init__(self):
         # Sistema integrato
         self.system = IntegratedCertificateSystem()
-        self.config_dir = Path("D:/Doc/File python/configs/")
+        self.config_dir = Path("D:/Doc/File python/configs/") #DA VERIFICARE
         self.config_dir.mkdir(exist_ok=True)
         
         # File configurazioni
         self.cert_file = self.config_dir / "enhanced_certificates.json"
         if not self.cert_file.exists():
-            self.cert_file = self.config_dir / "certificates.json"  # Fallback
+            self.cert_file = self.config_dir / "certificates1.json"  # Fallback
         
         # Carica configurazioni esistenti
         self.certificates = self._load_certificates()

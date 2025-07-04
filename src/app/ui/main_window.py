@@ -898,7 +898,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         # Variabili
         self.certificates = {}
         # Modifica: nuovo path e nome file
-        self.cert_file = Path("configs/certificates_v15.json")
+        self.cert_file = Path("src/app/data/certificates.json") #DA VERIFICARE
         
         # Enhanced manager per calc date
         if ENHANCED_MANAGER_AVAILABLE:
@@ -1582,7 +1582,7 @@ Autocall Levels: {len(cert_data.get('autocall_levels', []))} livelli
         try:
             from app.core.enhanced_certificate_manager_fixed import EnhancedCertificateManagerV15
             manager = EnhancedCertificateManagerV15(
-                config_dir="D:/Doc/File python/Finanza/Certificates/Revisione2/configs"
+                config_dir="D:/Doc/File python/Finanza/Certificates/Revisione2/src/app/data"
             )
             # Correzione: passa sia cert_id che cert_data
             real_config = manager.add_certificate_from_dict_v15(cert_id, cert_data)
@@ -1618,7 +1618,7 @@ Autocall Levels: {len(cert_data.get('autocall_levels', []))} livelli
         try:
             from app.core.enhanced_certificate_manager_fixed import EnhancedCertificateManagerV15
             manager = EnhancedCertificateManagerV15(
-                config_dir="D:/Doc/File python/Finanza/Certificates/Revisione2/configs"
+                config_dir="D:/Doc/File python/Finanza/Certificates/Revisione2/src/app/data"
             )
             # Correzione: passa sia cert_id che cert_data
             real_config = manager.add_certificate_from_dict_v15(cert_id, cert_data)

@@ -30,7 +30,8 @@ import numpy as np
 from pathlib import Path
 
 # Import dal sistema esistente
-from app.utils.real_certificate_integration import (
+
+from app.utils.real_certificate_integration import ( 
     RealCertificateConfig, IntegratedCertificateSystem,
     RealCertificateImporter
 )
@@ -38,7 +39,7 @@ from app.utils.real_certificate_integration import (
 class CertificateConfigManager:
     """Gestore configurazioni certificati senza database"""
     
-    def __init__(self, config_dir="D:/Doc/File python/configs/"): #DA VERIFICARE
+    def __init__(self, config_dir="D:/Doc/File python/Finanza/Certificates/Revisione2/src/app/data"): #DA VERIFICARE
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(exist_ok=True)
         

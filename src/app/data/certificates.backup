@@ -156,6 +156,12 @@
     "yahoo_ticker": "^GSPC, ^STOXX50E, ^N225",
     "underlying_names": "S&P 500, EURO STOXX 50, NIKKEI 225",
     "underlying_dependency_type": "Single",
-    "dynamic_barrier_feature": false
+    "dynamic_barrier_feature": false,
+    "coupon_dates": [],
+    "coupon_rates": [],
+    "autocall_levels": [],
+    "dynamic_barrier_start_level": null,
+    "step_down_rate": null,
+    "dynamic_barrier_end_level": null
   }
 }

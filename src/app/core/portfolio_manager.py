@@ -215,7 +215,7 @@ class PortfolioMetrics:
 class PortfolioManager:
     """Portfolio Manager principale - gestione portafogli multi-certificato"""
     
-    def __init__(self, base_dir: str = "D:/Doc/File python/Finanza/Certificates/Revisione2/"):
+    def __init__(self, base_dir: str = "D:/Doc/File python/Finanza/Certificates/Revisione2/src/app/data"):
         # base_dir deve essere la directory "configs", NON la directory superiore
         self.base_dir = Path(base_dir)
         # Rimuovi eventuale aggiunta di "configs" qui sotto

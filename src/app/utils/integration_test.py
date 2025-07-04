@@ -36,7 +36,7 @@ import platform
 
 def cleanup_test_portfolios():
     """Pulizia portfolio di test esistenti"""
-    config_dir = Path("D:/Doc/File python/configs/")
+    config_dir = Path("D:/Doc/File python/finanza/certificates/revisione2/src/app/data")
     
     # Carica file portfolios
     portfolios_file = config_dir / "enhanced_certificates.json"
@@ -131,7 +131,7 @@ def test_barrier_fix_integration():
     
     try:
         # Import barrier fix
-        from app.utils.gui_barrier_fix import BarrierLogicManager, SmartBarrierFrame
+        from app.ui.gui_barrier_fix import BarrierLogicManager, SmartBarrierFrame
         
         # Test configurazioni
         print("📋 Test configurazioni barriere:")
@@ -328,7 +328,7 @@ def test_workflow_end_to_end():
         # Step 2: Configura certificato con barrier fix
         print("\n🛡️ STEP 2: Configurazione Certificato")
         
-        from app.utils.gui_barrier_fix import BarrierLogicManager
+        from app.ui.gui_barrier_fix import BarrierLogicManager
         
         # Simula configurazione barriere
         coupon_config = BarrierLogicManager.get_barrier_config('protected')
@@ -452,7 +452,7 @@ def test_performance_stability():
         # Test performance Barrier Logic
         print("\n⚡ Test performance Barrier Logic:")
         
-        from app.utils.gui_barrier_fix import BarrierLogicManager
+        from app.ui.gui_barrier_fix import BarrierLogicManager
         
         start_time = time.time()
         
@@ -506,7 +506,7 @@ def test_data_validation_consistency():
         # Test 1: Barrier consistency
         print("\n🛡️ Test barrier consistency:")
         
-        from app.utils.gui_barrier_fix import BarrierLogicManager
+        from app.ui.gui_barrier_fix import BarrierLogicManager
         
         # Test casi edge
         edge_cases = [

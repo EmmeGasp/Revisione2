@@ -1,0 +1,775 @@
+Log main.py
+(venv) PS D:\Doc\File python\Finanza\Certificates\Revisione2> & "D:/Doc/File python/Finanza/Certificates/Revisione2/venv/Scripts/python.exe" "d:/Doc/File python/Finanza/Certificates/Revisione2/src/main.py"
+✅ Import sistema esistente OK
+✅ Import enhanced manager v15 OK
+Avvio dell'applicazione Certificati Finanziari...
+2025-07-03 16:57:43,369 - INFO - EnhancedExcelExporter inizializzato
+2025-07-03 16:57:43,369 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-03 16:57:43,370 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-03 16:57:43,370 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-03 16:57:43,370 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-03 16:57:43,370 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-03 16:57:43,370 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-03 16:57:43,370 - INFO - UnifiedRiskDashboard inizializzato
+🚀 Sistema Certificati Integrato inizializzato
+📁 Output Excel: D:/Doc/File python/
+📂 Caricamento configurazioni v15: 5 certificati
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'note_barriere', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_level', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months', 'note_barriere']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = IT0006767872
+   name: <class 'str'> = Autocallable Worst-of Reverse Convertible Certificate correlato a un paniere di azioni ordinarie
+   certificate_instrument_ticker: <class 'str'> = I76787.TI
+   issuer: <class 'str'> = Marex
+   certificate_type: <class 'str'> = express
+   issue_date: <class 'datetime.datetime'> = 2025-03-08 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2030-02-28 00:00:00
+   notional: <class 'float'> = 1000.0
+   risk_free_rate: <class 'float'> = 0.035
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   dynamic_barrier_start_level: <class 'float'> = 1.0
+   step_down_rate: <class 'float'> = 0.005
+   dynamic_barrier_end_level: <class 'float'> = 0.73
+   yahoo_ticker: <class 'str'> = DBK.DE,GLE.PA,UCG.MI,BIMI.MI
+   underlying_names: <class 'str'> = Deutsche Bank AG, Società Generale, Unicredit, Banco BPM
+   underlying_currencies: <class 'str'> = Eur, Eur,Eur,Eur
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento IT0006767872: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = XS3031184206
+   name: <class 'str'> = Fast Casch Collect
+   certificate_instrument_ticker: <class 'str'> = B18420.TI
+   issuer: <class 'str'> = BNP Paribas
+   certificate_type: <class 'str'> = cash_collect
+   issue_date: <class 'datetime.datetime'> = 2025-05-21 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2027-05-24 00:00:00
+   notional: <class 'float'> = 100.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   dynamic_barrier_start_level: <class 'float'> = 0.95
+   step_down_rate: <class 'float'> = 0.01
+   dynamic_barrier_end_level: <class 'float'> = 0.75
+   yahoo_ticker: <class 'str'> = STLAM.MI,CPR.MI,NEXI.MI, STMMI.MI
+   underlying_names: <class 'str'> = Stellantis NV, Davide campari, Nexi StMicroelettronics
+   underlying_currencies: <class 'str'> = EUR, EUR, EUR, EUR
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento XS3031184206: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = DE000VK2NM23
+   name: <class 'str'> = MEMORY MULTI CASH COLLECT BARRIER EXPRESS
+   certificate_instrument_ticker: <class 'str'> = F70170.MI
+   issuer: <class 'str'> = Vontobel
+   certificate_type: <class 'str'> = express
+   issue_date: <class 'datetime.datetime'> = 2025-05-16 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2027-05-14 00:00:00
+   notional: <class 'float'> = 100.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   dynamic_barrier_start_level: <class 'float'> = 0.95
+   step_down_rate: <class 'float'> = 0.01
+   dynamic_barrier_end_level: <class 'float'> = 0.75
+   yahoo_ticker: <class 'str'> = BMW.DE, MBG.DE,STLAM.MI,VOW.DE
+   underlying_names: <class 'str'> = Bayerische Motoren Werke AG, Mercedes-Benz Group AG,, Stellantis N.V., Volkswagen AG
+   underlying_currencies: <class 'str'> = EUR, EUR, EUR, EUR
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento DE000VK2NM23: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = XS2902921233
+   name: <class 'str'> = Autocallable Barrier Worst-of Phoenix
+   certificate_instrument_ticker: <class 'str'> = BA2123.TI
+   issuer: <class 'str'> = Altro
+   certificate_type: <class 'str'> = express
+   issue_date: <class 'datetime.datetime'> = 2024-11-26 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2027-11-29 00:00:00
+   notional: <class 'float'> = 100.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = False
+   dynamic_barrier_start_level: <class 'float'> = 0.6
+   step_down_rate: <class 'float'> = 0.0
+   dynamic_barrier_end_level: <class 'float'> = 0.6
+   yahoo_ticker: <class 'str'> = BMPS.MI, BAMI.MI, BPE.MI
+   underlying_names: <class 'str'> = Banca Monte Paschi, Banco BPM, Bper Banca
+   underlying_currencies: <class 'str'> = EUR, EUR, EUR
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento XS2902921233: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'yahoo_ticker', 'underlying_names', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'yahoo_ticker', 'underlying_names', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']
+   isin: <class 'str'> = XS2705561756
+   name: <class 'str'> = CAPITAL PROTECTION WITH PREMIUM
+   certificate_instrument_ticker: <class 'str'> = I09742.MI
+   issuer: <class 'str'> = Altro
+   certificate_type: <class 'str'> = phoenix
+   issue_date: <class 'datetime.datetime'> = 2023-11-30 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2026-11-30 00:00:00
+   notional: <class 'float'> = 1000.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   yahoo_ticker: <class 'str'> = ^GSPC, ^STOXX50E, ^N225
+   underlying_names: <class 'str'> = S&P 500, EURO STOXX 50, NIKKEI 225
+   underlying_dependency_type: <class 'str'> = Single
+   dynamic_barrier_feature: <class 'bool'> = False
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   dynamic_barrier_start_level: <class 'NoneType'> = None
+   step_down_rate: <class 'NoneType'> = None
+   dynamic_barrier_end_level: <class 'NoneType'> = None
+   ❌ Errore caricamento XS2705561756: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+📊 Portfolio caricati: 2
+🚀 Enhanced Certificate Manager v15 inizializzato
+   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\src\app\data
+   Certificati: 0
+   Portfolio: 2
+   Versione: v15 (CORRETTA)
+✅ Enhanced Manager v15 inizializzato per calc date
+2025-07-03 16:57:43,382 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-03 16:57:43,383 - INFO - EnhancedExcelExporter inizializzato
+2025-07-03 16:57:43,383 - INFO - Caricati 2 portafogli
+2025-07-03 16:57:43,383 - INFO - Caricati positions per 1 portafogli
+2025-07-03 16:57:43,384 - INFO - Portfolio Manager inizializzato
+✅ Portfolio Manager e GUI Manager inizializzati direttamente nella GUI principale.
+📂 Caricamento 5 certificati...
+🔄 Conversion v15.1 for IT0006767872
+🔄 Conversion v15.1 for XS3031184206
+🔄 Conversion v15.1 for DE000VK2NM23
+🔄 Conversion v15.1 for XS2902921233
+🔄 Conversion v15.1 for XS2705561756
+✅ Caricati 5 certificati da src\app\data\certificates.json
+🚀 === GUI MANAGER v15.1 CORRECTED INIZIALIZZATO ===
+➕ === NUOVO CERTIFICATO v15.1 CORRECTED ===
+📝 === APERTURA DIALOG v15.1 CORRECTED ===
+📝 Title: Nuovo Certificato
+📝 Nuovo certificato (form vuoto)
+🏗️ === CREAZIONE FORM COMPLETO v15.1 CORRECTED ===
+✅ Valori default caricati per nuovo certificato
+✅ Form completo v15.1 CORRECTED creato con successo
+💾 === INIZIO SALVATAGGIO v15.1 CORRECTED ===
+✅ Validazione campi base OK
+✅ Estrazione dati completata: 20 campi.
+📊 Risk-Free Rate finale: 0.03
+💾 === SALVATAGGIO v15.1 CORRECTED COMPLETATO ===
+💾 Creazione certificato it1212121212
+📊 Risk-Free Rate: 0.03
+💾 === SALVATAGGIO CERTIFICATI v15.1 CORRECTED ===
+💾 Certificati da salvare: 6
+💾 Backup creato: src\app\data\certificates.backup
+✅ Certificati salvati in src\app\data\certificates.json
+✅ Certificato it1212121212 creato e salvato
+📅 === CALC DATE INTEGRATA v15.1 CORRECTED per it1212121212 ===
+📊 Caricamento defaults da it1212121212
+   💰 Tasso default dal certificato: 1.00%
+   ✅ Defaults caricati: Mensile, 1.0%
+🖥️  Dialog calcolo date v15 aperto per it1212121212
+🧮 === INIZIO CALCOLO DATE v15 ===
+   Frequency: Mensile
+   Period rate: 0.0100
+   Method: robust_v15
+   Issue: 2024-01-15
+   Maturity: 2027-01-15
+📅 Calcolo date robusto v15:
+   Start: 2024-01-15
+   End: 2027-01-15
+   Frequency: Mensile
+   Primo periodo: 2024-02-15
+   Data generata: 2024-02-15
+   Data generata: 2024-03-15
+   Data generata: 2024-04-15
+   Data generata: 2024-05-15
+   Data generata: 2024-06-15
+   Data generata: 2024-07-15
+   Data generata: 2024-08-15
+   Data generata: 2024-09-15
+   Data generata: 2024-10-15
+   Data generata: 2024-11-15
+   Data generata: 2024-12-15
+   Data generata: 2025-01-15
+   Data generata: 2025-02-15
+   Data generata: 2025-03-15
+   Data generata: 2025-04-15
+   Data generata: 2025-05-15
+   Data generata: 2025-06-15
+   Data generata: 2025-07-15
+   Data generata: 2025-08-15
+   Data generata: 2025-09-15
+   Data generata: 2025-10-15
+   Data generata: 2025-11-15
+   Data generata: 2025-12-15
+   Data generata: 2026-01-15
+   Data generata: 2026-02-15
+   Data generata: 2026-03-15
+   Data generata: 2026-04-15
+   Data generata: 2026-05-15
+   Data generata: 2026-06-15
+   Data generata: 2026-07-15
+   Data generata: 2026-08-15
+   Data generata: 2026-09-15
+   Data generata: 2026-10-15
+   Data generata: 2026-11-15
+   Data generata: 2026-12-15
+   Data generata: 2027-01-15
+   Data generata: 2027-02-15
+   Fermato: data supera end_date
+📊 Totale 36 date cedole generate (robusto v15)
+   ✅ Calcolate 36 date cedole
+🧮 === CALCOLO DATE v15 COMPLETATO ===
+   Risultato impostato: True
+   Date generate: 36
+   Tasso periodo: 1.000%
+   Tasso annuo equivalente: 12.000%
+📅 Date calcolate per it1212121212
+💾 === SALVATAGGIO CERTIFICATI v15.1 CORRECTED ===
+💾 Certificati da salvare: 6
+💾 Backup creato: src\app\data\certificates.backup
+✅ Certificati salvati in src\app\data\certificates.json
+✏️ === MODIFICA CERTIFICATO it1212121212 v15.1 CORRECTED ===
+📊 Risk-Free Rate originale: 0.03
+📝 === APERTURA DIALOG v15.1 CORRECTED ===
+📝 Title: Modifica it1212121212
+📝 Dati esistenti: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier_type', 'capital_barrier_type', 'note_barriere', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
+📝 Risk-Free Rate esistente: 0.03
+🏗️ === CREAZIONE FORM COMPLETO v15.1 CORRECTED ===
+📊 === CARICAMENTO DATI ESISTENTI v15.1 CORRECTED ===
+📊 Risk-Free Rate originale: 0.03 (tipo: <class 'float'>)
+📊 Risk-Free Rate convertito: 3.0% (display)
+<class 'tkinter.Text'>
+✅ Dati esistenti caricati, Risk-Free Rate: 3.00%
+✅ Form completo v15.1 CORRECTED creato con successo
+💾 === INIZIO SALVATAGGIO v15.1 CORRECTED ===
+✅ Validazione campi base OK
+✅ Estrazione dati completata: 21 campi.
+📊 Risk-Free Rate finale: 0.03
+💾 === SALVATAGGIO v15.1 CORRECTED COMPLETATO ===
+📊 Risk-Free Rate aggiornato: 0.03
+💾 === SALVATAGGIO CERTIFICATI v15.1 CORRECTED ===
+💾 Certificati da salvare: 6
+💾 Backup creato: src\app\data\certificates.backup
+✅ Certificati salvati in src\app\data\certificates.json
+✅ Certificato it1212121212 modificato e salvato
+💾 === SALVATAGGIO CERTIFICATI v15.1 CORRECTED ===
+💾 Certificati da salvare: 5
+💾 Backup creato: src\app\data\certificates.backup
+✅ Certificati salvati in src\app\data\certificates.json
+2025-07-03 16:59:51,340 - INFO - EnhancedExcelExporter inizializzato
+2025-07-03 16:59:51,341 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-03 16:59:51,341 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-03 16:59:51,341 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-03 16:59:51,342 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-03 16:59:51,342 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-03 16:59:51,342 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-03 16:59:51,342 - INFO - UnifiedRiskDashboard inizializzato
+🚀 Sistema Certificati Integrato inizializzato
+📁 Output Excel: D:/Doc/File python/
+📂 Caricamento configurazioni v15: 5 certificati
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'note_barriere', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_level', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months', 'note_barriere']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = IT0006767872
+   name: <class 'str'> = Autocallable Worst-of Reverse Convertible Certificate correlato a un paniere di azioni ordinarie
+   certificate_instrument_ticker: <class 'str'> = I76787.TI
+   issuer: <class 'str'> = Marex
+   certificate_type: <class 'str'> = express
+   issue_date: <class 'datetime.datetime'> = 2025-03-08 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2030-02-28 00:00:00
+   notional: <class 'float'> = 1000.0
+   risk_free_rate: <class 'float'> = 0.035
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   dynamic_barrier_start_level: <class 'float'> = 1.0
+   step_down_rate: <class 'float'> = 0.005
+   dynamic_barrier_end_level: <class 'float'> = 0.73
+   yahoo_ticker: <class 'str'> = DBK.DE,GLE.PA,UCG.MI,BIMI.MI
+   underlying_names: <class 'str'> = Deutsche Bank AG, Società Generale, Unicredit, Banco BPM
+   underlying_currencies: <class 'str'> = Eur, Eur,Eur,Eur
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento IT0006767872: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = XS3031184206
+   name: <class 'str'> = Fast Casch Collect
+   certificate_instrument_ticker: <class 'str'> = B18420.TI
+   issuer: <class 'str'> = BNP Paribas
+   certificate_type: <class 'str'> = cash_collect
+   issue_date: <class 'datetime.datetime'> = 2025-05-21 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2027-05-24 00:00:00
+   notional: <class 'float'> = 100.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   dynamic_barrier_start_level: <class 'float'> = 0.95
+   step_down_rate: <class 'float'> = 0.01
+   dynamic_barrier_end_level: <class 'float'> = 0.75
+   yahoo_ticker: <class 'str'> = STLAM.MI,CPR.MI,NEXI.MI, STMMI.MI
+   underlying_names: <class 'str'> = Stellantis NV, Davide campari, Nexi StMicroelettronics
+   underlying_currencies: <class 'str'> = EUR, EUR, EUR, EUR
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento XS3031184206: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = DE000VK2NM23
+   name: <class 'str'> = MEMORY MULTI CASH COLLECT BARRIER EXPRESS
+   certificate_instrument_ticker: <class 'str'> = F70170.MI
+   issuer: <class 'str'> = Vontobel
+   certificate_type: <class 'str'> = express
+   issue_date: <class 'datetime.datetime'> = 2025-05-16 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2027-05-14 00:00:00
+   notional: <class 'float'> = 100.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   dynamic_barrier_start_level: <class 'float'> = 0.95
+   step_down_rate: <class 'float'> = 0.01
+   dynamic_barrier_end_level: <class 'float'> = 0.75
+   yahoo_ticker: <class 'str'> = BMW.DE, MBG.DE,STLAM.MI,VOW.DE
+   underlying_names: <class 'str'> = Bayerische Motoren Werke AG, Mercedes-Benz Group AG,, Stellantis N.V., Volkswagen AG
+   underlying_currencies: <class 'str'> = EUR, EUR, EUR, EUR
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento DE000VK2NM23: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = XS2902921233
+   name: <class 'str'> = Autocallable Barrier Worst-of Phoenix
+   certificate_instrument_ticker: <class 'str'> = BA2123.TI
+   issuer: <class 'str'> = Altro
+   certificate_type: <class 'str'> = express
+   issue_date: <class 'datetime.datetime'> = 2024-11-26 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2027-11-29 00:00:00
+   notional: <class 'float'> = 100.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = False
+   dynamic_barrier_start_level: <class 'float'> = 0.6
+   step_down_rate: <class 'float'> = 0.0
+   dynamic_barrier_end_level: <class 'float'> = 0.6
+   yahoo_ticker: <class 'str'> = BMPS.MI, BAMI.MI, BPE.MI
+   underlying_names: <class 'str'> = Banca Monte Paschi, Banco BPM, Bper Banca
+   underlying_currencies: <class 'str'> = EUR, EUR, EUR
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento XS2902921233: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'yahoo_ticker', 'underlying_names', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'yahoo_ticker', 'underlying_names', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']
+   isin: <class 'str'> = XS2705561756
+   name: <class 'str'> = CAPITAL PROTECTION WITH PREMIUM
+   certificate_instrument_ticker: <class 'str'> = I09742.MI
+   issuer: <class 'str'> = Altro
+   certificate_type: <class 'str'> = phoenix
+   issue_date: <class 'datetime.datetime'> = 2023-11-30 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2026-11-30 00:00:00
+   notional: <class 'float'> = 1000.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   yahoo_ticker: <class 'str'> = ^GSPC, ^STOXX50E, ^N225
+   underlying_names: <class 'str'> = S&P 500, EURO STOXX 50, NIKKEI 225
+   underlying_dependency_type: <class 'str'> = Single
+   dynamic_barrier_feature: <class 'bool'> = False
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   dynamic_barrier_start_level: <class 'NoneType'> = None
+   step_down_rate: <class 'NoneType'> = None
+   dynamic_barrier_end_level: <class 'NoneType'> = None
+   ❌ Errore caricamento XS2705561756: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+📊 Portfolio caricati: 2
+🚀 Enhanced Certificate Manager v15 inizializzato
+   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\src\app\data
+   Certificati: 0
+   Portfolio: 2
+   Versione: v15 (CORRETTA)
+🆕 Aggiunta certificato v15: XS2902921233
+   Dati ricevuti: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   📊 Yahoo ticker specificato: BMPS.MI, BAMI.MI, BPE.MI
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = XS2902921233
+   name: <class 'str'> = Autocallable Barrier Worst-of Phoenix
+   certificate_instrument_ticker: <class 'str'> = BA2123.TI
+   issuer: <class 'str'> = Altro
+   certificate_type: <class 'str'> = express
+   issue_date: <class 'datetime.datetime'> = 2024-11-26 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2027-11-29 00:00:00
+   notional: <class 'float'> = 100.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = False
+   dynamic_barrier_start_level: <class 'float'> = 0.6
+   step_down_rate: <class 'float'> = 0.0
+   dynamic_barrier_end_level: <class 'float'> = 0.6
+   yahoo_ticker: <class 'str'> = BMPS.MI, BAMI.MI, BPE.MI
+   underlying_names: <class 'str'> = Banca Monte Paschi, Banco BPM, Bper Banca
+   underlying_currencies: <class 'str'> = EUR, EUR, EUR
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+❌ Errore aggiunta certificato XS2902921233: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 755, in _dict_to_real_config_safe_v15
+    real_config = RealCertificateConfig(**filtered_config)
+TypeError: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 593, in add_certificate_from_dict_v15
+    base_config = self._dict_to_real_config_safe_v15(config_dict)
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 770, in _dict_to_real_config_safe_v15
+    raise Exception(f"Impossibile creare RealCertificateConfig: {e}")
+Exception: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 755, in _dict_to_real_config_safe_v15
+    real_config = RealCertificateConfig(**filtered_config)
+TypeError: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1588, in _analyze_selected_certificate
+    real_config = manager.add_certificate_from_dict_v15(cert_id, cert_data)
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 593, in add_certificate_from_dict_v15
+    base_config = self._dict_to_real_config_safe_v15(config_dict)
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 770, in _dict_to_real_config_safe_v15
+    raise Exception(f"Impossibile creare RealCertificateConfig: {e}")
+Exception: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+2025-07-03 17:00:01,360 - INFO - EnhancedExcelExporter inizializzato
+2025-07-03 17:00:01,360 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-03 17:00:01,360 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-03 17:00:01,361 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-03 17:00:01,361 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-03 17:00:01,361 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-03 17:00:01,362 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-03 17:00:01,362 - INFO - UnifiedRiskDashboard inizializzato
+🚀 Sistema Certificati Integrato inizializzato
+📁 Output Excel: D:/Doc/File python/
+📂 Caricamento configurazioni v15: 5 certificati
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'note_barriere', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_level', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months', 'note_barriere']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = IT0006767872
+   name: <class 'str'> = Autocallable Worst-of Reverse Convertible Certificate correlato a un paniere di azioni ordinarie
+   certificate_instrument_ticker: <class 'str'> = I76787.TI
+   issuer: <class 'str'> = Marex
+   certificate_type: <class 'str'> = express
+   issue_date: <class 'datetime.datetime'> = 2025-03-08 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2030-02-28 00:00:00
+   notional: <class 'float'> = 1000.0
+   risk_free_rate: <class 'float'> = 0.035
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   dynamic_barrier_start_level: <class 'float'> = 1.0
+   step_down_rate: <class 'float'> = 0.005
+   dynamic_barrier_end_level: <class 'float'> = 0.73
+   yahoo_ticker: <class 'str'> = DBK.DE,GLE.PA,UCG.MI,BIMI.MI
+   underlying_names: <class 'str'> = Deutsche Bank AG, Società Generale, Unicredit, Banco BPM
+   underlying_currencies: <class 'str'> = Eur, Eur,Eur,Eur
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento IT0006767872: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = XS3031184206
+   name: <class 'str'> = Fast Casch Collect
+   certificate_instrument_ticker: <class 'str'> = B18420.TI
+   issuer: <class 'str'> = BNP Paribas
+   certificate_type: <class 'str'> = cash_collect
+   issue_date: <class 'datetime.datetime'> = 2025-05-21 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2027-05-24 00:00:00
+   notional: <class 'float'> = 100.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   dynamic_barrier_start_level: <class 'float'> = 0.95
+   step_down_rate: <class 'float'> = 0.01
+   dynamic_barrier_end_level: <class 'float'> = 0.75
+   yahoo_ticker: <class 'str'> = STLAM.MI,CPR.MI,NEXI.MI, STMMI.MI
+   underlying_names: <class 'str'> = Stellantis NV, Davide campari, Nexi StMicroelettronics
+   underlying_currencies: <class 'str'> = EUR, EUR, EUR, EUR
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento XS3031184206: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = DE000VK2NM23
+   name: <class 'str'> = MEMORY MULTI CASH COLLECT BARRIER EXPRESS
+   certificate_instrument_ticker: <class 'str'> = F70170.MI
+   issuer: <class 'str'> = Vontobel
+   certificate_type: <class 'str'> = express
+   issue_date: <class 'datetime.datetime'> = 2025-05-16 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2027-05-14 00:00:00
+   notional: <class 'float'> = 100.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   dynamic_barrier_start_level: <class 'float'> = 0.95
+   step_down_rate: <class 'float'> = 0.01
+   dynamic_barrier_end_level: <class 'float'> = 0.75
+   yahoo_ticker: <class 'str'> = BMW.DE, MBG.DE,STLAM.MI,VOW.DE
+   underlying_names: <class 'str'> = Bayerische Motoren Werke AG, Mercedes-Benz Group AG,, Stellantis N.V., Volkswagen AG
+   underlying_currencies: <class 'str'> = EUR, EUR, EUR, EUR
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento DE000VK2NM23: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = XS2902921233
+   name: <class 'str'> = Autocallable Barrier Worst-of Phoenix
+   certificate_instrument_ticker: <class 'str'> = BA2123.TI
+   issuer: <class 'str'> = Altro
+   certificate_type: <class 'str'> = express
+   issue_date: <class 'datetime.datetime'> = 2024-11-26 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2027-11-29 00:00:00
+   notional: <class 'float'> = 100.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = False
+   dynamic_barrier_start_level: <class 'float'> = 0.6
+   step_down_rate: <class 'float'> = 0.0
+   dynamic_barrier_end_level: <class 'float'> = 0.6
+   yahoo_ticker: <class 'str'> = BMPS.MI, BAMI.MI, BPE.MI
+   underlying_names: <class 'str'> = Banca Monte Paschi, Banco BPM, Bper Banca
+   underlying_currencies: <class 'str'> = EUR, EUR, EUR
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   ❌ Errore caricamento XS2902921233: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+   🔄 Conversione da formato legacy
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'yahoo_ticker', 'underlying_names', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'yahoo_ticker', 'underlying_names', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']
+   isin: <class 'str'> = XS2705561756
+   name: <class 'str'> = CAPITAL PROTECTION WITH PREMIUM
+   certificate_instrument_ticker: <class 'str'> = I09742.MI
+   issuer: <class 'str'> = Altro
+   certificate_type: <class 'str'> = phoenix
+   issue_date: <class 'datetime.datetime'> = 2023-11-30 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2026-11-30 00:00:00
+   notional: <class 'float'> = 1000.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = True
+   yahoo_ticker: <class 'str'> = ^GSPC, ^STOXX50E, ^N225
+   underlying_names: <class 'str'> = S&P 500, EURO STOXX 50, NIKKEI 225
+   underlying_dependency_type: <class 'str'> = Single
+   dynamic_barrier_feature: <class 'bool'> = False
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+   dynamic_barrier_start_level: <class 'NoneType'> = None
+   step_down_rate: <class 'NoneType'> = None
+   dynamic_barrier_end_level: <class 'NoneType'> = None
+   ❌ Errore caricamento XS2705561756: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'    
+📊 Portfolio caricati: 2
+🚀 Enhanced Certificate Manager v15 inizializzato
+   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\src\app\data
+   Certificati: 0
+   Portfolio: 2
+   Versione: v15 (CORRETTA)
+🆕 Aggiunta certificato v15: XS2902921233
+   Dati ricevuti: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   📊 Yahoo ticker specificato: BMPS.MI, BAMI.MI, BPE.MI
+🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
+📊 Input keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'airbag_feature', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'observation_delay_months']
+❌ ERRORE CRITICO creazione RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+📊 Filtered config keys: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'currency', 'memory_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'yahoo_ticker', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dynamic_barrier_feature', 'coupon_dates', 'coupon_rates', 'autocall_levels']
+   isin: <class 'str'> = XS2902921233
+   name: <class 'str'> = Autocallable Barrier Worst-of Phoenix
+   certificate_instrument_ticker: <class 'str'> = BA2123.TI
+   issuer: <class 'str'> = Altro
+   certificate_type: <class 'str'> = express
+   issue_date: <class 'datetime.datetime'> = 2024-11-26 00:00:00
+   maturity_date: <class 'datetime.datetime'> = 2027-11-29 00:00:00
+   notional: <class 'float'> = 100.0
+   risk_free_rate: <class 'float'> = 0.03
+   currency: <class 'str'> = EUR
+   memory_feature: <class 'bool'> = False
+   dynamic_barrier_start_level: <class 'float'> = 0.6
+   step_down_rate: <class 'float'> = 0.0
+   dynamic_barrier_end_level: <class 'float'> = 0.6
+   yahoo_ticker: <class 'str'> = BMPS.MI, BAMI.MI, BPE.MI
+   underlying_names: <class 'str'> = Banca Monte Paschi, Banco BPM, Bper Banca
+   underlying_currencies: <class 'str'> = EUR, EUR, EUR
+   underlying_dependency_type: <class 'str'> = Worst-Of
+   dynamic_barrier_feature: <class 'bool'> = True
+   coupon_dates: <class 'list'> = []
+   coupon_rates: <class 'list'> = []
+   autocall_levels: <class 'list'> = []
+❌ Errore aggiunta certificato XS2902921233: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 755, in _dict_to_real_config_safe_v15
+    real_config = RealCertificateConfig(**filtered_config)
+TypeError: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 593, in add_certificate_from_dict_v15
+    base_config = self._dict_to_real_config_safe_v15(config_dict)
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 770, in _dict_to_real_config_safe_v15
+    raise Exception(f"Impossibile creare RealCertificateConfig: {e}")
+Exception: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 755, in _dict_to_real_config_safe_v15
+    real_config = RealCertificateConfig(**filtered_config)
+TypeError: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1624, in _export_analysis_excel
+    real_config = manager.add_certificate_from_dict_v15(cert_id, cert_data)
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 593, in add_certificate_from_dict_v15
+    base_config = self._dict_to_real_config_safe_v15(config_dict)
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\enhanced_certificate_manager_fixed.py", line 770, in _dict_to_real_config_safe_v15
+    raise Exception(f"Impossibile creare RealCertificateConfig: {e}")
+Exception: Impossibile creare RealCertificateConfig: RealCertificateConfig.__init__() got an unexpected keyword argument 'certificate_instrument_ticker'
+💾 === SALVATAGGIO CERTIFICATI v15.1 CORRECTED ===
+💾 Certificati da salvare: 5
+💾 Backup creato: src\app\data\certificates.backup
+✅ Certificati salvati in src\app\data\certificates.json
+2025-07-03 17:00:08,639 - INFO - Certificates data updated in PortfolioGUIManager (5 certs)
+2025-07-03 17:00:08,639 - INFO - Calcolo metriche per portfolio PF_PROVACONTIPO_20250628 con 2 posizioni
+2025-07-03 17:00:11,953 - INFO - Portfolio 'PF_PROVA_4_20250703' selezionato nel dashboard.
+2025-07-03 17:00:11,953 - INFO - Portfolio 'PF_PROVA_4_20250703' selezionato nel dashboard.
+2025-07-03 17:00:26,619 - INFO - Salvati 3 portafogli
+2025-07-03 17:00:26,620 - INFO - Portfolio PF_POI_20250703 creato: poi
+2025-07-03 17:00:26,620 - INFO - Calcolo fair value per NoneType
+2025-07-03 17:00:26,620 - ERROR - Errore calcolo fair value: 'NoneType' object has no attribute 'market_data'
+2025-07-03 17:00:26,620 - WARNING - Fair value non calcolabile per IT0006767872: 'NoneType' object has no attribute 'market_data'
+2025-07-03 17:00:26,621 - ERROR - Errore salvataggio positions: 'dict' object has no attribute 'certificate_id'
+2025-07-03 17:00:26,621 - INFO - Posizione IT0006767872 aggiunta a PF_POI_20250703: €1,000
+2025-07-03 17:00:26,621 - INFO - Calcolo fair value per NoneType
+2025-07-03 17:00:26,622 - ERROR - Errore calcolo fair value: 'NoneType' object has no attribute 'market_data'
+2025-07-03 17:00:26,622 - WARNING - Fair value non calcolabile per XS3031184206: 'NoneType' object has no attribute 'market_data'
+2025-07-03 17:00:26,622 - ERROR - Errore salvataggio positions: 'dict' object has no attribute 'certificate_id'
+2025-07-03 17:00:26,622 - INFO - Posizione XS3031184206 aggiunta a PF_POI_20250703: €1,000
+2025-07-03 17:00:28,156 - INFO - Calcolo metriche per portfolio PF_PROVACONTIPO_20250628 con 2 posizioni
+2025-07-03 17:00:28,157 - INFO - Calcolo metriche per portfolio PF_POI_20250703 con 2 posizioni
+2025-07-03 17:00:28,157 - INFO - Calcolo metriche di rischio
+2025-07-03 17:00:28,157 - WARNING - Risk calc failed for IT0006767872: 'NoneType' object has no attribute 'market_data'
+2025-07-03 17:00:28,157 - INFO - Calcolo metriche di rischio
+2025-07-03 17:00:28,157 - WARNING - Risk calc failed for XS3031184206: 'NoneType' object has no attribute 'market_data'
+2025-07-03 17:00:30,538 - INFO - Portfolio 'PF_POI_20250703' selezionato nel dashboard.
+2025-07-03 17:00:30,538 - INFO - Portfolio 'PF_POI_20250703' selezionato nel dashboard.
+2025-07-03 17:00:38,547 - INFO - Salvati 3 portafogli
+2025-07-03 17:00:38,547 - ERROR - Errore salvataggio positions: 'dict' object has no attribute 'certificate_id'
+2025-07-03 17:00:38,547 - INFO - Calcolo metriche per portfolio PF_PROVACONTIPO_20250628 con 2 posizioni
+2025-07-03 17:00:38,547 - INFO - Calcolo metriche per portfolio PF_POI_20250703 con 3 posizioni
+2025-07-03 17:00:42,560 - INFO - Portfolio 'PF_POI_20250703' selezionato nel dashboard.
+2025-07-03 17:00:42,561 - INFO - Portfolio 'PF_POI_20250703' selezionato nel dashboard.
+2025-07-03 17:00:46,490 - INFO - Salvati 2 portafogli
+2025-07-03 17:00:46,490 - ERROR - Errore salvataggio positions: 'dict' object has no attribute 'certificate_id'
+2025-07-03 17:00:48,597 - INFO - Portfolio 'PF_POI_20250703' eliminato.
+📁 Finestra Portfolio Manager aperta.
+🚪 Chiusura GUI Certificate Manager v15.1 CORRECTED
+Applicazione terminata.
+(venv) PS D:\Doc\File python\Finanza\Certificates\Revisione2> 
