@@ -230,7 +230,7 @@ class ExpressCertificate(CertificateBase):
     def calculate_express_payoffs(self, percorsi: np.ndarray = None) -> Dict:
         """*** AGGIORNATO v14.11 *** - Calcola payoffs Express con underlying evaluation"""
 
-        from app.utils.real_certificate_integration import UnderlyingEvaluationEngine
+        from app.core.real_certificate_integration import UnderlyingEvaluationEngine
 
         # *** NUOVO v14.11 *** - Ottieni evaluation type dalla configurazione
         evaluation_type = getattr(self, 'underlying_evaluation', 'worst_of')
@@ -269,7 +269,7 @@ class ExpressCertificate(CertificateBase):
             # Performance worst-of
             # *** AGGIORNATO v14.11 *** - Performance con evaluation type
             # *** AGGIORNATO v14.11 *** - Performance con evaluation type  
-            from app.utils.real_certificate_integration import UnderlyingEvaluationEngine
+            from app.core.real_certificate_integration import UnderlyingEvaluationEngine
 
             # Calcola performance per ogni step usando il metodo esistente
             performance = np.zeros(n_steps)
@@ -548,7 +548,7 @@ class PhoenixCertificate(CertificateBase):
     
     def calculate_phoenix_payoffs(self, percorsi: np.ndarray = None) -> Dict:
         """*** AGGIORNATO v14.11 *** - Calcola payoffs Phoenix con underlying evaluation"""
-        from app.utils.real_certificate_integration import UnderlyingEvaluationEngine
+        from app.core.real_certificate_integration import UnderlyingEvaluationEngine
         
         # *** NUOVO v14.11 *** - Ottieni evaluation type
         evaluation_type = getattr(self, 'underlying_evaluation', 'worst_of')
@@ -575,7 +575,7 @@ class PhoenixCertificate(CertificateBase):
         
         for sim in range(n_sim):
             # *** AGGIORNATO v14.11 *** - Performance con evaluation type
-            from app.utils.real_certificate_integration import UnderlyingEvaluationEngine
+            from app.core.real_certificate_integration import UnderlyingEvaluationEngine
 
             # Calcola performance per ogni step
             performance = np.zeros(n_steps)

@@ -69,7 +69,7 @@ class ExcelIntegration:
         self.base_path = "D:/Doc/File python/"
 
         # 🚀 USA IL NUOVO SISTEMA AVANZATO
-        from app.utils.real_certificate_integration import EnhancedExcelExporter
+        from app.core.real_certificate_integration import EnhancedExcelExporter
         self.enhanced_exporter = EnhancedExcelExporter(self.base_path)
 
 

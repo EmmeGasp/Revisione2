@@ -31,7 +31,7 @@ from pathlib import Path
 
 # Import dal sistema esistente
 
-from app.utils.real_certificate_integration import ( 
+from app.core.real_certificate_integration import ( 
     RealCertificateConfig, IntegratedCertificateSystem,
     RealCertificateImporter
 )

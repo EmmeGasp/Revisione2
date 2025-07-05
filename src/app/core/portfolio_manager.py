@@ -86,7 +86,7 @@ from app.core.consolidated_risk_system import (
     UnifiedRiskAnalyzer, RiskMetrics, RiskLevel, AlertType
 )
 
-from app.utils.real_certificate_integration import (
+from app.core.real_certificate_integration import (
     RealCertificateImporter, EnhancedExcelExporter
 )
 

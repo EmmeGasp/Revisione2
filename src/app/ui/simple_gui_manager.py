@@ -36,7 +36,7 @@ import threading
 
 # Import sistema esistente
 try:
-    from app.utils.real_certificate_integration import (
+    from app.core.real_certificate_integration import (
         RealCertificateConfig, IntegratedCertificateSystem
     )
     print("✅ Import sistema esistente OK")

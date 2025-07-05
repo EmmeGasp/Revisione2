@@ -1,0 +1,76 @@
+    def _save_v15_1_corrected(self):
+        """
+        *** SALVATAGGIO v15.3 - LOGICA DEFINITIVA ***
+        Gestisce correttamente campi vuoti, il valore 'None', e fornisce errori specifici.
+        """
+        print("💾 === INIZIO SALVATAGGIO v15.3 (Logica Definitiva) ===")
+        
+        result_data = {}
+        raw_values = {}
+
+        # 1. Raccoglie tutti i valori grezzi dalla GUI
+        for field_name, widget in self.fields.items():
+            if hasattr(widget, 'get'):
+                value = widget.get("1.0", "end-1c") if isinstance(widget, tk.Text) else widget.get()
+                raw_values[field_name] = value.strip() if isinstance(value, str) else value
+
+        # 2. Validazione preliminare dei campi obbligatori
+        required_fields = ['isin', 'name', 'issue_date', 'maturity_date', 'notional']
+        for field in required_fields:
+            if not raw_values.get(field):
+                messagebox.showerror("Errore", f"Il campo '{field}' è obbligatorio.")
+                self.fields[field].focus()
+                return
+
+        # 3. Processa i valori con la nuova logica intelligente
+        try:
+            for field_name, value in raw_values.items():
+                
+                # Se il campo non è stato modificato (contiene 'None' come stringa) o è vuoto, trattalo come nullo
+                if isinstance(value, str) and (value.lower() == 'none' or value == ''):
+                    value = None
+
+                # Campi booleani (True/False)
+                if field_name in ['memory_feature', 'airbag_feature', 'dynamic_barrier_feature']:
+                    result_data[field_name] = (str(value).lower() == 'true')
+                    continue
+
+                # Campi numerici
+                numeric_fields = [
+                    'notional', 'risk_free_rate', 'coupon_rate', 'coupon_barrier', 'capital_barrier', 
+                    'airbag_level', 'dynamic_barrier_start_level', 'step_down_rate', 
+                    'dynamic_barrier_end_level', 'observation_delay_months'
+                ]
+                if field_name in numeric_fields:
+                    if value is not None:
+                        num_value = float(str(value).replace(',', '.'))
+                        # Converte in decimale i tassi percentuali
+                        if field_name in ['risk_free_rate', 'coupon_rate', 'coupon_barrier', 'capital_barrier', 'airbag_level', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level'] and num_value > 1:
+                             result_data[field_name] = num_value / 100.0
+                        else:
+                             result_data[field_name] = num_value
+                    else:
+                        result_data[field_name] = None
+                    continue
+
+                # Gestione Ticker (splitta in lista)
+                if field_name == 'yahoo_ticker':
+                    result_data[field_name] = [t.strip() for t in value.split(',')] if value else []
+                    continue
+                
+                # Tutti gli altri campi vengono salvati come sono
+                result_data[field_name] = value
+
+        except ValueError:
+            # ERRORE SPECIFICO: Ora ti dice quale campo ha il problema
+            messagebox.showerror("Errore di Input", f"Il valore '{value}' per il campo '{field_name}' non è un numero valido.")
+            print(f"❌ Errore di conversione nel campo '{field_name}' con valore '{value}'")
+            return
+
+        # 4. Logica post-elaborazione e finalizzazione
+        if result_data.get('capital_barrier_type') != 'dynamic':
+             result_data['dynamic_barrier_feature'] = False
+
+        self.result = result_data
+        self.dialog.destroy()
+        print("💾 === SALVATAGGIO v15.3 COMPLETATO CON SUCCESSO ===")

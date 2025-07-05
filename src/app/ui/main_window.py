@@ -64,12 +64,15 @@ from pathlib import Path
 import threading
 import calendar 
 import copy
+import logging
 import textwrap # Per formattare la descrizione della dipendenza
+from app.core.consolidated_risk_system import UnifiedRiskAnalyzer
+from app.core.real_certificate_integration import RealCertificateImporter
 
 # Import sistema esistente
 try:
-    from app.utils.real_certificate_integration import (
-        RealCertificateConfig, IntegratedCertificateSystem
+    from app.core.real_certificate_integration import (
+         RealCertificateConfig, IntegratedCertificateSystem
     )
     print("✅ Import sistema esistente OK")
     
@@ -98,6 +101,7 @@ except ImportError as e:
 # Importa moduli di analisi e reportistica
 from app.core.consolidated_risk_system import UnifiedRiskAnalyzer
 from app.utils.excel_enhancement_plan import AdvancedExcelExporter
+
 
 # ========================================
 # ENHANCED CERTIFICATE DIALOG v15.1 CORRECTED - FORM COMPLETO
@@ -716,102 +720,83 @@ class EnhancedCertificateDialogV15_1_Corrected:
         print(f"✅ Dati esistenti caricati, Risk-Free Rate: {risk_free_percentage:.2f}%")
     
     def _save_v15_1_corrected(self):
-        """*** SALVATAGGIO v15.1 CORRECTED *** - Con fix Risk-Free Rate e validazione completa"""
-        
-        print("💾 === INIZIO SALVATAGGIO v15.1 CORRECTED ===")
+        """
+        *** SALVATAGGIO v15.4 - LOGICA FINALE E ROBUSTA ***
+        Gestisce correttamente campi vuoti, il valore 'None', e una regola coerente per le percentuali.
+        """
+        print("💾 === INIZIO SALVATAGGIO v15.4 (Logica Finale) ===")
         
         result_data = {}
-        raw_values = {} # Per memorizzare tutti i valori grezzi (stringhe) prima della conversione
-        
-        # Validazione campi obbligatori
-        required_fields = ['isin', 'name', 'issue_date', 'maturity_date']
-        for field in required_fields:
-            if field in self.fields:
-                value = self.fields[field].get().strip()
-                if not value:
-                    messagebox.showerror("Errore", f"Il campo '{field}' è obbligatorio.")
-                    self.fields[field].focus()
-                    return
-        
-        print("✅ Validazione campi base OK")
-        
-        # Step 1: Estrai tutti i valori grezzi (stringhe) dai campi della GUI
+        raw_values = {}
+
+        # 1. Raccoglie tutti i valori grezzi dalla GUI
         for field_name, widget in self.fields.items():
-            if field_name in ['airbag_notes', 'note_barriere']:
-                value = widget.get('1.0', tk.END).strip()
-                raw_values[field_name] = value
-                continue
             if hasattr(widget, 'get'):
-                raw_values[field_name] = widget.get().strip()
-        
-        # Step 2: Processa e converti i valori in base alla logica e alle condizioni
-        for field_name, value in raw_values.items():
-            if not value and field_name not in ['airbag_notes', 'note_barriere']:
-                continue
-            try:
-                # Conversioni speciali
-                if field_name == 'risk_free_rate':
-                    rf_value = float(value)
-                    result_data[field_name] = rf_value / 100.0
-                elif field_name == 'coupon_rate':
-                    cr_value = float(value)
-                    result_data[field_name] = cr_value / 100.0
-                elif field_name in ['coupon_barrier', 'capital_barrier', 'airbag_level']:
-                    perc_value = float(value)
-                    result_data[field_name] = perc_value / 100.0 if perc_value > 1 else perc_value
-                elif field_name in ['step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months'] and raw_values.get('capital_barrier_type') == 'dynamic':
-                    # Processa questi campi SOLO se il tipo di barriera capitale è 'dynamic'
-                    if field_name == 'observation_delay_months':
-                        result_data[field_name] = int(value)
-                    else:
-                        result_data[field_name] = float(value) / 100.0
-                elif field_name in ['memory_feature', 'airbag_feature']:
-                    result_data[field_name] = value.lower() == 'true'
-                elif field_name == 'notional':
-                    result_data[field_name] = float(value)
-                # Tutti gli altri campi sono trattati come stringhe
-                else:
-                    result_data[field_name] = value
-            
-            except ValueError:
-                # Gestisce errori di conversione per float() e int()
-                print(f"⚠️ Errore di conversione per il campo '{field_name}': il valore '{value}' non è un numero valido.")
-                messagebox.showerror("Errore di Input", f"Il valore '{value}' per il campo '{field_name}' non è valido. Inserire un numero corretto.")
-                return # Interrompe il processo di salvataggio
-            except Exception as e:
-                # Gestisce qualsiasi altro errore imprevisto durante l'elaborazione del campo
-                print(f"⚠️ Errore generico durante l'elaborazione del campo '{field_name}': {e}")
-                messagebox.showerror("Errore", f"Errore imprevisto nel campo '{field_name}':\n{e}")
+                value = widget.get("1.0", "end-1c") if isinstance(widget, tk.Text) else widget.get()
+                raw_values[field_name] = value.strip() if isinstance(value, str) else value
+
+        # 2. Validazione preliminare dei campi obbligatori
+        required_fields = ['isin', 'name', 'issue_date', 'maturity_date', 'notional']
+        for field in required_fields:
+            if not raw_values.get(field):
+                messagebox.showerror("Errore", f"Il campo '{field}' è obbligatorio.")
+                self.fields[field].focus()
                 return
 
-        # Logica post-estrazione
-        # Imposta 'dynamic_barrier_feature' e pulisce i campi non necessari
-        if result_data.get('capital_barrier_type') == 'dynamic':
-            # Usa il valore della Barriera Capitale come livello iniziale per la barriera dinamica
-            if 'capital_barrier' in result_data:
-                result_data['dynamic_barrier_start_level'] = result_data['capital_barrier']
-            result_data['dynamic_barrier_feature'] = True
-        else:
-            result_data['dynamic_barrier_feature'] = False
-            # Rimuovi i campi dinamici se il tipo di barriera non è 'dynamic'
-            for key in ['dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months']:
-                result_data.pop(key, None)
-        
-        # Validazione coerenza airbag
-        if result_data.get('airbag_feature', False) and not result_data.get('airbag_level'):
-            messagebox.showerror("Errore", "Specificare il livello dell'airbag se la feature è abilitata.")
+        # 3. Processa i valori con la logica definitiva
+        try:
+            for field_name, value in raw_values.items():
+                
+                # Pulisci il valore se è la stringa 'None' o è vuoto
+                if isinstance(value, str) and (value.lower() == 'none' or value == ''):
+                    value = None
+
+                # Campi booleani
+                if field_name in ['memory_feature', 'airbag_feature', 'dynamic_barrier_feature']:
+                    result_data[field_name] = (str(value).lower() == 'true')
+                    continue
+
+                # --- NUOVA LOGICA PER PERCENTUALI E NUMERI ---
+                percentage_fields = [
+                    'risk_free_rate', 'coupon_rate', 'coupon_barrier', 'capital_barrier', 
+                    'airbag_level', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level'
+                ]
+                if field_name in percentage_fields:
+                    if value is not None:
+                        # Regola Semplice: Converte sempre il valore inserito (es: 0.7) in decimale (0.007)
+                        result_data[field_name] = float(str(value).replace(',', '.')) / 100.0
+                    else:
+                        result_data[field_name] = None
+                    continue
+
+                # Campi numerici non percentuali
+                if field_name == 'notional':
+                    result_data[field_name] = float(str(value).replace(',', '.')) if value is not None else None
+                elif field_name == 'observation_delay_months':
+                    result_data[field_name] = int(value) if value is not None else None
+                
+                # Gestione Ticker
+                elif field_name == 'yahoo_ticker':
+                    result_data[field_name] = [t.strip() for t in value.split(',')] if value else []
+                
+                # Tutti gli altri campi vengono salvati come sono
+                elif field_name not in result_data:
+                    result_data[field_name] = value
+
+        except ValueError:
+            messagebox.showerror("Errore di Input", f"Il valore '{value}' per il campo '{field_name}' non è un numero valido.")
+            print(f"❌ Errore di conversione nel campo '{field_name}' con valore '{value}'")
             return
-        
-        print(f"✅ Estrazione dati completata: {len(result_data)} campi.")
-        print(f"📊 Risk-Free Rate finale: {result_data.get('risk_free_rate', 'N/A')}")
-        
-        # Salva e chiudi
+
+        # 4. Logica post-elaborazione e finalizzazione
+        if result_data.get('capital_barrier_type') != 'dynamic':
+            result_data['dynamic_barrier_feature'] = False
+
         self.result = result_data
         self.dialog.destroy()
-        
-        print("💾 === SALVATAGGIO v15.1 CORRECTED COMPLETATO ===")
-     
-    
+        print("💾 === SALVATAGGIO v15.4 COMPLETATO CON SUCCESSO ===")
+
+
     def _cancel(self):
         """Annulla dialog v15.1 CORRECTED"""
         print("❌ Dialog v15.1 CORRECTED annullato dall'utente")
@@ -895,6 +880,8 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         self.root.title("Sistema Certificati v15.1 CORRECTED")
         self.root.geometry("1400x900")
         
+        self.logger = logging.getLogger(__name__)
+
         # Variabili
         self.certificates = {}
         # Modifica: nuovo path e nome file
@@ -936,7 +923,14 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         self._refresh_certificate_list()
         
         print("🚀 === GUI MANAGER v15.1 CORRECTED INIZIALIZZATO ===")
-    
+
+    def get_selected_isin(self):
+            """Restituisce l'ISIN del certificato selezionato nel treeview, o None se non c'è selezione."""
+            selection = self.tree.selection()
+            if selection:
+                return self.tree.item(selection[0])['values'][0]
+            return None
+
     def _setup_gui_v15_1_corrected(self):
         """Setup GUI completa v15.1 CORRECTED"""
         
@@ -1310,6 +1304,23 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
             return
         
         cert_data = self.certificates[cert_id]
+        
+
+        # ---> AGGIUNGE CONTROLLO <---
+        if cert_data is None:
+            self.logger.warning(f"Nessun dato trovato per il certificato con ID: {cert_id}")
+            self._clear_fields() # Assicurati che i campi vengano puliti
+            return
+        # ---> FINE DEL CONTROLLO <---
+
+        # Formattazione per la visualizzazione dei ticker
+        yahoo_tickers_data = cert_data.get('yahoo_ticker', 'N/A')
+        if isinstance(yahoo_tickers_data, list):
+            # Se è una lista, unisci gli elementi in una stringa pulita
+            yahoo_tickers_display = ', '.join(yahoo_tickers_data)
+        else:
+            # Altrimenti, usa il valore così com'è (per retrocompatibilità)
+            yahoo_tickers_display = yahoo_tickers_data
 
         # *** FORMATTAZIONE RISK-FREE RATE CORRETTA ***
         risk_free_rate = cert_data.get('risk_free_rate', 0)
@@ -1334,13 +1345,13 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         airbag_feature = cert_data.get('airbag_feature', 'N/A')
         if airbag_feature is True or (isinstance(airbag_feature, str) and airbag_feature.lower() == 'true'):
             airbag_level_str = format_percentage(cert_data.get('airbag_level', 0))
-            airbag_notes = cert_data.get('airbag_notes', '').strip()
+            airbag_notes = cert_data.get('airbag_notes') or ''
         else:
             airbag_level_str = "N/A"
             airbag_notes = ""
 
         prezzi_iniziali = cert_data.get('prezzi_iniziali_sottostanti', 'N/A')
-        note_barriere = cert_data.get('note_barriere', '').strip()
+        note_barriere = cert_data.get('note_barriere') or ''
 
         # Formatta prezzi_iniziali per visualizzazione con separatore migliaia
         def format_prezzi_iniziali(val):
@@ -1412,7 +1423,7 @@ Mesi di Ritardo Osservazione: {cert_data.get('observation_delay_months', 'N/A')}
 ''' if cert_data.get('dynamic_barrier_feature') else ''}
 
 SOTTOSTANTI:
-Tickers Sottostanti (Yahoo): {cert_data.get('yahoo_ticker', 'N/A')}
+Tickers Sottostanti (Yahoo): {yahoo_tickers_display}
 Prezzi Iniziali/Strike: {format_prezzi_iniziali(prezzi_iniziali)}
 Nomi/Desc Sottostanti: {cert_data.get('underlying_names', 'N/A')}
 Valute Sottostanti: {cert_data.get('underlying_currencies', 'N/A')}
@@ -1568,72 +1579,84 @@ Autocall Levels: {len(cert_data.get('autocall_levels', []))} livelli
                 messagebox.showinfo("Eliminato", f"Certificato {cert_id} eliminato")
     
     def _analyze_selected_certificate(self):
-        """Analizza il certificato selezionato con UnifiedRiskAnalyzer"""
-        selection = self.tree.selection()
-        if not selection:
-            messagebox.showwarning("Attenzione", "Seleziona un certificato da analizzare")
-            return
-        cert_id = self.tree.item(selection[0])['values'][0]
-        cert_data = self.certificates.get(cert_id)
-        if not cert_data:
-            messagebox.showerror("Errore", f"Certificato {cert_id} non trovato")
+        """
+        Esegue l'analisi completa del certificato selezionato (versione corretta).
+        """
+        selected_isin = self.get_selected_isin()
+        if not selected_isin:
+            messagebox.showwarning("Attenzione", "Seleziona un certificato da analizzare.")
             return
 
+        cert_data = self.certificates.get(selected_isin)
+        if not cert_data:
+            messagebox.showerror("Errore", f"Dati per il certificato {selected_isin} non trovati.")
+            return
+            
+        self.status_var.set(f"Analisi in corso per {selected_isin}...")
+        self.root.update_idletasks()
+
         try:
-            from app.core.enhanced_certificate_manager_fixed import EnhancedCertificateManagerV15
-            manager = EnhancedCertificateManagerV15(
-                config_dir="D:/Doc/File python/Finanza/Certificates/Revisione2/src/app/data"
-            )
-            # Correzione: passa sia cert_id che cert_data
-            real_config = manager.add_certificate_from_dict_v15(cert_id, cert_data)
-            from app.core.consolidated_risk_system import UnifiedRiskAnalyzer
+            # 1. Crea l'oggetto di configurazione dai dati in memoria
+            config = RealCertificateConfig(**cert_data)
+
+            # 2. Converti la configurazione in un oggetto certificato "vivo"
+            importer = RealCertificateImporter()
+            certificate_object = importer.import_certificate(config)
+
+            # 3. Esegui l'analisi di rischio
             analyzer = UnifiedRiskAnalyzer()
-            risk_metrics = analyzer.analyze_certificate_risk(real_config)
-            result_text = (
-                f"Analisi Rischio Certificato: {cert_id}\n"
-                f"VaR 95%: {risk_metrics.var_95:.2%}\n"
-                f"VaR 99%: {risk_metrics.var_99:.2%}\n"
-                f"Volatilità: {risk_metrics.volatility:.2%}\n"
-                f"Sharpe Ratio: {risk_metrics.sharpe_ratio:.2f}\n"
-                f"Sortino Ratio: {risk_metrics.sortino_ratio:.2f}\n"
-            )
-            messagebox.showinfo("Analisi Rischio", result_text)
+            risk_metrics = analyzer.analyze_certificate_risk(certificate_object, n_simulations=1000)
+            self.logger.info(f"Analisi di rischio completata. VaR 95%: {risk_metrics.var_95:.2%}")
+
+            # 4. Mostra i risultati
+            self.update_analysis_results_display(risk_metrics.to_dict())
+            self.status_var.set("Analisi completata con successo.")
+
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            messagebox.showerror("Errore Analisi", f"Errore durante l'analisi:\n{e}")
+            self.logger.error(f"Errore durante l'analisi del certificato {selected_isin}: {e}", exc_info=True)
+            messagebox.showerror("Errore di Analisi", f"Si è verificato un errore: {e}")
+            self.status_var.set("Analisi fallita.") 
 
     def _export_analysis_excel(self):
-        """Esporta analisi avanzata in Excel"""
-        selection = self.tree.selection()
-        if not selection:
+        """Esporta analisi avanzata in Excel (versione corretta)."""
+        selected_isin = self.get_selected_isin()
+        if not selected_isin:
             messagebox.showwarning("Attenzione", "Seleziona un certificato da esportare")
             return
-        cert_id = self.tree.item(selection[0])['values'][0]
-        cert_data = self.certificates.get(cert_id)
+        
+        cert_data = self.certificates.get(selected_isin)
         if not cert_data:
-            messagebox.showerror("Errore", f"Certificato {cert_id} non trovato")
+            messagebox.showerror("Errore", f"Dati per il certificato {selected_isin} non trovati.")
             return
 
+        self.status_var.set(f"Esportazione Excel per {selected_isin} in corso...")
+        self.root.update_idletasks()
+
         try:
-            from app.core.enhanced_certificate_manager_fixed import EnhancedCertificateManagerV15
-            manager = EnhancedCertificateManagerV15(
-                config_dir="D:/Doc/File python/Finanza/Certificates/Revisione2/src/app/data"
-            )
-            # Correzione: passa sia cert_id che cert_data
-            real_config = manager.add_certificate_from_dict_v15(cert_id, cert_data)
-            from app.core.consolidated_risk_system import UnifiedRiskAnalyzer
+            # Stessa logica della funzione di analisi
+            config = RealCertificateConfig(**cert_data)
+            importer = RealCertificateImporter()
+            certificate_object = importer.import_certificate(config)
             analyzer = UnifiedRiskAnalyzer()
-            risk_metrics = analyzer.analyze_certificate_risk(real_config)
-            analysis_results = {'risk_metrics': risk_metrics.to_dict()}
-            from app.utils.excel_enhancement_plan import AdvancedExcelExporter
-            exporter = AdvancedExcelExporter()
-            path = exporter.create_comprehensive_report(real_config, analysis_results)
-            messagebox.showinfo("Export Excel", f"Report Excel creato:\n{path}")
+            risk_metrics = analyzer.analyze_certificate_risk(certificate_object)
+            analysis_results = {
+                'risk_metrics': risk_metrics.to_dict(),
+                'fair_value': {} # Placeholder
+            }
+            
+            exporter = EnhancedExcelExporter() # Assicurati che sia importato da real_certificate_integration
+            report_path = exporter.create_comprehensive_certificate_report(certificate_object, analysis_results)
+
+            if report_path:
+                messagebox.showinfo("Export Completato", f"Report Excel creato:\n{report_path}")
+            else:
+                messagebox.showerror("Errore Export", "Creazione del report fallita.")
+
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            messagebox.showerror("Errore Export", f"Errore durante l'export:\n{e}")
+            self.logger.error(f"Errore durante l'export Excel per {selected_isin}: {e}", exc_info=True)
+            messagebox.showerror("Errore Durante l'Export", f"Si è verificato un errore:\n{e}")
+        finally:
+            self.status_var.set("Pronto")    
 
     def close(self):
         """Chiusura applicazione"""

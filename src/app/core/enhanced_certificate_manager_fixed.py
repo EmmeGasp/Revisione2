@@ -43,7 +43,7 @@ import threading
 import calendar
 
 # Import dal sistema esistente
-from app.utils.real_certificate_integration import (
+from app.core.real_certificate_integration import (
     RealCertificateConfig, IntegratedCertificateSystem,
     RealCertificateImporter
 )
@@ -751,7 +751,7 @@ class EnhancedCertificateManagerV15:
         
         # *** STEP 7: CREAZIONE RealCertificateConfig ***
         try:
-            from app.utils.real_certificate_integration import RealCertificateConfig
+            from app.core.real_certificate_integration import RealCertificateConfig
             real_config = RealCertificateConfig(**filtered_config)
             
             print(f"✅ RealCertificateConfig creato (Enhanced Manager v15.1)")

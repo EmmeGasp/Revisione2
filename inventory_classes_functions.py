@@ -25,7 +25,8 @@ def scan_py_files(directory):
 
 def print_inventory(inventory, file=None):
     for entry in inventory:
-        line = f"\n📄 File: {os.path.basename(entry['file'])}\n"
+        #line = f"\n📄 File: {os.path.basename(entry['file'])}\n"
+        line = f"\n📄 File: {os.path.basename(entry['file'])} ({os.path.dirname(entry['file'])})\n"
         if file:
             file.write(line)
         else:
