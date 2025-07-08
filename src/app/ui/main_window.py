@@ -121,38 +121,41 @@ class EnhancedCertificateDialogV15_1_Corrected:
 
     def __init__(self, parent, title, existing_data=None):
         self.result = None
-        self.existing_data = copy.deepcopy(existing_data) if existing_data else {}
+        # Deepcopy funziona anche sugli oggetti
+        self.existing_data = copy.deepcopy(existing_data) if existing_data else None
         self.dialog_closed = False
         
         print(f"📝 === APERTURA DIALOG v15.1 CORRECTED ===")
         print(f"📝 Title: {title}")
-        if existing_data:
-            print(f"📝 Dati esistenti: {list(existing_data.keys())}")
-            print(f"📝 Risk-Free Rate esistente: {existing_data.get('risk_free_rate', 'N/A')}")
+        
+        # === LA CORREZIONE E' QUI ===
+        if self.existing_data:
+            # Controlliamo se è un oggetto RealCertificateConfig o un dizionario
+            if hasattr(self.existing_data, 'isin'):
+                print(f"📝 Dati esistenti per l'oggetto con ISIN: {self.existing_data.isin}")
+            else:
+                 # Fallback nel caso ricevessimo ancora un dizionario
+                print(f"📝 Dati esistenti (dict): {list(self.existing_data.keys())}")
         else:
             print(f"📝 Nuovo certificato (form vuoto)")
+        # === FINE CORREZIONE ===
         
-        # Finestra ottimizzata
         self.dialog = tk.Toplevel(parent)
         self.dialog.title(title + " - v15.1 CORRECTED")
-        self.dialog.geometry("1000x900")  # Più spazio per tutti i campi
+        self.dialog.geometry("1000x900")
         self.dialog.resizable(True, True)
         self.dialog.transient(parent)
         self.dialog.grab_set()
         
-        # Gestione chiusura
         self.dialog.protocol("WM_DELETE_WINDOW", self._on_dialog_close)
         
-        # Centra dialog
         self.dialog.update_idletasks()
-        x = (self.dialog.winfo_screenwidth() // 2) - (500)
-        y = (self.dialog.winfo_screenheight() // 2) - (450)
+        x = (self.dialog.winfo_screenwidth() // 2) - 500
+        y = (self.dialog.winfo_screenheight() // 2) - 450
         self.dialog.geometry(f"1000x900+{x}+{y}")
         
-        # Setup form completo
         self._setup_form_complete_v15_1_corrected()
         
-        # Attesa
         self.dialog.wait_window()
     
     def _on_dialog_close(self):
@@ -293,12 +296,13 @@ class EnhancedCertificateDialogV15_1_Corrected:
         
         ttk.Label(row3_frame, text="Data Emissione:", width=15).pack(side=tk.LEFT)
         self.fields['issue_date'] = ttk.Entry(row3_frame, width=12)
-        self.fields['issue_date'].pack(side=tk.LEFT, padx=(5, 20))
+        self.fields['issue_date'].pack(side=tk.LEFT, padx=(5, 0))
+        ttk.Label(row3_frame, text="(AAAA-MM-DD)", font=('Arial', 8), foreground='gray').pack(side=tk.LEFT, padx=(2, 20)) # <-- AGGIUNTA
         
         ttk.Label(row3_frame, text="Scadenza:", width=15).pack(side=tk.LEFT)
         self.fields['maturity_date'] = ttk.Entry(row3_frame, width=12)
         self.fields['maturity_date'].pack(side=tk.LEFT, padx=(5, 0))
-
+        ttk.Label(row3_frame, text="(AAAA-MM-DD)", font=('Arial', 8), foreground='gray').pack(side=tk.LEFT, padx=(2, 0)) # <-- AGGIUNTA
         
         
         # =======================================
@@ -322,17 +326,18 @@ class EnhancedCertificateDialogV15_1_Corrected:
         self.fields['risk_free_rate'].pack(side=tk.LEFT, padx=(5, 5))
     
         # Label informativo per formato
-        ttk.Label(fin_row1_frame, text="(es: 3.5 per 3.5%, usa '.' come decimale)", 
+        ttk.Label(fin_row1_frame, text="(es: 3.5 per 3.5%, usa '.' come decimale, valore su base annuale)", 
                  font=('Arial', 8), foreground='gray').pack(side=tk.LEFT, padx=(5, 0))
         
         # *** NUOVO v15.1 *** - Tasso Cedola
         fin_row2_frame = ttk.Frame(financial_frame)
         fin_row2_frame.pack(fill=tk.X, pady=5)
         
-        ttk.Label(fin_row2_frame, text="Tasso Cedola (% del periodo):", width=25).pack(side=tk.LEFT) # Label modificata
+        ttk.Label(fin_row2_frame, text="Tasso Cedola (% del periodo):", width=25).pack(side=tk.LEFT) 
         self.fields['coupon_rate'] = ttk.Entry(fin_row2_frame, width=10)
-        self.fields['coupon_rate'].pack(side=tk.LEFT, padx=(5, 20))
-        
+        self.fields['coupon_rate'].pack(side=tk.LEFT, padx=(5, 0))
+        ttk.Label(fin_row2_frame, text="(es. 0.7)", font=('Arial', 8), foreground='gray').pack(side=tk.LEFT, padx=(2, 20)) # <-- AGGIUNTA
+
         ttk.Label(fin_row2_frame, text="Frequenza:", width=15).pack(side=tk.LEFT)
         self.fields['coupon_frequency'] = ttk.Combobox(fin_row2_frame, width=12, state='readonly',
                                                      values=['Mensile', 'Bimestrale', 'Trimestrale', 'Quadrimestrale', 'Semestrale', 'Annuale'])
@@ -394,7 +399,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
         # SEZIONE 4: BARRIERE
         # =======================================
         
-        barriers_frame = ttk.LabelFrame(self.scrollable_frame, text="🚧 Livelli Barriera", padding=15)
+        barriers_frame = ttk.LabelFrame(self.scrollable_frame, text="🚧 Livelli Barriera (valori %)", padding=15)
         barriers_frame.pack(fill='x', padx=10, pady=5)
         
         # Barriera Cedola
@@ -478,27 +483,27 @@ class EnhancedCertificateDialogV15_1_Corrected:
         # Tickers Yahoo Sottostanti
         ticker_frame = ttk.Frame(underlying_frame)
         ticker_frame.pack(fill=tk.X, pady=5)
-        ttk.Label(ticker_frame, text="Tickers Sottostanti (Yahoo, virgola sep.):", width=35).pack(side=tk.LEFT)
+        ttk.Label(ticker_frame, text="Tickers Sottostanti (Yahoo, ';' sep.):", width=35).pack(side=tk.LEFT)
         self.fields['yahoo_ticker'] = ttk.Entry(ticker_frame, width=40)
         self.fields['yahoo_ticker'].pack(side=tk.LEFT, padx=(5, 20))
 
         # Prezzi iniziali/strike/prezzi di riferimento
         strike_frame = ttk.Frame(underlying_frame)
         strike_frame.pack(fill=tk.X, pady=5)
-        ttk.Label(strike_frame, text="Prezzi Iniziali/Strike (virgola sep.):", width=35).pack(side=tk.LEFT)
+        ttk.Label(strike_frame, text="Prezzi Iniziali/Strike (';' sep.):", width=35).pack(side=tk.LEFT)
         self.fields['prezzi_iniziali_sottostanti'] = ttk.Entry(strike_frame, width=40)
         self.fields['prezzi_iniziali_sottostanti'].pack(side=tk.LEFT, padx=(5, 5))
         # Indicazione formato inserimento
         ttk.Label(
             strike_frame,
-            text="(es: 1.234,56 oppure 1234.56 - usa ',' per decimali, '.' per migliaia)",
+            text="(Formato EU:1.234,56; 57,12)", #NOTA AGGIORNATA
             font=('Arial', 8), foreground='gray'
         ).pack(side=tk.LEFT, padx=(5, 0))
 
         # Nomi/Descrizioni Sottostanti
         desc_frame = ttk.Frame(underlying_frame)
         desc_frame.pack(fill=tk.X, pady=5)
-        ttk.Label(desc_frame, text="Nomi/Desc Sottostanti (virgola sep.):", width=35).pack(side=tk.LEFT)
+        ttk.Label(desc_frame, text="Nomi/Desc Sottostanti (';' sep.):", width=35).pack(side=tk.LEFT)
         self.fields['underlying_names'] = ttk.Entry(desc_frame, width=60) # Larghezza aumentata
         self.fields['underlying_names'].pack(side=tk.LEFT, padx=(5,0))
         
@@ -506,7 +511,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
         currency_frame = ttk.Frame(underlying_frame) # Nuovo frame per le valute
         currency_frame.pack(fill=tk.X, pady=5)
 
-        ttk.Label(currency_frame, text="Valute Sottostanti (virgola sep.):", width=35).pack(side=tk.LEFT)
+        ttk.Label(currency_frame, text="Valute Sottostanti (';' sep.):", width=35).pack(side=tk.LEFT)
         self.fields['underlying_currencies'] = ttk.Entry(currency_frame, width=40) # Nuovo campo per valute sottostanti
         self.fields['underlying_currencies'].pack(side=tk.LEFT, padx=(5, 20))
 
@@ -515,7 +520,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
         dependency_frame.pack(fill=tk.X, pady=5)
         ttk.Label(dependency_frame, text="Tipo Dipendenza Sottostanti:", width=35).pack(side=tk.LEFT)
         self.fields['underlying_dependency_type'] = ttk.Combobox(dependency_frame, width=25, state='readonly', # Larghezza aumentata
-                                                               values=['Worst-Of', 'Best-Of', 'Average', 'Single', 'Basket Custom'])
+                                                               values=["",'Worst-Of', 'Best-Of', 'Average', 'Single', 'Basket Custom']) #aggiunta opzione vuota
         self.fields['underlying_dependency_type'].pack(side=tk.LEFT, padx=(5,0))
         self.fields['underlying_dependency_type'].bind("<<ComboboxSelected>>", self._update_dependency_description)
 
@@ -540,262 +545,159 @@ class EnhancedCertificateDialogV15_1_Corrected:
         print("✅ Form completo v15.1 CORRECTED creato con successo")
     
     def _load_existing_data_v15_1_corrected(self):
-        """*** CARICAMENTO DATI v15.1 CORRECTED *** - Con fix Risk-Free Rate"""
-        
+        """
+        Versione Completa e Corretta:
+        - Popola i default per i nuovi certificati.
+        - Carica i dati da un oggetto RealCertificateConfig per la modifica.
+        """
         if not self.existing_data:
-            # Valori default per nuovo certificato
+            print("📝 Popolamento form con valori di default per nuovo certificato.")
             self.fields['issuer'].set('Vontobel')
             self.fields['certificate_type'].set('express')
-            self.fields['issue_date'].insert(0, '2024-01-15')
-            self.fields['maturity_date'].insert(0, '2027-01-15')
+            self.fields['issue_date'].insert(0, datetime.now().strftime('%Y-%m-%d'))
+            self.fields['maturity_date'].insert(0, (datetime.now() + timedelta(days=3*365)).strftime('%Y-%m-%d'))
             self.fields['notional'].insert(0, '1000')
-            self.fields['risk_free_rate'].insert(0, '3.50')  # Formato percentuale, 2 decimali
-            self.fields['coupon_rate'].insert(0, '2.500') # 3 decimali per 0.667%
-            self.fields['coupon_frequency'].set('Trimestrale')
-            self.fields['memory_feature'].set('False')
+            self.fields['risk_free_rate'].insert(0, '3.50')
+            self.fields['coupon_rate'].insert(0, '0.70')
+            self.fields['coupon_frequency'].set('Mensile') # Come da tua modifica
+            self.fields['memory_feature'].set('True')
             self.fields['airbag_feature'].set('False')
-            self.fields['coupon_barrier_type'].set('none')
+            self.fields['coupon_barrier_type'].set('european')
             self.fields['capital_barrier_type'].set('protected')
             self.fields['currency'].set('EUR')
-            # Default values for dynamic barrier fields (will be hidden initially)
+            self.fields['underlying_dependency_type'].set('Worst-Of')
             self.fields['dynamic_barrier_start_level'].insert(0, '100.00')
-            self.fields['dynamic_barrier_end_level'].insert(0, '73.00')
-            self.fields['underlying_dependency_type'].set('Worst-Of') # Default per dipendenza
-            self.fields['certificate_instrument_ticker'].insert(0, '') # Default vuoto
-            self.fields['underlying_names'].insert(0, '') # Default vuoto
-            self.fields['underlying_currencies'].insert(0, '') # Default vuoto
-            print("✅ Valori default caricati per nuovo certificato")
+            self.fields['dynamic_barrier_end_level'].insert(0, '70.00')
+            self.fields['step_down_rate'].insert(0, '5.0')
+            self._toggle_airbag_level_field()
+            self._on_capital_barrier_type_changed()
+            self._update_dependency_description()
             return
+
+        print("📊 === CARICAMENTO DATI (Logica Combobox corretta) ===")
         
-        print("📊 === CARICAMENTO DATI ESISTENTI v15.1 CORRECTED ===")
-        
-        # *** FIX RISK-FREE RATE v15.1 *** - Conversione formato
-        risk_free_rate = self.existing_data.get('risk_free_rate', 0.035)
-        print(f"📊 Risk-Free Rate originale: {risk_free_rate} (tipo: {type(risk_free_rate)})")
-        
-        # Conversione intelligente a percentuale
-        if isinstance(risk_free_rate, (int, float)):
-            if risk_free_rate <= 1.0:  # Formato decimale (es: 0.035)
-                risk_free_percentage = risk_free_rate * 100  # Converti a 3.5
-            else:  # Già in percentuale (es: 3.5)
-                risk_free_percentage = risk_free_rate
-        else:
-            try:
-                rf_float = float(str(risk_free_rate))
-                risk_free_percentage = rf_float * 100 if rf_float <= 1.0 else rf_float
-            except:
-                risk_free_percentage = 3.50  # Default
-        
-        print(f"📊 Risk-Free Rate convertito: {risk_free_percentage}% (display)")
-        
-        # Carica da dati esistenti con mapping completo
+        # Funzione helper per l'accesso sicuro agli attributi
+        def get_attr(attr_name, default=None):
+            return getattr(self.existing_data, attr_name, default)
+
         field_mapping = {
-            'isin': 'isin',
-            'name': 'name', 
-            'issuer': 'issuer',
-            'certificate_type': 'certificate_type',
-            'issue_date': 'issue_date',
-            'maturity_date': 'maturity_date',
-            'notional': 'notional',
-            'coupon_rate': 'coupon_rate',
-            'coupon_frequency': 'coupon_frequency',
-            'memory_feature': 'memory_feature',
-            'airbag_feature': 'airbag_feature',
-            'airbag_level': 'airbag_level',
-            'airbag_notes': 'airbag_notes',
-            'coupon_barrier': 'coupon_barrier',
-            'coupon_barrier_type': 'coupon_barrier_type',
-            'capital_barrier': 'capital_barrier',
-            'capital_barrier_type': 'capital_barrier_type',
-            'certificate_instrument_ticker': 'certificate_instrument_ticker', # Nuovo
-            'underlying_currencies': 'underlying_currencies', # Aggiunto per caricamento
-            'underlying_names': 'underlying_names', # Nuovo
-            'underlying_dependency_type': 'underlying_dependency_type', # Nuovo
-            'yahoo_ticker': 'yahoo_ticker',
-            'currency': 'currency',
-            'dynamic_barrier_start_level': 'dynamic_barrier_start_level', # Nuovo
-            'step_down_rate': 'step_down_rate', # Nuovo
-            'dynamic_barrier_end_level': 'dynamic_barrier_end_level', # Nuovo
-            'observation_delay_months': 'observation_delay_months', # Nuovo
-            'prezzi_iniziali_sottostanti': 'prezzi_iniziali_sottostanti', # Nuovo campo
-            'note_barriere': 'note_barriere', # Nuovo campo
+            'isin': 'isin', 'name': 'name', 'issuer': 'issuer', 'certificate_type': 'certificate_type', 
+            'issue_date': 'issue_date', 'maturity_date': 'maturity_date', 'notional': 'notional', 
+            'coupon_rate': 'coupon_rate', 'coupon_frequency': 'coupon_frequency', 'memory_feature': 'memory_feature', 
+            'airbag_feature': 'airbag_feature', 'airbag_level': 'airbag_level', 'airbag_notes': 'airbag_notes',
+            'coupon_barrier': 'coupon_barrier', 'coupon_barrier_type': 'coupon_barrier_type',
+            'capital_barrier': 'capital_barrier', 'capital_barrier_type': 'capital_barrier_type',
+            'certificate_instrument_ticker': 'certificate_instrument_ticker',
+            'underlying_currencies': 'underlying_currencies', 'underlying_names': 'underlying_names',
+            'underlying_dependency_type': 'underlying_dependency_type', 'yahoo_ticker': 'yahoo_ticker',
+            'currency': 'currency', 'dynamic_barrier_start_level': 'dynamic_barrier_start_level',
+            'step_down_rate': 'step_down_rate', 'dynamic_barrier_end_level': 'dynamic_barrier_end_level',
+            'observation_delay_months': 'observation_delay_months', 'prezzi_iniziali_sottostanti': 'prezzi_iniziali_sottostanti',
+            'note_barriere': 'note_barriere', 'risk_free_rate': 'risk_free_rate'
         }
-        
-        # Carica PRIMA airbag_feature, POI airbag_level, POI airbag_notes
-        # Carica airbag_feature prima di tutto il resto
-        if 'airbag_feature' in self.fields and 'airbag_feature' in field_mapping and field_mapping['airbag_feature'] in self.existing_data:
-            value = self.existing_data[field_mapping['airbag_feature']]
-            value = str(value)
-            try:
-                self.fields['airbag_feature'].set(value)
-            except Exception as e:
-                print(f"⚠️ Errore caricamento campo airbag_feature: {e}")
 
-        self._toggle_airbag_level_field()  # Solo abilitazione/disabilitazione, non svuota
-
-        # Poi carica airbag_level
-        if 'airbag_level' in self.fields and 'airbag_level' in field_mapping and field_mapping['airbag_level'] in self.existing_data:
-            value = self.existing_data[field_mapping['airbag_level']]
-            print(type(self.fields['airbag_level']))
-            if isinstance(value, (int, float)):
-                value_to_display = value * 100 if value <= 1.0 and value != 0 else value
-                value = f"{value_to_display:.2f}"
-            try:
-                self.fields['airbag_level'].delete(0, tk.END)
-                self.fields['airbag_level'].insert(0, str(value))
-            except Exception as e:
-                print(f"⚠️ Errore caricamento campo airbag_level: {e}")
-
-        # Poi carica airbag_notes
-        if 'airbag_notes' in self.fields and 'airbag_notes' in field_mapping and field_mapping['airbag_notes'] in self.existing_data:
-            value = self.existing_data[field_mapping['airbag_notes']]
-            print(type(self.fields['airbag_notes']))
-            try:
-                self.fields['airbag_notes'].delete('1.0', tk.END)
-                self.fields['airbag_notes'].insert('1.0', str(value))
-            except Exception as e:
-                print(f"⚠️ Errore caricamento campo airbag_notes: {e}")
-
-        # Dopo il caricamento, se la feature è False, svuota i campi e disabilita
-        airbag_feature_val = self.fields['airbag_feature'].get().lower()
-        if airbag_feature_val == 'false':
-            self._toggle_airbag_level_field(clear_on_disable=True)
-
-        # Carica tutti gli altri campi (escludendo quelli già gestiti sopra)
-        for field_name, data_key in field_mapping.items():
-            if field_name in ['airbag_feature', 'airbag_level', 'airbag_notes']:
+        # Loop principale di caricamento
+        for field_name, attr_name in field_mapping.items():
+            value = get_attr(attr_name)
+            if value is None:
                 continue
-            if field_name in self.fields and data_key in self.existing_data:
-                value = self.existing_data[data_key]
-                
-                # Conversioni speciali
-                if field_name == 'memory_feature':
-                    value = str(value)
-                elif field_name == 'observation_delay_months' and isinstance(value, (int, float)):
-                    value = str(int(value))
-                elif field_name in ['coupon_rate', 'coupon_barrier', 'capital_barrier', 'dynamic_barrier_end_level', 'step_down_rate'] and isinstance(value, (int, float)):
-                    value_to_display = value * 100 if value <= 1.0 and value !=0 else value
-                    if field_name == 'coupon_rate':
-                        value = f"{value_to_display:.3f}"
-                    else:
-                        value = f"{value_to_display:.2f}"
-                elif field_name == 'capital_barrier_type' and self.existing_data.get('dynamic_barrier_feature', False):
-                    value = 'dynamic'
-                try:
-                    if hasattr(self.fields[field_name], 'set'):
-                        self.fields[field_name].set(str(value))
-                    elif field_name == 'note_barriere':
-                        self.fields['note_barriere'].delete('1.0', tk.END)
-                        self.fields['note_barriere'].insert('1.0', str(value))
-                    else:
-                        self.fields[field_name].delete(0, tk.END)
-                        self.fields[field_name].insert(0, str(value))
-                except Exception as e:
-                    print(f"⚠️ Errore caricamento campo {field_name}: {e}")
 
-        # *** CARICAMENTO SPECIALE RISK-FREE RATE ***
-        self.fields['risk_free_rate'].delete(0, tk.END)
-        self.fields['risk_free_rate'].insert(0, f"{risk_free_percentage:.2f}")
+            display_value = ''
+            if field_name in ['yahoo_ticker', 'underlying_names', 'underlying_currencies'] and isinstance(value, list):
+                display_value = '; '.join(value)
+            elif field_name == 'prezzi_iniziali_sottostanti' and isinstance(value, list):
+                price_strings = [f"{price:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.') for price in value]
+                display_value = '; '.join(price_strings)
+            elif field_name in ['risk_free_rate', 'coupon_rate', 'coupon_barrier', 'capital_barrier', 'airbag_level', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']:
+                display_value = f"{value * 100:.3f}" if value <= 1.0 else f"{value:.3f}"
+            elif isinstance(value, bool):
+                 display_value = str(value)
+            elif isinstance(value, datetime):
+                 display_value = value.strftime('%Y-%m-%d')
+            else:
+                display_value = str(value)
 
-        # *** CARICAMENTO SPECIALE AIRBAG LEVEL (solo se il campo è abilitato) ***
-        airbag_level = self.existing_data.get('airbag_level', None)
-        if airbag_level is not None and 'airbag_level' in self.fields:
-            # Assicurati che il campo sia abilitato prima di inserire il valore
-            self.fields['airbag_level'].config(state=tk.NORMAL)
             try:
-                if isinstance(airbag_level, (int, float)) and airbag_level <= 1.0 and airbag_level != 0:
-                    airbag_level_display = airbag_level * 100
-                else:
-                    airbag_level_display = airbag_level
-                self.fields['airbag_level'].delete(0, tk.END)
-                self.fields['airbag_level'].insert(0, f"{airbag_level_display:.2f}")
+                widget = self.fields[field_name]
+                if isinstance(widget, ttk.Combobox):
+                    widget.set(display_value) # I Combobox usano .set()
+                elif isinstance(widget, ttk.Entry):
+                    widget.delete(0, tk.END)
+                    widget.insert(0, display_value)
+                elif isinstance(widget, tk.Text):
+                    widget.delete('1.0', tk.END)
+                    widget.insert('1.0', display_value)
             except Exception as e:
-                print(f"⚠️ Errore caricamento speciale airbag_level: {e}")
-
-        # Aggiorna stato finale dei campi airbag
+                print(f"⚠️ Errore nel caricare il campo {field_name} con valore '{display_value}': {e}")
+                      
+        
         self._toggle_airbag_level_field()
         self._on_capital_barrier_type_changed()
         self._update_dependency_description()
-
-        print(f"✅ Dati esistenti caricati, Risk-Free Rate: {risk_free_percentage:.2f}%")
     
     def _save_v15_1_corrected(self):
         """
-        *** SALVATAGGIO v15.4 - LOGICA FINALE E ROBUSTA ***
-        Gestisce correttamente campi vuoti, il valore 'None', e una regola coerente per le percentuali.
+        Salvataggio v16 - Gestisce il separatore ';' per le liste e i numeri in formato EU.
         """
-        print("💾 === INIZIO SALVATAGGIO v15.4 (Logica Finale) ===")
+        print("💾 === INIZIO SALVATAGGIO v16 (Logica con ';') ===")
         
         result_data = {}
-        raw_values = {}
+        raw_values = {field_name: widget.get("1.0", "end-1c") if isinstance(widget, tk.Text) else widget.get() for field_name, widget in self.fields.items()}
 
-        # 1. Raccoglie tutti i valori grezzi dalla GUI
-        for field_name, widget in self.fields.items():
-            if hasattr(widget, 'get'):
-                value = widget.get("1.0", "end-1c") if isinstance(widget, tk.Text) else widget.get()
-                raw_values[field_name] = value.strip() if isinstance(value, str) else value
-
-        # 2. Validazione preliminare dei campi obbligatori
         required_fields = ['isin', 'name', 'issue_date', 'maturity_date', 'notional']
         for field in required_fields:
             if not raw_values.get(field):
                 messagebox.showerror("Errore", f"Il campo '{field}' è obbligatorio.")
-                self.fields[field].focus()
                 return
 
-        # 3. Processa i valori con la logica definitiva
         try:
-            for field_name, value in raw_values.items():
-                
-                # Pulisci il valore se è la stringa 'None' o è vuoto
-                if isinstance(value, str) and (value.lower() == 'none' or value == ''):
+            # Crea un dizionario pulito e convertito
+            for field_name, value_str in raw_values.items():
+                value = value_str.strip() if isinstance(value_str, str) else value_str
+                if value == '' or (isinstance(value, str) and value.lower() == 'none'):
                     value = None
 
-                # Campi booleani
-                if field_name in ['memory_feature', 'airbag_feature', 'dynamic_barrier_feature']:
-                    result_data[field_name] = (str(value).lower() == 'true')
-                    continue
-
-                # --- NUOVA LOGICA PER PERCENTUALI E NUMERI ---
-                percentage_fields = [
-                    'risk_free_rate', 'coupon_rate', 'coupon_barrier', 'capital_barrier', 
-                    'airbag_level', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level'
-                ]
-                if field_name in percentage_fields:
-                    if value is not None:
-                        # Regola Semplice: Converte sempre il valore inserito (es: 0.7) in decimale (0.007)
-                        result_data[field_name] = float(str(value).replace(',', '.')) / 100.0
+                # Campi a lista di stringhe (usano ';')
+                if field_name in ['yahoo_ticker', 'underlying_names', 'underlying_currencies']:
+                    result_data[field_name] = [item.strip() for item in value.split(';')] if value else []
+                
+                # CAMPO CHIAVE: Lista di numeri con formato EU
+                elif field_name == 'prezzi_iniziali_sottostanti':
+                    if not value:
+                        result_data[field_name] = []
                     else:
-                        result_data[field_name] = None
-                    continue
-
-                # Campi numerici non percentuali
-                if field_name == 'notional':
-                    result_data[field_name] = float(str(value).replace(',', '.')) if value is not None else None
+                        prices = []
+                        price_strings = value.split(';')
+                        for p_str in price_strings:
+                            if not p_str.strip(): continue
+                            # Converte da formato EU (1.234,56) a float (1234.56)
+                            clean_str = p_str.strip().replace('.', '').replace(',', '.')
+                            prices.append(float(clean_str))
+                        result_data[field_name] = prices
+                
+                # Campi percentuali (formato anglosassone con '.')
+                elif field_name in ['risk_free_rate', 'coupon_rate', 'coupon_barrier', 'capital_barrier', 'airbag_level', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']:
+                    result_data[field_name] = float(value.replace(',', '.')) / 100.0 if value is not None else None
+                
+                # Campi numerici semplici
+                elif field_name == 'notional':
+                    result_data[field_name] = float(value.replace(',', '.')) if value is not None else None
                 elif field_name == 'observation_delay_months':
                     result_data[field_name] = int(value) if value is not None else None
                 
-                # Gestione Ticker
-                elif field_name == 'yahoo_ticker':
-                    result_data[field_name] = [t.strip() for t in value.split(',')] if value else []
-                
-                # Tutti gli altri campi vengono salvati come sono
-                elif field_name not in result_data:
+                # Booleani e stringhe
+                elif field_name in ['memory_feature', 'airbag_feature', 'dynamic_barrier_feature']:
+                    result_data[field_name] = (str(value).lower() == 'true')
+                else:
                     result_data[field_name] = value
 
-        except ValueError:
-            messagebox.showerror("Errore di Input", f"Il valore '{value}' per il campo '{field_name}' non è un numero valido.")
-            print(f"❌ Errore di conversione nel campo '{field_name}' con valore '{value}'")
+        except (ValueError, TypeError) as e:
+            messagebox.showerror("Errore di Input", f"Il valore '{value_str}' per il campo '{field_name}' non è valido.\nErrore: {e}")
             return
-
-        # 4. Logica post-elaborazione e finalizzazione
-        if result_data.get('capital_barrier_type') != 'dynamic':
-            result_data['dynamic_barrier_feature'] = False
 
         self.result = result_data
         self.dialog.destroy()
-        print("💾 === SALVATAGGIO v15.4 COMPLETATO CON SUCCESSO ===")
-
+        print("💾 === SALVATAGGIO v16 COMPLETATO CON SUCCESSO ===")
 
     def _cancel(self):
         """Annulla dialog v15.1 CORRECTED"""
@@ -876,53 +778,49 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
     }
 
     def __init__(self):
-        self.root = tk.Tk()
-        self.root.title("Sistema Certificati v15.1 CORRECTED")
-        self.root.geometry("1400x900")
-        
-        self.logger = logging.getLogger(__name__)
+            self.root = tk.Tk()
+            self.root.title("Sistema Certificati v15.1 CORRECTED")
+            self.root.geometry("1400x900")
+            
+            self.logger = logging.getLogger(__name__)
 
-        # Variabili
-        self.certificates = {}
-        # Modifica: nuovo path e nome file
-        self.cert_file = Path("src/app/data/certificates.json") #DA VERIFICARE
-        
-        # Enhanced manager per calc date
-        if ENHANCED_MANAGER_AVAILABLE:
-            try:
-                self.enhanced_manager = EnhancedCertificateManagerV15()
-                print("✅ Enhanced Manager v15 inizializzato per calc date")
-            except Exception as e:
-                print(f"⚠️ Enhanced Manager non disponibile: {e}")
+            # Definiamo PRIMA il percorso del file, così possiamo usarlo subito.
+            self.cert_file = Path("src/app/data/certificates.json") # <-- SPOSTATA QUI
+
+            # --- GESTIONE CENTRALIZZATA TRAMITE MANAGER ---
+            print("▶️  Inizializzazione del Manager Enhanced come sorgente dati principale...")
+            if ENHANCED_MANAGER_AVAILABLE:
+                # Ora self.cert_file esiste e può essere usato qui.
+                self.enhanced_manager = EnhancedCertificateManagerV15(config_dir=self.cert_file.parent)
+                self.certificates = self.enhanced_manager.configurations # Lavoriamo su una reference
+                print(f"✅ Enhanced Manager v15 inizializzato con {len(self.certificates)} certificati.")
+            else:
                 self.enhanced_manager = None
-        else:
-            self.enhanced_manager = None
-        
-        # *** PORTFOLIO MANAGER INTEGRATION v15.1 ***
-        # Istanziamo PortfolioManager e PortfolioGUIManager direttamente qui
-        try:
-            from app.core.portfolio_manager import PortfolioManager, PortfolioGUIManager # Assicurati che sia importato
-            self.portfolio_manager = PortfolioManager(self.cert_file.parent if self.cert_file else Path("."))
-            # Passa una lista di dicts per i certificati, non l'oggetto EnhancedCertificateConfig
-            # Questo è un placeholder, la gestione reale dei certificati nel portfolio manager
-            # dovrebbe essere più robusta e probabilmente caricare i certificati dal manager stesso.
-            self.portfolio_gui = PortfolioGUIManager(self.portfolio_manager, self.root, list(self.certificates.values())) 
-            print("✅ Portfolio Manager e GUI Manager inizializzati direttamente nella GUI principale.")
-        except ImportError as e:
-            print(f"⚠️ Portfolio Manager non disponibile per importazione diretta: {e}")
-            self.portfolio_manager = None # Imposta a None se l'import fallisce
-            self.portfolio_gui = None   # Imposta a None se l'import fallisce
+                self.certificates = self._load_certificates() # Fallback a caricamento locale
+                print("⚠️  Enhanced Manager non disponibile. Gestione certificati locale.")
 
-        # Carica certificati esistenti
-        self.certificates = self._load_certificates()
-        
-        # Setup GUI
-        self._setup_gui_v15_1_corrected()
-        
-        # Refresh lista
-        self._refresh_certificate_list()
-        
-        print("🚀 === GUI MANAGER v15.1 CORRECTED INIZIALIZZATO ===")
+            # --- FINE GESTIONE CENTRALIZZATA ---
+
+            # *** PORTFOLIO MANAGER INTEGRATION v15.1 ***
+            try:
+                from app.core.portfolio_manager import PortfolioManager, PortfolioGUIManager
+                self.portfolio_manager = PortfolioManager(self.cert_file.parent)
+                self.portfolio_gui = PortfolioGUIManager(self.portfolio_manager, self.root, self.certificates)
+                print("✅ Portfolio Manager e GUI Manager inizializzati.")
+            except ImportError as e:
+                print(f"⚠️ Portfolio Manager non disponibile: {e}")
+                self.portfolio_manager = None
+                self.portfolio_gui = None   
+
+            # Non c'è più bisogno di caricare i certificati qui, lo fa già il manager.
+            
+            # Setup GUI
+            self._setup_gui_v15_1_corrected()
+            
+            # Refresh lista
+            self._refresh_certificate_list()
+            
+            print("🚀 === GUI MANAGER v15.1 CORRECTED INIZIALIZZATO ===") 
 
     def get_selected_isin(self):
             """Restituisce l'ISIN del certificato selezionato nel treeview, o None se non c'è selezione."""
@@ -1063,7 +961,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
 
 
     def _calculate_dates_integrated(self):
-        """*** CALC DATE INTEGRATA v15.1 CORRECTED *** - Funzione completamente operativa"""
+        """Calc Date che gestisce correttamente gli oggetti certificato."""
         
         selection = self.tree.selection()
         if not selection:
@@ -1072,70 +970,47 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         
         cert_id = self.tree.item(selection[0])['values'][0]
         
-        if cert_id not in self.certificates:
+        # Prendiamo l'oggetto EnhancedCertificateConfig
+        enhanced_config_obj = self.certificates.get(cert_id)
+        if not enhanced_config_obj:
             messagebox.showerror("Errore", f"Certificato {cert_id} non trovato")
             return
         
-        print(f"📅 === CALC DATE INTEGRATA v15.1 CORRECTED per {cert_id} ===")
+        print(f"📅 === CALC DATE INTEGRATA per l'oggetto {cert_id} ===")
         
         try:
             if self.enhanced_manager:
-                # Usa enhanced manager
-                cert_data = copy.deepcopy(self.certificates[cert_id])
-                # --- AGGIUNTA: assicurati che i parametri dinamici siano coerenti ---
-                if cert_data.get('capital_barrier_type') == 'dynamic' or cert_data.get('dynamic_barrier_feature'):
-                    # Se mancano i parametri dinamici, prova a recuperarli da capital_barrier ecc.
-                    if 'dynamic_barrier_start_level' not in cert_data and 'capital_barrier' in cert_data:
-                        cert_data['dynamic_barrier_start_level'] = cert_data['capital_barrier']
-                    if 'step_down_rate' not in cert_data:
-                        cert_data['step_down_rate'] = 0.0
-                    if 'dynamic_barrier_end_level' not in cert_data:
-                        cert_data['dynamic_barrier_end_level'] = 0.0
-                    if 'observation_delay_months' not in cert_data:
-                        cert_data['observation_delay_months'] = 0
-                # --- FINE AGGIUNTA ---
+                # Il Dialog di calcolo si aspetta un dizionario, non un oggetto.
+                # Convertiamo il nostro base_config in un dizionario al volo.
+                # NOTA: usiamo vars() per ottenere un dizionario dagli attributi di un oggetto.
+                cert_data_as_dict = vars(copy.deepcopy(enhanced_config_obj.base_config))
 
-                # Apri dialog calc date v15
                 dialog = CalculoDateAutoDialogV15(
                     self.root, 
                     selected_certificate_id=cert_id,
-                    configurations={cert_id: cert_data}
+                    configurations={cert_id: cert_data_as_dict}
                 )
                 
-                # *** FIX CRITICO ***: Attende che il dialog sia chiuso prima di procedere
                 self.root.wait_window(dialog.dialog)
                 
                 if hasattr(dialog, 'result') and dialog.result:
-                    print(f"📅 Date calcolate per {cert_id}")
+                    print(f"📅 Date calcolate per {cert_id}. Aggiornamento in corso...")
                     
-                    # Aggiorna certificato
-                    self.certificates[cert_id].update(dialog.result)
+                    # Aggiorniamo il nostro certificato esistente con i risultati
+                    self.enhanced_manager.update_certificate_from_dict(cert_id, dialog.result)
                     
-                    # Salva
-                    if self._save_certificates():
-                        self._refresh_certificate_list()
-                        # Dopo aver aggiornato la lista, ri-seleziona il certificato modificato
-                        # Trova l'elemento nel treeview tramite il suo ISIN
-                        for item_id in self.tree.get_children():
-                            if self.tree.item(item_id, 'values')[0] == cert_id:
-                                self.tree.selection_set(item_id)
-                                self.tree.focus(item_id)
-                                break
-                        self._display_certificate_details(cert_id)
-                        messagebox.showinfo("Successo", f"Date calcolate e salvate per {cert_id}!")
-                    else:
-                        messagebox.showerror("Errore", "Errore salvataggio date calcolate")
+                    self._save_certificates()
+                    self._refresh_certificate_list()
+                    self._reselect_tree_item(cert_id)
+                    messagebox.showinfo("Successo", f"Date calcolate e salvate per {cert_id}!")
                 else:
                     print("📅 Calc date annullata dall'utente")
             else:
                 messagebox.showerror("Errore", "Enhanced Manager non disponibile per calc date")
-                
         except Exception as e:
-            print(f"❌ Errore calc date integrata: {e}")
-            import traceback
-            traceback.print_exc()
+            self.logger.error(f"Errore in _calculate_dates_integrated: {e}", exc_info=True)
             messagebox.showerror("Errore", f"Errore calcolo date:\n{e}")
-    
+
     def _new_certificate(self):
         """Nuovo certificato con dialog v15.1 CORRECTED"""
         
@@ -1158,7 +1033,8 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
                         return
                 
                 # Salva certificato
-                self.certificates[cert_id] = cert_data
+                #self.certificates[cert_id] = cert_data #vecchio modo
+                self.enhanced_manager.add_certificate_from_dict_v15(cert_id, cert_data) # NUOVO MODO
                 
                 if self._save_certificates():
                     self._refresh_certificate_list()
@@ -1184,219 +1060,198 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
             messagebox.showerror("Errore", f"Errore creazione certificato:\n{e}")
     
     def _edit_selected(self, event=None):
-        """Modifica certificato con dialog v15.1 CORRECTED"""
-        
+        """
+        Modifica il certificato selezionato, accedendo correttamente ai dati
+        dall'oggetto EnhancedCertificateConfig e usando il nome corretto del Dialog.
+        """
         selection = self.tree.selection()
         if not selection:
-            messagebox.showwarning("Attenzione", "Seleziona un certificato da modificare")
+            messagebox.showwarning("Attenzione", "Seleziona un certificato da modificare.")
             return
-        
-        cert_id = self.tree.item(selection[0])['values'][0]
-        
-        if cert_id not in self.certificates:
-            messagebox.showerror("Errore", f"Certificato {cert_id} non trovato")
+
+        selected_isin = self.tree.item(selection[0])['values'][0]
+
+        # Recuperiamo l'intero oggetto EnhancedCertificateConfig
+        cert_data_original_obj = self.certificates.get(selected_isin)
+        if not cert_data_original_obj:
+            messagebox.showerror("Errore", "Dati del certificato non trovati.")
             return
-        
-        # Backup dati originali
-        cert_data_original = copy.deepcopy(self.certificates[cert_id])
-        print(f"✏️ === MODIFICA CERTIFICATO {cert_id} v15.1 CORRECTED ===")
-        print(f"📊 Risk-Free Rate originale: {cert_data_original.get('risk_free_rate', 'N/A')}")
-        
+
+        # I dati per la GUI sono nel base_config dell'oggetto.
+        # È un oggetto RealCertificateConfig, non un dizionario.
+        cert_data_for_dialog = cert_data_original_obj.base_config
+
+        print(f"✏️ === MODIFICA CERTIFICATO {selected_isin} v15.1 CORRECTED ===")
+        original_rf = getattr(cert_data_for_dialog, 'risk_free_rate', 'N/A')
+        print(f"📊 Risk-Free Rate originale: {original_rf}")
+
         try:
-            dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, f"Modifica {cert_id}", cert_data_original)
+            dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, f"Modifica {selected_isin}", cert_data_for_dialog)
             
             if hasattr(dialog, 'result') and dialog.result:
                 updated_data = dialog.result
-                print(f"📊 Risk-Free Rate aggiornato: {updated_data.get('risk_free_rate', 'N/A')}")
-                
-                # Verifica ISIN non cambiato
-                if updated_data['isin'] != cert_id:
-                    if messagebox.askyesno("ISIN Modificato", 
-                                         f"ISIN cambiato da {cert_id} a {updated_data['isin']}. Procedere?"):
-                        # Rimuovi vecchio ISIN
-                        del self.certificates[cert_id]
-                        cert_id = updated_data['isin']
-                    else:
-                        updated_data['isin'] = cert_id  # Ripristina ISIN originale
-                
-                # Salva modifiche
-                self.certificates[cert_id] = updated_data
-                
-                if self._save_certificates():
-                    self._refresh_certificate_list()
-                    self._display_certificate_details(cert_id)
+                cert_id = updated_data['isin'] # Il risultato del dialog è un dizionario
 
-                    # Dopo aver aggiornato la lista, ri-seleziona il certificato modificato
-                    # Trova l'elemento nel treeview tramite il suo ISIN
-                    for item_id in self.tree.get_children():
-                        if self.tree.item(item_id, 'values')[0] == cert_id:
-                            self.tree.selection_set(item_id)
-                            self.tree.focus(item_id)
-                            break                    
-                    messagebox.showinfo("Successo", f"Certificato {cert_id} modificato con successo!")
-                    print(f"✅ Certificato {cert_id} modificato e salvato")
-                else:
-                    print(f"❌ Errore salvataggio, rollback")
-                    self.certificates[cert_id] = cert_data_original  # Rollback
-                    messagebox.showerror("Errore", f"Impossibile salvare modifiche a {cert_id}")
-            else:
-                print(f"❌ Dialog certificato v15.1 CORRECTED annullato dall'utente")
+                # Deleghiamo l'aggiornamento al manager
+                self.enhanced_manager.add_certificate_from_dict_v15(cert_id, updated_data)
                 
+                # Le operazioni di salvataggio e refresh sono gestite dal manager
+                self._save_certificates()
+                self._refresh_certificate_list()
+                self._reselect_tree_item(cert_id)
+                #self._display_certificate_details(cert_id)
+                
+                messagebox.showinfo("Successo", f"Certificato {cert_id} modificato con successo!")
+                print(f"✅ Certificato {cert_id} modificato e salvato.")
+            else:
+                print(f"❌ Dialog di modifica annullato.")
+
         except Exception as e:
-            print(f"❌ Errore modifica certificato, rollback: {e}")
-            self.certificates[cert_id] = cert_data_original  # Rollback
-            import traceback
-            traceback.print_exc()
-            messagebox.showerror("Errore", f"Errore modifica certificato:\n{e}")
-    
+            self.logger.error(f"Errore durante la modifica di {selected_isin}: {e}", exc_info=True)
+            messagebox.showerror("Errore Modifica", f"Si è verificato un errore imprevisto:\n{e}")
+             
     def _refresh_certificate_list(self):
-        """Refresh lista certificati con Risk-Free Rate corretto"""
+        """Refresh lista certificati accedendo correttamente agli attributi dell'oggetto."""
         
         # Pulisci tree
         for item in self.tree.get_children():
             self.tree.delete(item)
         
         # Aggiungi certificati
-        for cert_id, cert_data in self.certificates.items():
-            if cert_data:
-                # *** FIX DISPLAY RISK-FREE RATE v15.1 ***
-                risk_free_rate = cert_data.get('risk_free_rate', 0)
+        for cert_id, enhanced_config in self.certificates.items():
+            if enhanced_config:
+                # enhanced_config è un oggetto, accediamo al suo base_config per i dati
+                cert_data = enhanced_config.base_config 
+                
+                # Usiamo getattr per accedere agli attributi in modo sicuro (come .get)
+                risk_free_rate = getattr(cert_data, 'risk_free_rate', 0)
+                
                 if isinstance(risk_free_rate, (int, float)):
-                    if risk_free_rate <= 1.0:  # Formato decimale
-                        rf_display = f"{risk_free_rate * 100:.2f}%"
-                    else:  # Già percentuale
-                        rf_display = f"{risk_free_rate:.2f}%"
+                    # La logica di formattazione rimane la stessa
+                    rf_display = f"{risk_free_rate * 100:.2f}%" if risk_free_rate <= 1.0 else f"{risk_free_rate:.2f}%"
                 else:
                     rf_display = str(risk_free_rate)
                 
-                # Recupera stato se Enhanced, altrimenti "N/A"
-                status = "N/A"
-                if 'status' in cert_data:
-                    status = cert_data['status']
-                elif 'base_config' in cert_data and 'status' in cert_data:
-                    status = cert_data['status']
+                status = getattr(enhanced_config, 'status', 'N/A')
                 
                 self.tree.insert("", tk.END, values=(
-                    cert_id,
-                    cert_data.get('name', 'N/A'),
-                    cert_data.get('certificate_type', 'N/A'),
-                    cert_data.get('issuer', 'N/A'),
+                    getattr(cert_data, 'isin', 'N/A'),
+                    getattr(cert_data, 'name', 'N/A'),
+                    getattr(cert_data, 'certificate_type', 'N/A'),
+                    getattr(cert_data, 'issuer', 'N/A'),
                     rf_display,
-                    cert_data.get('maturity_date', 'N/A'),
+                    getattr(cert_data, 'maturity_date', 'N/A'),
                     status
                 ))
         
         # Status update
         count = len(self.certificates)
         self.status_var.set(f"Sistema Certificati v15.1 CORRECTED - {count} certificati caricati")
-    
+
+    def _reselect_tree_item(self, cert_id_to_select: str):
+        """
+        Scorre il treeview e riseleziona la riga corrispondente all'ISIN fornito.
+        """
+        for item_id in self.tree.get_children():
+            item_values = self.tree.item(item_id, 'values')
+            if item_values and item_values[0] == cert_id_to_select:
+                self.tree.selection_set(item_id)
+                self.tree.focus(item_id)
+                self.tree.see(item_id) # Assicura che la riga sia visibile
+                self._on_selection_changed() # Simula il click per aggiornare i dettagli
+                break
+            
     def _on_selection_changed(self, event=None):
         """Gestione selezione certificato"""
         selection = self.tree.selection()
         if selection:
             cert_id = self.tree.item(selection[0])['values'][0]
             self._display_certificate_details(cert_id)
-    
+
     def _display_certificate_details(self, cert_id):
-        """*** DISPLAY DETTAGLI v15.1 CORRECTED *** - Con Risk-Free Rate corretto"""
+        """Visualizza dettagli accedendo correttamente agli attributi dell'oggetto e le date senza orario"""
         
         if cert_id not in self.certificates:
             return
         
-        cert_data = self.certificates[cert_id]
-        
-
-        # ---> AGGIUNGE CONTROLLO <---
-        if cert_data is None:
+        enhanced_config = self.certificates[cert_id]
+        if enhanced_config is None:
             self.logger.warning(f"Nessun dato trovato per il certificato con ID: {cert_id}")
-            self._clear_fields() # Assicurati che i campi vengano puliti
+            self.details_text.delete(1.0, tk.END)
             return
-        # ---> FINE DEL CONTROLLO <---
 
-        # Formattazione per la visualizzazione dei ticker
-        yahoo_tickers_data = cert_data.get('yahoo_ticker', 'N/A')
-        if isinstance(yahoo_tickers_data, list):
-            # Se è una lista, unisci gli elementi in una stringa pulita
-            yahoo_tickers_display = ', '.join(yahoo_tickers_data)
-        else:
-            # Altrimenti, usa il valore così com'è (per retrocompatibilità)
-            yahoo_tickers_display = yahoo_tickers_data
+        # Lavoriamo sempre con base_config per i dati principali
+        cert_data = enhanced_config.base_config
 
-        # *** FORMATTAZIONE RISK-FREE RATE CORRETTA ***
-        risk_free_rate = cert_data.get('risk_free_rate', 0)
-        if isinstance(risk_free_rate, (int, float)):
-            if risk_free_rate <= 1.0:  # Formato decimale
-                rf_display = f"{risk_free_rate * 100:.2f}%"
-            else:
-                rf_display = f"{risk_free_rate:.2f}%"
-        else:
-            rf_display = str(risk_free_rate)
-        
-        # Formatta altri campi percentuali
+        # Funzione helper per la formattazione
         def format_percentage(value, decimals=2):
             if isinstance(value, (int, float)):
-                if value <= 1.0:
-                    return f"{value * 100:.{decimals}f}%"
-                else:
-                    return f"{value:.{decimals}f}%"
-            return str(value)
+                return f"{value * 100:.{decimals}f}%" if value <= 1.0 and value !=0 else f"{value:.{decimals}f}%"
+            return str(value) if value is not None else 'N/A'
+
+        # Funzione helper per l'accesso sicuro agli attributi
+        def get_attr(obj, attr_name, default='N/A'):
+            # Aggiungiamo un controllo per ritornare il default se il valore è None
+            val = getattr(obj, attr_name, default)
+            return val if val is not None else default
         
-        # --- AIRBAG: mostra N/A se disattivato, mostra note se presenti ---
-        airbag_feature = cert_data.get('airbag_feature', 'N/A')
-        if airbag_feature is True or (isinstance(airbag_feature, str) and airbag_feature.lower() == 'true'):
-            airbag_level_str = format_percentage(cert_data.get('airbag_level', 0))
-            airbag_notes = cert_data.get('airbag_notes') or ''
-        else:
-            airbag_level_str = "N/A"
-            airbag_notes = ""
+        # === MODIFICA FORMATO DATA ===
+        issue_date_obj = get_attr(cert_data, 'issue_date')
+        maturity_date_obj = get_attr(cert_data, 'maturity_date')
+        
+        issue_date_str = issue_date_obj.strftime('%Y-%m-%d') if isinstance(issue_date_obj, datetime) else issue_date_obj
+        maturity_date_str = maturity_date_obj.strftime('%Y-%m-%d') if isinstance(maturity_date_obj, datetime) else maturity_date_obj
+        # === FINE MODIFICA ===
 
-        prezzi_iniziali = cert_data.get('prezzi_iniziali_sottostanti', 'N/A')
-        note_barriere = cert_data.get('note_barriere') or ''
+        yahoo_tickers_data = get_attr(cert_data, 'yahoo_ticker', [])
+        yahoo_tickers_display = ', '.join(yahoo_tickers_data) if isinstance(yahoo_tickers_data, list) else str(yahoo_tickers_data)
 
-        # Formatta prezzi_iniziali per visualizzazione con separatore migliaia
+        rf_display = format_percentage(get_attr(cert_data, 'risk_free_rate', 0))
+
+        airbag_feature = get_attr(cert_data, 'airbag_feature', False)
+        airbag_level_str = format_percentage(get_attr(cert_data, 'airbag_level', 0)) if airbag_feature else "N/A"
+        airbag_notes = get_attr(cert_data, 'airbag_notes', '') or ''
+        
+        prezzi_iniziali = get_attr(cert_data, 'prezzi_iniziali_sottostanti', 'N/A')
+        note_barriere = get_attr(cert_data, 'note_barriere', '') or ''
+
+        # (La funzione format_prezzi_iniziali interna può rimanere la stessa)
         def format_prezzi_iniziali(val):
-            if not val or val == 'N/A':
-                return 'N/A'
+            #... (la funzione interna rimane invariata)
+            if not val or val == 'N/A': return 'N/A'
             try:
-                # Supporta lista di valori separati da virgola
                 parts = [x.strip() for x in str(val).split(',')]
                 formatted = []
                 for p in parts:
-                    # Sostituisci eventuali punti con niente (per chi inserisce 1.234,56)
-                    p_clean = p.replace('.', '').replace(' ', '').replace("'", "")
-                    # Sostituisci virgola con punto per float
-                    p_clean = p_clean.replace(',', '.')
+                    p_clean = p.replace('.', '').replace(' ', '').replace("'", "").replace(',', '.')
                     num = float(p_clean)
                     formatted.append(f"{num:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'))
                 return ', '.join(formatted)
-            except Exception:
-                return val
+            except Exception: return val
 
-        status = cert_data.get('status', 'N/A')
-        details = f"""DETTAGLI CERTIFICATO v15.1 CORRECTED
+        details = f"""DETTAGLI CERTIFICATO v16
 {'='*60}
 
 INFORMAZIONI BASE:
-ISIN: {cert_data.get('isin', 'N/A')}
-Nome Certificato: {cert_data.get('name', 'N/A')}
-Ticker Strumento: {cert_data.get('certificate_instrument_ticker', 'N/A')}
-Tipo Certificato: {cert_data.get('certificate_type', 'N/A')}
-Emittente: {cert_data.get('issuer', 'N/A')}
-Stato: {status}
+ISIN: {get_attr(cert_data, 'isin')}
+Nome Certificato: {get_attr(cert_data, 'name')}
+Ticker Strumento: {get_attr(cert_data, 'certificate_instrument_ticker')}
+Tipo Certificato: {get_attr(cert_data, 'certificate_type')}
+Emittente: {get_attr(cert_data, 'issuer')}
+Stato: {get_attr(enhanced_config, 'status')}
 
 DATE E PARAMETRI:
-Data Emissione: {cert_data.get('issue_date', 'N/A')}
-Data Scadenza: {cert_data.get('maturity_date', 'N/A')}
-Nominale: €{cert_data.get('notional', 0):,.2f}
+Data Emissione: {issue_date_str}
+Data Scadenza: {maturity_date_str}
+Nominale: €{get_attr(cert_data, 'notional', 0):,.2f}
 
 TASSI:
 Risk-Free Rate: {rf_display}
-Tasso Cedola Periodico: {format_percentage(cert_data.get('coupon_rate', 0), decimals=3)}
-Frequenza Cedola: {cert_data.get('coupon_frequency', 'N/A')}
+Tasso Cedola Periodico: {format_percentage(get_attr(cert_data, 'coupon_rate', 0), decimals=3)}
+Frequenza Cedola: {get_attr(cert_data, 'coupon_frequency')}
 
 CARATTERISTICHE:
-Effetto Memoria: {cert_data.get('memory_feature', 'N/A')}
-
+Effetto Memoria: {get_attr(cert_data, 'memory_feature')}
 Airbag: {airbag_feature}
 Livello Airbag: {airbag_level_str}
 """
@@ -1405,44 +1260,45 @@ Livello Airbag: {airbag_level_str}
 
         details += f"""
 BARRIERE:
-Barriera Cedola: {format_percentage(cert_data.get('coupon_barrier', 0))} ({cert_data.get('coupon_barrier_type', 'N/A')})
-Barriera Capitale: {format_percentage(cert_data.get('capital_barrier', 0))} ({cert_data.get('capital_barrier_type', 'N/A')})
+Barriera Cedola: {format_percentage(get_attr(cert_data, 'coupon_barrier', 0))} ({get_attr(cert_data, 'coupon_barrier_type')})
+Barriera Capitale: {format_percentage(get_attr(cert_data, 'capital_barrier', 0))} ({get_attr(cert_data, 'capital_barrier_type')})
 """
         if note_barriere:
             details += f"Note Barriere: {note_barriere}\n"
 
-
         details += f"""
 BARRIERE DINAMICHE:
-Abilitata: {cert_data.get('dynamic_barrier_feature', 'N/A')}{' (Livello Iniziale = Barriera Capitale)' if cert_data.get('dynamic_barrier_feature') else ''}
-{f'''
-Livello Iniziale: {format_percentage(cert_data.get('dynamic_barrier_start_level', 0))}
-Step Down Rate: {format_percentage(cert_data.get('step_down_rate', 0), decimals=3)}
-Livello Finale: {format_percentage(cert_data.get('dynamic_barrier_end_level', 0))}
-Mesi di Ritardo Osservazione: {cert_data.get('observation_delay_months', 'N/A')}
-''' if cert_data.get('dynamic_barrier_feature') else ''}
+Abilitata: {get_attr(cert_data, 'dynamic_barrier_feature', False)}
+"""
+        if get_attr(cert_data, 'dynamic_barrier_feature', False):
+            details += f"""Livello Iniziale: {format_percentage(get_attr(cert_data, 'dynamic_barrier_start_level', 0))}
+Step Down Rate: {format_percentage(get_attr(cert_data, 'step_down_rate', 0), decimals=3)}
+Livello Finale: {format_percentage(get_attr(cert_data, 'dynamic_barrier_end_level', 0))}
+Mesi di Ritardo Osservazione: {get_attr(cert_data, 'observation_delay_months')}
+"""
 
+        details += f"""
 SOTTOSTANTI:
 Tickers Sottostanti (Yahoo): {yahoo_tickers_display}
 Prezzi Iniziali/Strike: {format_prezzi_iniziali(prezzi_iniziali)}
-Nomi/Desc Sottostanti: {cert_data.get('underlying_names', 'N/A')}
-Valute Sottostanti: {cert_data.get('underlying_currencies', 'N/A')}
-Tipo Dipendenza Sottostanti: {cert_data.get('underlying_dependency_type', 'N/A')}
+Nomi/Desc Sottostanti: {get_attr(cert_data, 'underlying_names')}
+Valute Sottostanti: {get_attr(cert_data, 'underlying_currencies')}
+Tipo Dipendenza Sottostanti: {get_attr(cert_data, 'underlying_dependency_type')}
 """
-        # Aggiungi descrizione della dipendenza se disponibile (usa self._dependency_descriptions)
-        dependency_type = cert_data.get('underlying_dependency_type')
+        dependency_type = get_attr(cert_data, 'underlying_dependency_type')
         if dependency_type and dependency_type in self._dependency_descriptions:
             details += f"Descrizione Dipendenza: {self._dependency_descriptions[dependency_type]}\n"
         
         details += f"""
-Valuta Certificato: {cert_data.get('currency', 'N/A')}
+Valuta Certificato: {get_attr(cert_data, 'currency')}
 
 DATI AVANZATI:
-Date Cedole: {len(cert_data.get('coupon_dates', []))} date
-Autocall Levels: {len(cert_data.get('autocall_levels', []))} livelli
+Date Cedole: {len(get_attr(cert_data, 'coupon_dates', []))} date
+Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
 """
         self.details_text.delete(1.0, tk.END)
-        self.details_text.insert(1.0, details)
+        self.details_text.insert(1.0, details)    
+
     
     def _load_certificates(self):
         """*** CARICAMENTO CERTIFICATI v15.1 CORRECTED *** - Con conversione campi v15.1 e gestione nuovi campi"""
@@ -1529,30 +1385,45 @@ Autocall Levels: {len(cert_data.get('autocall_levels', []))} livelli
         return converted
     
     def _save_certificates(self):
-        """Salva certificati"""
-        
-        try:
-            print(f"💾 === SALVATAGGIO CERTIFICATI v15.1 CORRECTED ===")
-            print(f"💾 Certificati da salvare: {len(self.certificates)}")
-            
-            # Crea backup
-            if self.cert_file.exists():
-                backup_file = self.cert_file.with_suffix('.backup')
-                import shutil
-                shutil.copy2(self.cert_file, backup_file)
-                print(f"💾 Backup creato: {backup_file}")
-            
-            # Salva
-            with open(self.cert_file, 'w', encoding='utf-8') as f:
-                json.dump(self.certificates, f, ensure_ascii=False, indent=2, default=str)
-            
-            print(f"✅ Certificati salvati in {self.cert_file}")
-            return True
-            
-        except Exception as e:
-            print(f"❌ Errore salvataggio: {e}")
-            messagebox.showerror("Errore Salvataggio", f"Errore salvataggio certificati:\n{e}")
-            return False
+            """
+            Salva tutti i certificati DELEGANDO l'operazione al manager.
+            Questo centralizza la logica di salvataggio, inclusa la creazione dei backup.
+            """
+            if self.enhanced_manager:
+                try:
+                    # La GUI non sa come si salva, chiede semplicemente al manager di farlo.
+                    # Sarà il manager ad occuparsi del file, del formato e del backup.
+                    self.enhanced_manager.save_all_certificates()
+                    self.status_var.set(f"Salvataggio completato con successo tramite manager.")
+                    print("✅ Salvataggio delegato al manager completato.")
+                    return True
+                except Exception as e:
+                    self.logger.error(f"Errore durante il salvataggio delegato al manager: {e}", exc_info=True)
+                    messagebox.showerror("Errore Salvataggio", f"Il manager ha riscontrato un errore durante il salvataggio:\n{e}")
+                    return False
+            else:
+                # Questa sezione è un "fallback" nel caso in cui il manager non fosse disponibile.
+                # Mantiene la vecchia logica di salvataggio diretto per robustezza.
+                print("⚠️  Manager non disponibile, si procede con il salvataggio locale (legacy).")
+                try:
+                    # La logica di backup e salvataggio che prima era qui, rimane per il fallback.
+                    if self.cert_file.exists():
+                        backup_file = self.cert_file.with_suffix(f'.backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}')
+                        import shutil
+                        shutil.copy2(self.cert_file, backup_file)
+                        print(f"💾 Backup locale (fallback) creato: {backup_file}")
+
+                    with open(self.cert_file, 'w', encoding='utf-8') as f:
+                        json.dump(self.certificates, f, ensure_ascii=False, indent=2, default=str)
+
+                    self.status_var.set(f"Salvataggio locale (fallback) completato.")
+                    print(f"✅ Certificati salvati localmente in {self.cert_file}")
+                    return True
+
+                except Exception as e:
+                    self.logger.error(f"Errore durante il salvataggio locale (fallback): {e}", exc_info=True)
+                    messagebox.showerror("Errore Salvataggio Locale", f"Errore durante il salvataggio dei certificati:\n{e}")
+                    return False
     
     def _reload_certificates(self):
         """Ricarica certificati da file"""
@@ -1572,7 +1443,10 @@ Autocall Levels: {len(cert_data.get('autocall_levels', []))} livelli
         
         if messagebox.askyesno("Conferma Eliminazione", 
                              f"Eliminare definitivamente il certificato {cert_id}?"):
-            del self.certificates[cert_id]
+            # del self.certificates[cert_id] #vecchio modo
+            if self.enhanced_manager.delete_certificate(cert_id): # NUOVO MODO
+                self._refresh_certificate_list()
+
             if self._save_certificates():
                 self._refresh_certificate_list()
                 self.details_text.delete(1.0, tk.END)
@@ -1580,42 +1454,54 @@ Autocall Levels: {len(cert_data.get('autocall_levels', []))} livelli
     
     def _analyze_selected_certificate(self):
         """
-        Esegue l'analisi completa del certificato selezionato (versione corretta).
+        *** VERSIONE AGGIORNATA CHE INTEGRA IL DATA FETCHING ***
+        Esegue l'analisi completa del certificato, attivando il recupero dei dati di mercato.
         """
         selected_isin = self.get_selected_isin()
         if not selected_isin:
             messagebox.showwarning("Attenzione", "Seleziona un certificato da analizzare.")
             return
 
-        cert_data = self.certificates.get(selected_isin)
-        if not cert_data:
-            messagebox.showerror("Errore", f"Dati per il certificato {selected_isin} non trovati.")
+        if not self.enhanced_manager:
+            messagebox.showerror("Errore", "Funzionalità di analisi non disponibile. Enhanced Manager non trovato.")
             return
-            
-        self.status_var.set(f"Analisi in corso per {selected_isin}...")
+
+        self.status_var.set(f"Analisi in corso per {selected_isin}... (Recupero dati di mercato)")
         self.root.update_idletasks()
 
         try:
-            # 1. Crea l'oggetto di configurazione dai dati in memoria
-            config = RealCertificateConfig(**cert_data)
+            # 1. DELEGA AL MANAGER: chiede di aggiornare i dati e restituire la config
+            config_pronta_per_analisi = self.enhanced_manager.refresh_and_get_certificate_for_analysis(selected_isin)
 
-            # 2. Converti la configurazione in un oggetto certificato "vivo"
+            if not config_pronta_per_analisi:
+                messagebox.showerror("Errore", f"Impossibile preparare il certificato {selected_isin} per l'analisi.")
+                self.status_var.set("Analisi fallita.")
+                return
+
+            # 2. Converti la configurazione aggiornata in un oggetto certificato "vivo"
             importer = RealCertificateImporter()
-            certificate_object = importer.import_certificate(config)
+            certificate_object = importer.import_certificate(config_pronta_per_analisi)
 
-            # 3. Esegui l'analisi di rischio
+            # 3. Esegui l'analisi di rischio con i dati freschi
             analyzer = UnifiedRiskAnalyzer()
             risk_metrics = analyzer.analyze_certificate_risk(certificate_object, n_simulations=1000)
             self.logger.info(f"Analisi di rischio completata. VaR 95%: {risk_metrics.var_95:.2%}")
 
-            # 4. Mostra i risultati
-            self.update_analysis_results_display(risk_metrics.to_dict())
+            # 4. Mostra i risultati (questa funzione andrà creata o migliorata)
+            # self.update_analysis_results_display(risk_metrics.to_dict())
+            messagebox.showinfo("Analisi Completata",
+                                f"Analisi per {selected_isin} completata con successo.\n\n"
+                                f"VaR 95%: {risk_metrics.var_95:.2%}\n"
+                                f"VaR 99%: {risk_metrics.var_99:.2%}\n"
+                                f"Volatilità: {risk_metrics.volatility:.2%}\n"
+                                f"Sharpe Ratio: {risk_metrics.sharpe_ratio:.3f}")
+
             self.status_var.set("Analisi completata con successo.")
 
         except Exception as e:
             self.logger.error(f"Errore durante l'analisi del certificato {selected_isin}: {e}", exc_info=True)
-            messagebox.showerror("Errore di Analisi", f"Si è verificato un errore: {e}")
-            self.status_var.set("Analisi fallita.") 
+            messagebox.showerror("Errore di Analisi", f"Si è verificato un errore durante l'analisi:\n{e}")
+            self.status_var.set("Analisi fallita.")
 
     def _export_analysis_excel(self):
         """Esporta analisi avanzata in Excel (versione corretta)."""

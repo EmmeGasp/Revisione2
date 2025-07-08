@@ -576,6 +576,61 @@ class EnhancedCertificateManagerV15:
         print(f"   Portfolio: {len(self.portfolio_configs)}")
         print(f"   Versione: v15 (CORRETTA)")
     
+
+    # ========================================
+    # NUOVI METODI DI GESTIONE CENTRALE v16   
+    # ========================================
+    # Time stamp 07/07/2025
+    
+    def get_certificate_data_for_gui(self, cert_id: str) -> Optional[Dict]:
+        """Restituisce i dati di un certificato in formato dizionario, pronto per la GUI."""
+        if cert_id in self.configurations:
+            # Per la GUI, è più semplice lavorare con il dizionario base
+            enhanced_config = self.configurations[cert_id]
+            # Assicuriamo che tutti i campi siano presenti per evitare errori nel dialog
+            base_data = self._enhanced_config_to_dict_v15(enhanced_config)
+            return base_data.get('base_config', {})
+        return None
+
+    def delete_certificate(self, cert_id: str):
+        """Elimina un certificato dalla gestione."""
+        if cert_id in self.configurations:
+            del self.configurations[cert_id]
+            self._save_configurations()
+            print(f"🗑️ Certificato {cert_id} eliminato dal manager.")
+            return True
+        return False
+
+    def save_all_certificates(self):
+        """Salva tutte le configurazioni attuali."""
+        self._save_configurations()
+        print("💾 Tutti i certificati sono stati salvati dal manager.")
+
+    def refresh_and_get_certificate_for_analysis(self, cert_id: str) -> Optional[RealCertificateConfig]:
+        """
+        *** METODO CHIAVE ***
+        Aggiorna i dati di mercato per un singolo certificato e lo restituisce pronto per l'analisi.
+        """
+        if cert_id not in self.configurations:
+            print(f"❌ Certificato {cert_id} non trovato per l'analisi.")
+            return None
+
+        print(f"🔄 Aggiornamento dati di mercato on-demand per {cert_id}...")
+        enhanced_config = self.configurations[cert_id]
+
+        # 1. Chiama il provider per aggiornare i dati sull'oggetto config
+        success = self.yahoo_provider.update_certificate_market_data(enhanced_config)
+        
+        if not success:
+            print(f"⚠️  Impossibile aggiornare i dati di mercato per {cert_id}. L'analisi procederà con i dati esistenti.")
+            # Non blocchiamo l'analisi, ma usiamo i dati che abbiamo.
+
+        # 2. (Opzionale ma consigliato) Salva la configurazione aggiornata
+        self._save_configurations()
+
+        # 3. Restituisce l'oggetto RealCertificateConfig aggiornato e pronto
+        return enhanced_config.base_config
+        
     def add_certificate_from_dict_v15(self, cert_id: str, config_dict: Dict,
                                      valuation_date: datetime = None) -> EnhancedCertificateConfig:
         """*** VERSIONE CORRETTA v15 *** - Aggiunge certificato con validazione completa"""
@@ -629,146 +684,92 @@ class EnhancedCertificateManagerV15:
             traceback.print_exc()
             raise
     
+    def update_certificate_from_dict(self, cert_id: str, update_data: Dict):
+        """
+        Aggiorna un certificato esistente con i dati forniti in un dizionario.
+        Non crea un nuovo certificato, ma modifica quello esistente.
+        """
+        if cert_id not in self.configurations:
+            print(f"❌ Impossibile aggiornare: certificato {cert_id} non trovato.")
+            return False
+
+        print(f"🔄 Aggiornamento parziale per {cert_id} con i seguenti campi: {list(update_data.keys())}")
+        
+        # Recupera l'oggetto base_config esistente
+        base_config = self.configurations[cert_id].base_config
+        
+        # Itera sui dati di aggiornamento e imposta gli attributi sull'oggetto esistente
+        for key, value in update_data.items():
+            if hasattr(base_config, key):
+                # Converte le date se sono stringhe
+                if key in ['coupon_dates', 'autocall_dates'] and value and isinstance(value[0], str):
+                    try:
+                        value = [datetime.fromisoformat(d) for d in value]
+                    except (ValueError, TypeError):
+                        print(f"⚠️ Formato data non valido per {key}, lasciato come stringa.")
+                
+                setattr(base_config, key, value)
+        
+        # Non c'è bisogno di risalvare l'oggetto nel dizionario configurations
+        # perché abbiamo modificato l'oggetto esistente direttamente.
+        
+        print(f"✅ Certificato {cert_id} aggiornato in memoria.")
+        return True
+
     def _dict_to_real_config_safe_v15(self, config_dict: Dict) -> RealCertificateConfig:
-        
         """
-        *** VERSIONE CORRETTA v15.1 *** - SOSTITUISCI IL METODO ESISTENTE
-    
-        TROVA nel file enhanced_certificate_manager_fixed.py:
-        def _dict_to_real_config_safe_v15(self, config_dict: Dict) -> RealCertificateConfig:
-            
-        E SOSTITUISCI tutto il contenuto con questo codice:
+        *** VERSIONE CORRETTA v17 ***
+        Converte un dizionario in un oggetto RealCertificateConfig,
+        gestendo 'underlying_names' sia come stringa che come lista.
         """
-      
-        print(f"🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===")
-        print(f"📊 Input keys: {list(config_dict.keys())}")
+        print(f"🔄 === CONVERSIONE SAFE v17 (Manager) ===")
         
-        # *** STEP 1: GESTIONE YAHOO_TICKER GARANTITA ***
-        if 'yahoo_ticker' not in config_dict:
-            config_dict['yahoo_ticker'] = None
-            print(f"   📊 yahoo_ticker non specificato, impostato a None")
-        
-        # *** STEP 2: CONVERSIONE CAMPI v15.1 -> RealCertificateConfig ***
-        
-        # Lista campi supportati da RealCertificateConfig
+        # Lista completa dei campi supportati (già corretta)
         supported_fields = {
             'isin', 'name', 'certificate_type', 'issuer', 'underlying_assets',
             'issue_date', 'maturity_date', 'notional', 'currency', 'yahoo_ticker',
             'coupon_rates', 'coupon_dates', 'autocall_levels', 'autocall_dates',
             'barrier_levels', 'memory_feature', 'current_spots', 'volatilities',
             'correlations', 'risk_free_rate', 'dividend_yields',
-            'certificate_instrument_ticker', 'underlying_currencies', 'underlying_names', 'underlying_dependency_type', # Nuovi campi
-            'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level' # Nuovi campi barriera dinamica
+            'certificate_instrument_ticker', 'underlying_names', 'underlying_currencies',
+            'underlying_dependency_type', 'prezzi_iniziali_sottostanti',
+            'coupon_rate', 'coupon_frequency', 'coupon_barrier', 'capital_barrier',
+            'coupon_barrier_type', 'capital_barrier_type', 'note_barriere',
+            'airbag_feature', 'airbag_level', 'airbag_notes',
+            'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate',
+            'dynamic_barrier_end_level', 'observation_delay_months'
         }
-        
-        # Filtra campi supportati
+
         filtered_config = {}
-        excluded_fields = []
-        
         for key, value in config_dict.items():
             if key in supported_fields:
                 filtered_config[key] = value
-            else:
-                excluded_fields.append(key)
-        
-        print(f"🔧 Campi esclusi v15.1: {excluded_fields}")
-        
-        # *** STEP 3: CONVERSIONE BARRIERE v15.1 ***
-        barrier_levels = {}
-        
-        # Converte barriera cedola v15.1 -> barrier_levels['coupon']
-        if 'coupon_barrier_value' in config_dict:
-            coupon_value = config_dict['coupon_barrier_value']
-            if isinstance(coupon_value, (int, float)) and coupon_value > 0:
-                barrier_levels['coupon'] = coupon_value
-                print(f"🔄 Barriera cedola convertita: {coupon_value}")
-        
-        # Converte barriera capitale v15.1 -> barrier_levels['capital']  
-        if 'capital_barrier_value' in config_dict:
-            capital_value = config_dict['capital_barrier_value']
-            if isinstance(capital_value, (int, float)) and capital_value > 0:
-                barrier_levels['capital'] = capital_value
-                print(f"🔄 Barriera capitale convertita: {capital_value}")
-        
-        # Converte airbag v15.1 -> barrier_levels['airbag']
-        if config_dict.get('airbag_feature') and 'airbag_level' in config_dict:
-            airbag_value = config_dict['airbag_level']
-            if isinstance(airbag_value, (int, float)) and airbag_value > 0:
-                barrier_levels['airbag'] = airbag_value
-                print(f"🔄 Airbag convertito: {airbag_value}")
-        
-        # Aggiungi barrier_levels convertite
-        if barrier_levels:
-            filtered_config['barrier_levels'] = barrier_levels
-            print(f"✅ barrier_levels creato: {barrier_levels}")
-        
-        # *** STEP 4: GESTIONE DATE SICURA ***
-        
-        # Gestione date singole
+
+        # Gestione date
         for date_field in ['issue_date', 'maturity_date']:
-            if isinstance(filtered_config.get(date_field), str):
+            if date_field in filtered_config and isinstance(filtered_config[date_field], str):
                 try:
                     filtered_config[date_field] = datetime.fromisoformat(filtered_config[date_field])
-                except ValueError as e:
-                    print(f"⚠️ Errore parsing {date_field}: {e}")
-                    # Fallback a data default
-                    if date_field == 'issue_date':
-                        filtered_config[date_field] = datetime.now()
-                    else:
-                        filtered_config[date_field] = datetime.now() + timedelta(days=365*5)
-        
-        # Gestione date lists
-        for date_list_field in ['coupon_dates', 'autocall_dates']:
-            if filtered_config.get(date_list_field):
-                parsed_dates = []
-                for date_item in filtered_config[date_list_field]:
-                    if isinstance(date_item, str):
-                        try:
-                            parsed_dates.append(datetime.fromisoformat(date_item))
-                        except ValueError as e:
-                            print(f"⚠️ Errore parsing date in {date_list_field}: {e}")
-                    elif isinstance(date_item, datetime):
-                        parsed_dates.append(date_item)
-                
-                filtered_config[date_list_field] = parsed_dates
-        
-        # *** STEP 5: GESTIONE CORRELATIONS ***
-        if filtered_config.get('correlations'):
-            if isinstance(filtered_config['correlations'], list):
-                try:
-                    import numpy as np
-                    filtered_config['correlations'] = np.array(filtered_config['correlations'])
-                except Exception as e:
-                    print(f"⚠️ Errore conversione correlations: {e}")
-                    # Rimuovi per usare default
-                    del filtered_config['correlations']
-        
-        # *** STEP 6: GESTIONE UNDERLYING ASSETS ***
-        if 'underlying_assets' in filtered_config:
-            if isinstance(filtered_config['underlying_assets'], str):
-                # Singolo asset
-                filtered_config['underlying_assets'] = [filtered_config['underlying_assets']]
-        
-        # *** STEP 7: CREAZIONE RealCertificateConfig ***
-        try:
-            from app.core.real_certificate_integration import RealCertificateConfig
-            real_config = RealCertificateConfig(**filtered_config)
-            
-            print(f"✅ RealCertificateConfig creato (Enhanced Manager v15.1)")
-            print(f"📊 Campi utilizzati: {len(filtered_config)}")
-            
-            return real_config
-            
-        except Exception as e:
-            print(f"❌ ERRORE CRITICO creazione RealCertificateConfig: {e}")
-            print(f"📊 Filtered config keys: {list(filtered_config.keys())}")
-            
-            # Debug dettagliato
-            for key, value in filtered_config.items():
-                print(f"   {key}: {type(value)} = {value}")
-            
-            raise Exception(f"Impossibile creare RealCertificateConfig: {e}")
+                except (ValueError, TypeError):
+                    filtered_config[date_field] = None
 
+        # === LA CORREZIONE È QUI ===
+        # Gestione UNDERLYING_ASSETS in modo robusto
+        if 'underlying_names' in filtered_config and filtered_config['underlying_names']:
+             # Se è già una lista (dal nuovo dialog), la usiamo direttamente.
+            if isinstance(filtered_config['underlying_names'], list):
+                filtered_config['underlying_assets'] = filtered_config['underlying_names']
+            # Se è una stringa (da dati vecchi), la splittiamo con ';'.
+            elif isinstance(filtered_config['underlying_names'], str):
+                filtered_config['underlying_assets'] = [name.strip() for name in filtered_config['underlying_names'].split(';')]
+        # === FINE CORREZIONE ===
+
+        try:
+            return RealCertificateConfig(**filtered_config)
+        except TypeError as e:
+            print(f"❌ ERRORE CRITICO creazione RealCertificateConfig: {e}")
+            print(f"   Dati passati al costruttore: {filtered_config.keys()}")
+            raise 
 
     def calculate_coupon_dates_for_certificate(self, cert_id: str, 
                                              frequency: str, 

@@ -1,617 +1,141 @@
 Log main.py
-(venv) PS D:\Doc\File python\Finanza\Certificates\Revisione2> & "D:/Doc/File python/Finanza/Certificates/Revisione2/venv/Scripts/python.exe" "d:/Doc/File python/Finanza/Certificates/Revisione2/src/main.py"
+PS D:\Doc\File python\Finanza\Certificates\Revisione2> & "D:/Doc/File python/Finanza/Certificates/Revisione2/venv/Scripts/python.exe" "d:/Doc/File python/Finanza/Certificates/Revisione2/src/main.py"
 ✅ Import sistema esistente OK
 ✅ Import enhanced manager v15 OK
 Avvio dell'applicazione Certificati Finanziari...
-2025-07-04 15:58:18,000 - INFO - EnhancedExcelExporter inizializzato
-2025-07-04 15:58:18,000 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:58:18,001 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 15:58:18,001 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 15:58:18,001 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:58:18,001 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 15:58:18,001 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 15:58:18,001 - INFO - UnifiedRiskDashboard inizializzato
+▶️  Inizializzazione del Manager Enhanced come sorgente dati principale...
+2025-07-07 16:26:18,357 - INFO - EnhancedExcelExporter inizializzato
+2025-07-07 16:26:18,357 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-07 16:26:18,357 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-07 16:26:18,357 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-07 16:26:18,357 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-07 16:26:18,357 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-07 16:26:18,357 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-07 16:26:18,358 - INFO - UnifiedRiskDashboard inizializzato
 🚀 Sistema Certificati Integrato inizializzato
 📁 Output Excel: D:/Doc/File python/
 📂 Caricamento configurazioni v15: 5 certificati
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
    ✅ IT0006767872 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
    ✅ XS3031184206 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
    ✅ DE000VK2NM23 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
    ✅ XS2902921233 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
    ✅ XS2705561756 caricato
 📊 Portfolio caricati: 2
 🚀 Enhanced Certificate Manager v15 inizializzato
-   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\src\app\data
+   Directory: src\app\data
    Certificati: 5
    Portfolio: 2
    Versione: v15 (CORRETTA)
-✅ Enhanced Manager v15 inizializzato per calc date
-2025-07-04 15:58:18,007 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:58:18,008 - INFO - EnhancedExcelExporter inizializzato
-2025-07-04 15:58:18,008 - INFO - Caricati 2 portafogli
-2025-07-04 15:58:18,008 - INFO - Caricati positions per 1 portafogli
-2025-07-04 15:58:18,009 - INFO - Portfolio Manager inizializzato
-✅ Portfolio Manager e GUI Manager inizializzati direttamente nella GUI principale.
-📂 Caricamento 5 certificati...
-🔄 Conversion v15.1 for IT0006767872
-🔄 Conversion v15.1 for XS3031184206
-🔄 Conversion v15.1 for DE000VK2NM23
-🔄 Conversion v15.1 for XS2902921233
-🔄 Conversion v15.1 for XS2705561756
-✅ Caricati 5 certificati da src\app\data\certificates.json
+✅ Enhanced Manager v15 inizializzato con 5 certificati.
+2025-07-07 16:26:18,367 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-07 16:26:18,368 - INFO - EnhancedExcelExporter inizializzato
+2025-07-07 16:26:18,368 - INFO - Caricati 2 portafogli
+2025-07-07 16:26:18,369 - INFO - Caricati positions per 1 portafogli
+2025-07-07 16:26:18,369 - INFO - Portfolio Manager inizializzato
+✅ Portfolio Manager e GUI Manager inizializzati.
 🚀 === GUI MANAGER v15.1 CORRECTED INIZIALIZZATO ===
+➕ === NUOVO CERTIFICATO v15.1 CORRECTED ===
+📝 === APERTURA DIALOG v15.1 CORRECTED ===
+📝 Title: Nuovo Certificato
+📝 Nuovo certificato (form vuoto)
+🏗️ === CREAZIONE FORM COMPLETO v15.1 CORRECTED ===
+📝 Popolamento form con valori di default per nuovo certificato.
+✅ Form completo v15.1 CORRECTED creato con successo
+💾 === INIZIO SALVATAGGIO v16 (Logica con ';') ===
+💾 === SALVATAGGIO v16 COMPLETATO CON SUCCESSO ===
+💾 Creazione certificato IT0012451451
+📊 Risk-Free Rate: 0.035
+🆕 Aggiunta certificato v15: IT0012451451
+   Dati ricevuti: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'note_barriere', 'yahoo_ticker', 'prezzi_iniziali_sottostanti', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type']
+   📊 Yahoo ticker specificato: ['UCG.MI', 'ISP.MI']
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+📊 Auto-updating market data per IT0012451451...
+🔍 DEBUG v16.1 - PRIMA del fetch Yahoo:
+   Current spots: Non definiti
+📊 Fetch market data per 2 assets...
+📊 Usando ticker specificato per Unicredit: UCG.MI
+   🔄 Downloading Unicredit (UCG.MI)...
+   ✅ Unicredit: €57.14, Vol=35.15%
+📊 Usando ticker specificato per Intesa SanPaolo: ISP.MI
+   🔄 Downloading Intesa SanPaolo (ISP.MI)...
+   ✅ Intesa SanPaolo: €4.91, Vol=27.07%
+📊 Fetch completato: 2/2 successi
+🔍 DEBUG v16.1 - DOPO il fetch Yahoo:
+   Dati scaricati spots: {'Unicredit': 57.13999938964844, 'Intesa SanPaolo': 4.91349983215332}
+🔍 DEBUG v16.1 - STATO FINALE:
+   Current spots finali: [57.13999938964844, 4.91349983215332]
+✅ Market data aggiornati completamente
+✅ Market data aggiornati da Yahoo Finance
+🔄 Backup creato: certificates.backup_20250707_162733.json
+💾 Configurazioni v15 salvate: 6 certificati
+✅ Certificato enhanced IT0012451451 aggiunto (v15)
+🔄 Backup creato: certificates.backup_20250707_162733.json
+💾 Configurazioni v15 salvate: 6 certificati
+💾 Tutti i certificati sono stati salvati dal manager.
+✅ Salvataggio delegato al manager completato.
+✅ Certificato IT0012451451 creato e salvato
+📅 === CALC DATE INTEGRATA v15.1 CORRECTED per IT0012451451 ===
+❌ Errore calc date integrata: 'EnhancedCertificateConfig' object has no attribute 'get'
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 979, in _calculate_dates_integrated
+    if cert_data.get('capital_barrier_type') == 'dynamic' or cert_data.get('dynamic_barrier_feature'):
+       ^^^^^^^^^^^^^
+AttributeError: 'EnhancedCertificateConfig' object has no attribute 'get'
+✏️ === MODIFICA CERTIFICATO IT0012451451 v15.1 CORRECTED ===
+📊 Risk-Free Rate originale: 0.035
+📝 === APERTURA DIALOG v15.1 CORRECTED ===
+📝 Title: Modifica IT0012451451
+📝 Dati esistenti per l'oggetto con ISIN: IT0012451451
+🏗️ === CREAZIONE FORM COMPLETO v15.1 CORRECTED ===
+📊 === CARICAMENTO DATI (Logica con ';') ===
+2025-07-07 16:28:08,005 - ERROR - Errore durante la modifica di IT0012451451: name 'field_mapping' is not defined
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1109, in _edit_selected
+    dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, f"Modifica {selected_isin}", cert_data_for_dialog)
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 157, in __init__
+    self._setup_form_complete_v15_1_corrected()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 229, in _setup_form_complete_v15_1_corrected
+    self._create_complete_form_fields_v15_1_corrected()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 540, in _create_complete_form_fields_v15_1_corrected
+    self._load_existing_data_v15_1_corrected()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 587, in _load_existing_data_v15_1_corrected
+    for field_name, attr_name in field_mapping.items():
+                                 ^^^^^^^^^^^^^
+NameError: name 'field_mapping' is not defined
+❌ Dialog v15.1 CORRECTED annullato dall'utente
+✏️ === MODIFICA CERTIFICATO IT0006767872 v15.1 CORRECTED ===
+📊 Risk-Free Rate originale: None
+📝 === APERTURA DIALOG v15.1 CORRECTED ===
+📝 Title: Modifica IT0006767872
+📝 Dati esistenti per l'oggetto con ISIN: IT0006767872
+🏗️ === CREAZIONE FORM COMPLETO v15.1 CORRECTED ===
+📊 === CARICAMENTO DATI (Logica con ';') ===
+2025-07-07 16:28:17,133 - ERROR - Errore durante la modifica di IT0006767872: name 'field_mapping' is not defined
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1109, in _edit_selected
+    dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, f"Modifica {selected_isin}", cert_data_for_dialog)
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 157, in __init__
+    self._setup_form_complete_v15_1_corrected()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 229, in _setup_form_complete_v15_1_corrected
+    self._create_complete_form_fields_v15_1_corrected()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 540, in _create_complete_form_fields_v15_1_corrected
+    self._load_existing_data_v15_1_corrected()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 587, in _load_existing_data_v15_1_corrected
+    for field_name, attr_name in field_mapping.items():
+                                 ^^^^^^^^^^^^^
+NameError: name 'field_mapping' is not defined
+❌ Dialog v15.1 CORRECTED annullato dall'utente
 🚪 Chiusura GUI Certificate Manager v15.1 CORRECTED
 Applicazione terminata.
-(venv) PS D:\Doc\File python\Finanza\Certificates\Revisione2> & "D:/Doc/File python/Finanza/Certificates/Revisione2/venv/Scripts/python.exe" "d:/Doc/File python/Finanza/Certificates/Revisione2/src/main.py"
-✅ Import sistema esistente OK
-✅ Import enhanced manager v15 OK
-Avvio dell'applicazione Certificati Finanziari...
-2025-07-04 15:58:53,111 - INFO - EnhancedExcelExporter inizializzato
-2025-07-04 15:58:53,111 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:58:53,112 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 15:58:53,112 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 15:58:53,112 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:58:53,112 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 15:58:53,112 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 15:58:53,112 - INFO - UnifiedRiskDashboard inizializzato
-🚀 Sistema Certificati Integrato inizializzato
-📁 Output Excel: D:/Doc/File python/
-📂 Caricamento configurazioni v15: 5 certificati
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ IT0006767872 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS3031184206 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ DE000VK2NM23 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2902921233 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2705561756 caricato
-📊 Portfolio caricati: 2
-🚀 Enhanced Certificate Manager v15 inizializzato
-   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\src\app\data
-   Certificati: 5
-   Portfolio: 2
-   Versione: v15 (CORRETTA)
-✅ Enhanced Manager v15 inizializzato per calc date
-2025-07-04 15:58:53,121 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:58:53,122 - INFO - EnhancedExcelExporter inizializzato
-2025-07-04 15:58:53,122 - INFO - Caricati 2 portafogli
-2025-07-04 15:58:53,123 - INFO - Caricati positions per 1 portafogli
-2025-07-04 15:58:53,123 - INFO - Portfolio Manager inizializzato
-✅ Portfolio Manager e GUI Manager inizializzati direttamente nella GUI principale.
-📂 Caricamento 5 certificati...
-🔄 Conversion v15.1 for IT0006767872
-🔄 Conversion v15.1 for XS3031184206
-🔄 Conversion v15.1 for DE000VK2NM23
-🔄 Conversion v15.1 for XS2902921233
-🔄 Conversion v15.1 for XS2705561756
-✅ Caricati 5 certificati da src\app\data\certificates.json
-🚀 === GUI MANAGER v15.1 CORRECTED INIZIALIZZATO ===
-Exception in Tkinter callback
-Traceback (most recent call last):
-  File "C:\Users\namad\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 2068, in __call__
-    return self.func(*args)
-           ~~~~~~~~~^^^^^^^
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1307, in _on_selection_changed
-    self._display_certificate_details(cert_id)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1346, in _display_certificate_details
-    note_barriere = cert_data.get('note_barriere', '').strip()
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'strip'
-2025-07-04 15:58:58,668 - INFO - EnhancedExcelExporter inizializzato
-2025-07-04 15:58:58,668 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:58:58,668 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 15:58:58,669 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 15:58:58,669 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:58:58,669 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 15:58:58,669 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 15:58:58,670 - INFO - UnifiedRiskDashboard inizializzato
-🚀 Sistema Certificati Integrato inizializzato
-📁 Output Excel: D:/Doc/File python/
-📂 Caricamento configurazioni v15: 5 certificati
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ IT0006767872 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS3031184206 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ DE000VK2NM23 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2902921233 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2705561756 caricato
-📊 Portfolio caricati: 2
-🚀 Enhanced Certificate Manager v15 inizializzato
-   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\src\app\data
-   Certificati: 5
-   Portfolio: 2
-   Versione: v15 (CORRETTA)
-🆕 Aggiunta certificato v15: DE000VK2NM23
-   Dati ricevuti: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-   📊 Yahoo ticker specificato: BMW.DE, MBG.DE,STLAM.MI,VOW.DE
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-📊 Auto-updating market data per DE000VK2NM23...
-🔍 DEBUG v16.1 - PRIMA del fetch Yahoo:
-   Current spots: Non definiti
-📊 Fetch market data per 5 assets...
-📊 Usando ticker specificato per Bayerische Motoren Werke AG: BMW.DE, MBG.DE,STLAM.MI,VOW.DE
-   🔄 Downloading Bayerische Motoren Werke AG (BMW.DE, MBG.DE,STLAM.MI,VOW.DE)...
-2025-07-04 15:59:00,135 - ERROR - $BMW.DE, MBG.DE,STLAM.MI,VOW.DE: possibly delisted; no price data found  (1d 2024-10-25 15:58:58.679746 -> 2025-07-04 15:58:58.679755) (Yahoo error = "No data found, symbol may be delisted")
-   ⚠️  Nessun dato per Bayerische Motoren Werke AG (BMW.DE, MBG.DE,STLAM.MI,VOW.DE)
-📊 Ticker fallback per Mercedes-Benz Group AG: Mercedes-Benz Group AG
-   🔄 Downloading Mercedes-Benz Group AG (Mercedes-Benz Group AG)...
-2025-07-04 15:59:00,854 - ERROR - HTTP Error 404: 
-2025-07-04 15:59:01,094 - ERROR - $MERCEDES-BENZ GROUP AG: possibly delisted; no timezone found
-   ⚠️  Nessun dato per Mercedes-Benz Group AG (Mercedes-Benz Group AG)
-📊 Ticker fallback per :
-   🔄 Downloading  ()...
-   ❌ Errore fetch : Empty ticker name
-📊 Ticker fallback per Stellantis N.V.: Stellantis N.V.
-   🔄 Downloading Stellantis N.V. (Stellantis N.V.)...
-2025-07-04 15:59:01,845 - ERROR - HTTP Error 404: 
-2025-07-04 15:59:02,027 - ERROR - $STELLANTIS N.V.: possibly delisted; no timezone found
-   ⚠️  Nessun dato per Stellantis N.V. (Stellantis N.V.)
-📊 Ticker fallback per Volkswagen AG: Volkswagen AG
-   🔄 Downloading Volkswagen AG (Volkswagen AG)...
-2025-07-04 15:59:02,376 - ERROR - $VOLKSWAGEN AG: possibly delisted; no timezone found
-   ⚠️  Nessun dato per Volkswagen AG (Volkswagen AG)
-📊 Fetch completato: 0/5 successi
-🔍 DEBUG v16.1 - DOPO il fetch Yahoo:
-   Dati scaricati spots: {}
-❌ Nessun dato market recuperato
-⚠️  Alcuni dati market falliti, usando defaults
-🔄 Backup creato: certificates.backup_20250704_155902.json
-💾 Configurazioni v15 salvate: 5 certificati
-✅ Certificato enhanced DE000VK2NM23 aggiunto (v15)
-2025-07-04 15:59:02,394 - INFO - UnifiedRiskAnalyzer inizializzato
-Traceback (most recent call last):
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1639, in _export_analysis_excel
-    risk_metrics = analyzer.analyze_certificate_risk(real_config)
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\consolidated_risk_system.py", line 288, in analyze_certificate_risk
-    certificate.specs.isin,
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'EnhancedCertificateConfig' object has no attribute 'specs'
-🚪 Chiusura GUI Certificate Manager v15.1 CORRECTED
-Applicazione terminata.
-(venv) PS D:\Doc\File python\Finanza\Certificates\Revisione2> & "D:/Doc/File python/Finanza/Certificates/Revisione2/venv/Scripts/python.exe" "d:/Doc/File python/Finanza/Certificates/Revisione2/src/main.py"
-✅ Import sistema esistente OK
-✅ Import enhanced manager v15 OK
-Avvio dell'applicazione Certificati Finanziari...
-2025-07-04 15:59:52,538 - INFO - EnhancedExcelExporter inizializzato
-2025-07-04 15:59:52,538 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:59:52,538 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 15:59:52,538 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 15:59:52,538 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:59:52,539 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 15:59:52,539 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 15:59:52,539 - INFO - UnifiedRiskDashboard inizializzato
-🚀 Sistema Certificati Integrato inizializzato
-📁 Output Excel: D:/Doc/File python/
-📂 Caricamento configurazioni v15: 5 certificati
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ IT0006767872 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS3031184206 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ DE000VK2NM23 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2902921233 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2705561756 caricato
-📊 Portfolio caricati: 2
-🚀 Enhanced Certificate Manager v15 inizializzato
-   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\src\app\data
-   Certificati: 5
-   Portfolio: 2
-   Versione: v15 (CORRETTA)
-✅ Enhanced Manager v15 inizializzato per calc date
-2025-07-04 15:59:52,544 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:59:52,545 - INFO - EnhancedExcelExporter inizializzato
-2025-07-04 15:59:52,545 - INFO - Caricati 2 portafogli
-2025-07-04 15:59:52,545 - INFO - Caricati positions per 1 portafogli
-2025-07-04 15:59:52,545 - INFO - Portfolio Manager inizializzato
-✅ Portfolio Manager e GUI Manager inizializzati direttamente nella GUI principale.
-📂 Caricamento 5 certificati...
-🔄 Conversion v15.1 for IT0006767872
-🔄 Conversion v15.1 for XS3031184206
-🔄 Conversion v15.1 for DE000VK2NM23
-🔄 Conversion v15.1 for XS2902921233
-🔄 Conversion v15.1 for XS2705561756
-✅ Caricati 5 certificati da src\app\data\certificates.json
-🚀 === GUI MANAGER v15.1 CORRECTED INIZIALIZZATO ===
-Exception in Tkinter callback
-Traceback (most recent call last):
-  File "C:\Users\namad\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 2068, in __call__
-    return self.func(*args)
-           ~~~~~~~~~^^^^^^^
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1307, in _on_selection_changed
-    self._display_certificate_details(cert_id)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1346, in _display_certificate_details
-    note_barriere = cert_data.get('note_barriere', '').strip()
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'strip'
-2025-07-04 15:59:56,832 - INFO - EnhancedExcelExporter inizializzato
-2025-07-04 15:59:56,832 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:59:56,833 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 15:59:56,833 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 15:59:56,833 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 15:59:56,834 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 15:59:56,834 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 15:59:56,834 - INFO - UnifiedRiskDashboard inizializzato
-🚀 Sistema Certificati Integrato inizializzato
-📁 Output Excel: D:/Doc/File python/
-📂 Caricamento configurazioni v15: 5 certificati
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ IT0006767872 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS3031184206 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ DE000VK2NM23 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2902921233 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2705561756 caricato
-📊 Portfolio caricati: 2
-🚀 Enhanced Certificate Manager v15 inizializzato
-   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\src\app\data
-   Certificati: 5
-   Portfolio: 2
-   Versione: v15 (CORRETTA)
-🆕 Aggiunta certificato v15: XS2705561756
-   Dati ricevuti: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-   📊 Yahoo ticker specificato: ^GSPC, ^STOXX50E, ^N225
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-📊 Auto-updating market data per XS2705561756...
-🔍 DEBUG v16.1 - PRIMA del fetch Yahoo:
-   Current spots: Non definiti
-📊 Fetch market data per 3 assets...
-📊 Usando ticker specificato per S&P 500: ^GSPC, ^STOXX50E, ^N225
-   🔄 Downloading S&P 500 (^GSPC, ^STOXX50E, ^N225)...
-2025-07-04 15:59:57,788 - ERROR - HTTP Error 404: 
-2025-07-04 15:59:58,328 - ERROR - $^GSPC, ^STOXX50E, ^N225: possibly delisted; no price data found  (1d 2024-10-25 15:59:56.842985 -> 2025-07-04 15:59:56.843001) (Yahoo error = "No data found, symbol may be delisted")
-   ⚠️  Nessun dato per S&P 500 (^GSPC, ^STOXX50E, ^N225)
-📊 Ticker fallback per EURO STOXX 50: EURO STOXX 50
-   🔄 Downloading EURO STOXX 50 (EURO STOXX 50)...
-2025-07-04 15:59:58,936 - ERROR - HTTP Error 404: 
-2025-07-04 15:59:59,124 - ERROR - $EURO STOXX 50: possibly delisted; no timezone found
-   ⚠️  Nessun dato per EURO STOXX 50 (EURO STOXX 50)
-📊 Ticker fallback per NIKKEI 225: NIKKEI 225
-   🔄 Downloading NIKKEI 225 (NIKKEI 225)...
-2025-07-04 15:59:59,462 - ERROR - $NIKKEI 225: possibly delisted; no timezone found
-   ⚠️  Nessun dato per NIKKEI 225 (NIKKEI 225)
-📊 Fetch completato: 0/3 successi
-🔍 DEBUG v16.1 - DOPO il fetch Yahoo:
-   Dati scaricati spots: {}
-❌ Nessun dato market recuperato
-⚠️  Alcuni dati market falliti, usando defaults
-🔄 Backup creato: certificates.backup_20250704_155959.json
-💾 Configurazioni v15 salvate: 5 certificati
-✅ Certificato enhanced XS2705561756 aggiunto (v15)
-2025-07-04 15:59:59,471 - INFO - UnifiedRiskAnalyzer inizializzato
-Traceback (most recent call last):
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1639, in _export_analysis_excel
-    risk_metrics = analyzer.analyze_certificate_risk(real_config)
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\consolidated_risk_system.py", line 288, in analyze_certificate_risk
-    certificate.specs.isin,
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'EnhancedCertificateConfig' object has no attribute 'specs'
-Exception in Tkinter callback
-Traceback (most recent call last):
-  File "C:\Users\namad\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 2068, in __call__
-    return self.func(*args)
-           ~~~~~~~~~^^^^^^^
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1307, in _on_selection_changed
-    self._display_certificate_details(cert_id)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1346, in _display_certificate_details
-    note_barriere = cert_data.get('note_barriere', '').strip()
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'strip'
-2025-07-04 16:00:10,027 - INFO - EnhancedExcelExporter inizializzato
-2025-07-04 16:00:10,027 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 16:00:10,028 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 16:00:10,028 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 16:00:10,028 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 16:00:10,028 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 16:00:10,028 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 16:00:10,029 - INFO - UnifiedRiskDashboard inizializzato
-🚀 Sistema Certificati Integrato inizializzato
-📁 Output Excel: D:/Doc/File python/
-📂 Caricamento configurazioni v15: 5 certificati
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ IT0006767872 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS3031184206 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ DE000VK2NM23 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2902921233 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2705561756 caricato
-📊 Portfolio caricati: 2
-🚀 Enhanced Certificate Manager v15 inizializzato
-   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\src\app\data
-   Certificati: 5
-   Portfolio: 2
-   Versione: v15 (CORRETTA)
-🆕 Aggiunta certificato v15: IT0006767872
-   Dati ricevuti: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-   📊 Yahoo ticker specificato: DBK.DE,GLE.PA,UCG.MI,BIMI.MI
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-📊 Auto-updating market data per IT0006767872...
-🔍 DEBUG v16.1 - PRIMA del fetch Yahoo:
-   Current spots: Non definiti
-📊 Fetch market data per 4 assets...
-📊 Usando ticker specificato per Deutsche Bank AG: DBK.DE,GLE.PA,UCG.MI,BIMI.MI
-   🔄 Downloading Deutsche Bank AG (DBK.DE,GLE.PA,UCG.MI,BIMI.MI)...
-2025-07-04 16:00:10,347 - ERROR - $DBK.DE,GLE.PA,UCG.MI,BIMI.MI: possibly delisted; no timezone found
-   ⚠️  Nessun dato per Deutsche Bank AG (DBK.DE,GLE.PA,UCG.MI,BIMI.MI)
-📊 Ticker fallback per Società Generale: Società Generale
-   🔄 Downloading Società Generale (Società Generale)...
-2025-07-04 16:00:10,868 - ERROR - $SOCIETÀ GENERALE: possibly delisted; no timezone found
-   ⚠️  Nessun dato per Società Generale (Società Generale)
-📊 Ticker fallback per Unicredit: Unicredit
-   🔄 Downloading Unicredit (Unicredit)...
-2025-07-04 16:00:11,239 - ERROR - $UNICREDIT: possibly delisted; no timezone found
-   ⚠️  Nessun dato per Unicredit (Unicredit)
-📊 Ticker fallback per Banco BPM: Banco BPM
-   🔄 Downloading Banco BPM (Banco BPM)...
-2025-07-04 16:00:11,625 - ERROR - $BANCO BPM: possibly delisted; no timezone found
-   ⚠️  Nessun dato per Banco BPM (Banco BPM)
-📊 Fetch completato: 0/4 successi
-🔍 DEBUG v16.1 - DOPO il fetch Yahoo:
-   Dati scaricati spots: {}
-❌ Nessun dato market recuperato
-⚠️  Alcuni dati market falliti, usando defaults
-🔄 Backup creato: certificates.backup_20250704_160011.json
-💾 Configurazioni v15 salvate: 5 certificati
-✅ Certificato enhanced IT0006767872 aggiunto (v15)
-2025-07-04 16:00:11,633 - INFO - UnifiedRiskAnalyzer inizializzato
-Traceback (most recent call last):
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1639, in _export_analysis_excel
-    risk_metrics = analyzer.analyze_certificate_risk(real_config)
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\consolidated_risk_system.py", line 288, in analyze_certificate_risk
-    certificate.specs.isin,
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'EnhancedCertificateConfig' object has no attribute 'specs'
-Exception in Tkinter callback
-Traceback (most recent call last):
-  File "C:\Users\namad\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 2068, in __call__
-    return self.func(*args)
-           ~~~~~~~~~^^^^^^^
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1307, in _on_selection_changed
-    self._display_certificate_details(cert_id)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1346, in _display_certificate_details
-    note_barriere = cert_data.get('note_barriere', '').strip()
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'strip'
-2025-07-04 16:00:19,477 - INFO - EnhancedExcelExporter inizializzato
-2025-07-04 16:00:19,478 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 16:00:19,478 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 16:00:19,478 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 16:00:19,478 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-04 16:00:19,478 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-04 16:00:19,479 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-04 16:00:19,479 - INFO - UnifiedRiskDashboard inizializzato
-🚀 Sistema Certificati Integrato inizializzato
-📁 Output Excel: D:/Doc/File python/
-📂 Caricamento configurazioni v15: 5 certificati
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ IT0006767872 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS3031184206 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ DE000VK2NM23 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2902921233 caricato
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-   ✅ XS2705561756 caricato
-📊 Portfolio caricati: 2
-🚀 Enhanced Certificate Manager v15 inizializzato
-   Directory: D:\Doc\File python\Finanza\Certificates\Revisione2\src\app\data
-   Certificati: 5
-   Portfolio: 2
-   Versione: v15 (CORRETTA)
-🆕 Aggiunta certificato v15: XS3031184206
-   Dati ricevuti: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-   📊 Yahoo ticker specificato: STLAM.MI,CPR.MI,NEXI.MI, STMMI.MI
-🔄 === CONVERSIONE SAFE v15.1 (Enhanced Manager) ===
-📊 Input keys: ['isin', 'name', 'certificate_type', 'issuer', 'issue_date', 'maturity_date', 'notional', 'currency', 'underlying_names', 'yahoo_ticker', 'underlying_currencies', 'underlying_dependency_type', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'coupon_dates', 'coupon_rates', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'dynamic_barrier_feature', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'certificate_instrument_ticker', 'prezzi_iniziali_sottostanti', 'autocall_levels', 'autocall_dates', 'current_spots', 'volatilities', 'correlations', 'dividend_yields', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp', 'barrier_levels', 'underlying_assets']
-🔧 Campi esclusi v15.1: ['coupon_rate', 'coupon_frequency', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'note_barriere', 'airbag_feature', 'airbag_level', 'airbag_notes', 'observation_delay_months', 'prezzi_iniziali_sottostanti', 'period_rate', 'period_rate_percent', 'annual_equivalent_rate', 'calculation_method', 'calculation_version', 'calculation_timestamp']
-✅ RealCertificateConfig creato (Enhanced Manager v15.1)
-📊 Campi utilizzati: 29
-📊 Auto-updating market data per XS3031184206...
-🔍 DEBUG v16.1 - PRIMA del fetch Yahoo:
-   Current spots: Non definiti
-📊 Fetch market data per 3 assets...
-📊 Usando ticker specificato per Stellantis NV: STLAM.MI,CPR.MI,NEXI.MI, STMMI.MI
-   🔄 Downloading Stellantis NV (STLAM.MI,CPR.MI,NEXI.MI, STMMI.MI)...
-2025-07-04 16:00:19,821 - ERROR - $STLAM.MI,CPR.MI,NEXI.MI, STMMI.MI: possibly delisted; no timezone found
-   ⚠️  Nessun dato per Stellantis NV (STLAM.MI,CPR.MI,NEXI.MI, STMMI.MI)
-📊 Ticker fallback per Davide campari: Davide campari
-   🔄 Downloading Davide campari (Davide campari)...
-2025-07-04 16:00:20,178 - ERROR - $DAVIDE CAMPARI: possibly delisted; no timezone found
-   ⚠️  Nessun dato per Davide campari (Davide campari)
-📊 Ticker fallback per Nexi StMicroelettronics: Nexi StMicroelettronics
-   🔄 Downloading Nexi StMicroelettronics (Nexi StMicroelettronics)...
-2025-07-04 16:00:20,498 - ERROR - $NEXI STMICROELETTRONICS: possibly delisted; no timezone found
-   ⚠️  Nessun dato per Nexi StMicroelettronics (Nexi StMicroelettronics)
-📊 Fetch completato: 0/3 successi
-🔍 DEBUG v16.1 - DOPO il fetch Yahoo:
-   Dati scaricati spots: {}
-❌ Nessun dato market recuperato
-⚠️  Alcuni dati market falliti, usando defaults
-🔄 Backup creato: certificates.backup_20250704_160020.json
-💾 Configurazioni v15 salvate: 5 certificati
-✅ Certificato enhanced XS3031184206 aggiunto (v15)
-2025-07-04 16:00:20,505 - INFO - UnifiedRiskAnalyzer inizializzato
-Traceback (most recent call last):
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1639, in _export_analysis_excel
-    risk_metrics = analyzer.analyze_certificate_risk(real_config)
-  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\consolidated_risk_system.py", line 288, in analyze_certificate_risk
-    certificate.specs.isin,
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'EnhancedCertificateConfig' object has no attribute 'specs'
-🚪 Chiusura GUI Certificate Manager v15.1 CORRECTED
-Applicazione terminata.
-(venv) PS D:\Doc\File python\Finanza\Certificates\Revisione2> 
+PS D:\Doc\File python\Finanza\Certificates\Revisione2> 
