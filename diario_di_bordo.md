@@ -1,4 +1,4 @@
-# Diario di bordo Sistema Certificati. Aggiornamento riferito al 08/07/2025
+# Diario di bordo Sistema Certificati. Aggiornamento riferito al 09/07/2025 (mattino) 
 
 # Link al repo github: https://github.com/EmmeGasp/Revisione2 (mio branch refactoring-struttura)
 
@@ -26,12 +26,18 @@
 - ** riscritte e aggiunte diversi metodi sempre in logica di raccordo fra le varie routine sempre in ottemperenza all'applicazione del principio di delega nonché di introduzione dei dati più semplice e di facile utilizzo (user friendly). Sono presenti annotazioni all'interno delle singole routine 
 - ** Dopo le varie attività svolte è stata ripristinata e migliorata l'operatività CRUD, ivi incluso il calcolo delle date per le scadenze periodiche
 - ** È operativo e funzionante il provider dati
+- ** Testato il provider dati e raccordati i file affinchè il passaggio di dati avvenga come la procedura ricevente li desidera
+- ** Diversi interventi su main_window.py e enhance_certificate_manager_fixed.py per miglorare la struttura di delega, il colloquio fra i file e sulla esposizione dei dati
+- ** L'analisi dei dati viene ultimata. Adesso è necessario lavorare sulla qualità del dato estratto. Un primo intervento è stato effettuato sulla pulizia dei dati passati per il calcolo della volatilità omettendo i valori estremi
+- ** Fra i dati esposti incluso anche il prezzo di mercato (ma attualmente la routine produce un errore da sistemare)
 
 
 
 ## Obiettivo corrente
 
-  - ** Lavorare sulla fase di analisi dei dati raccordando l'acquisizione dei dati di mercato con le varie routine sulla valutazione di un certificato singolo
+  - ** Inserire la routine per la pulizia dei dati di mercato ai fini della determinazione della volatilità
+  - ** Inserimento del prezzo di mercato del certificato oggetto di valutazione (fatto ma c'è un errore)
+  - ** Aprire una finestra in luogo del box per esporre i risultati
 
 ## Passi completati. Note  
 
@@ -52,3 +58,8 @@
 
   ### Data di riferimento 08/07/2025
 - ** Dopo l'attività di refactoring ed il riprisitino della operatività CRUD, deve essere avviata la fase di lavorazione dei dati di mercato  
+
+  ### Data du riferimento 09/07/2025 (mattino, prima delle lavorazioni delle giornata)
+- ** Inserita senza problemi la routine di pulizia dei dati
+- ** Modificato main_window.py per recepire il prezzo di mercato. Generato errore da 'analysis_results' che risulta non definita
+- ** I dati di mercato sono recuperati correttamente. È continuata l'attività di pulizia e raccordo. Ad esempio inserita routine per convertire le date delle scadenze da stringhe appunto a date, come si aspetta la routine che deve analizzare il rischio.  

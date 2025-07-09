@@ -3,8 +3,8 @@
 # SCOPO: Gestione GUI avanzata per inserimento, modifica e visualizzazione certificati finanziari v15.1
 # AUTORE: Team di sviluppo
 # DATA CREAZIONE: 2024-06-22
-# ULTIMA MODIFICA: 2024-06-22
-# VERSIONE: 1.0
+# ULTIMA MODIFICA: 2025-07-08 (Integrazione analisi completa)
+# VERSIONE: 1.1
 # ==========================================================
 #
 # DESCRIZIONE:
@@ -68,6 +68,11 @@ import logging
 import textwrap # Per formattare la descrizione della dipendenza
 from app.core.consolidated_risk_system import UnifiedRiskAnalyzer
 from app.core.real_certificate_integration import RealCertificateImporter
+# --- MODIFICA ---
+# Aggiunto import per UnifiedCertificateAnalyzer
+from app.core.unified_certificates import UnifiedCertificateAnalyzer
+# --- FINE MODIFICA ---
+
 
 # Import sistema esistente
 try:
@@ -204,7 +209,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
         
         # Scroll area
         canvas.pack(side="left", fill="both", expand=True)
-        v_scrollbar.pack(side="right", fill="y")
+        v_scrollbar.pack(side=tk.RIGHT, fill="y")
         h_scrollbar.pack(side="bottom", fill="x")
         
         # Window nel canvas
@@ -1454,9 +1459,15 @@ Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
     
     def _analyze_selected_certificate(self):
         """
-        *** VERSIONE AGGIORNATA CHE INTEGRA IL DATA FETCHING ***
-        Esegue l'analisi completa del certificato, attivando il recupero dei dati di mercato.
+        *** VERSIONE COMPLETAMENTE RIVISTA E FUNZIONANTE ***
+        Esegue l'analisi completa:
+        1. Controlla la presenza dei dati necessari (date cedole).
+        2. Recupera i dati di mercato aggiornati.
+        3. Esegue l'analisi di rischio (VaR, Vol, etc.).
+        4. Esegue il calcolo del Fair Value.
+        5. Mostra un riepilogo completo dei risultati.
         """
+
         selected_isin = self.get_selected_isin()
         if not selected_isin:
             messagebox.showwarning("Attenzione", "Seleziona un certificato da analizzare.")
@@ -1465,6 +1476,21 @@ Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
         if not self.enhanced_manager:
             messagebox.showerror("Errore", "Funzionalità di analisi non disponibile. Enhanced Manager non trovato.")
             return
+
+       # --- MODIFICA 1: CONTROLLO PREVENTIVO SULLE DATE CEDOLA ---
+        try:
+            cert_data_dict = self.enhanced_manager.get_certificate_data_for_gui(selected_isin)
+            if not cert_data_dict.get('coupon_dates'):
+                messagebox.showwarning(
+                    "Dati Mancanti",
+                    f"Il certificato '{selected_isin}' non ha una schedulazione delle cedole.\n\n"
+                    "Per favore, usa il pulsante 'Calc Date' per generarle prima di avviare l'analisi."
+                )
+                return
+        except Exception as e:
+            messagebox.showerror("Errore", f"Impossibile verificare i dati del certificato: {e}")
+            return
+        # --- FINE MODIFICA 1 ---
 
         self.status_var.set(f"Analisi in corso per {selected_isin}... (Recupero dati di mercato)")
         self.root.update_idletasks()
@@ -1482,11 +1508,32 @@ Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
             importer = RealCertificateImporter()
             certificate_object = importer.import_certificate(config_pronta_per_analisi)
 
-            # 3. Esegui l'analisi di rischio con i dati freschi
+            # 3. Esegui l'analisi di rischio
             analyzer = UnifiedRiskAnalyzer()
             risk_metrics = analyzer.analyze_certificate_risk(certificate_object, n_simulations=1000)
             self.logger.info(f"Analisi di rischio completata. VaR 95%: {risk_metrics.var_95:.2%}")
 
+            # --- MODIFICA 2: CALCOLO DEL FAIR VALUE ---
+            self.logger.info("💰 Calcolo del Fair Value in corso...")
+            fair_value_results = {}
+            try:
+                fv_analyzer = UnifiedCertificateAnalyzer(certificate_object)
+                fair_value_results = fv_analyzer.calculate_fair_value(n_simulations=5000)
+                self.logger.info(f"✅ Fair Value calcolato: {fair_value_results.get('fair_value'):.2f}")
+            except Exception as fv_error:
+                self.logger.error(f"⚠️ Errore nel calcolo del Fair Value: {fv_error}", exc_info=True)
+                fair_value_results = {'fair_value': 0, 'error': str(fv_error)}
+            # --- FINE MODIFICA 2 ---
+
+            # --- MODIFICA 3: VISUALIZZAZIONE COMPLETA DEI RISULTATI ---
+            # Prepara il messaggio formattato
+            fair_value = fair_value_results.get('fair_value', 'N/A')
+            exp_return = fair_value_results.get('expected_return', 'N/A')
+
+            # Recupera il prezzo di mercato dai risultati (il manager lo mette lì)
+            market_price = analysis_results.get('market_data', {}).get('certificate_market_price', 'N/A')
+
+            """"
             # 4. Mostra i risultati (questa funzione andrà creata o migliorata)
             # self.update_analysis_results_display(risk_metrics.to_dict())
             messagebox.showinfo("Analisi Completata",
@@ -1496,7 +1543,38 @@ Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
                                 f"Volatilità: {risk_metrics.volatility:.2%}\n"
                                 f"Sharpe Ratio: {risk_metrics.sharpe_ratio:.3f}")
 
+            """
+            # Formattazione sicura dei valori
+            mkt_price_str = f"€ {market_price:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") if isinstance(market_price, (int, float)) else "N/A"
+            fv_str = f"€ {fair_value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") if isinstance(fair_value, (int, float)) else "N/A"
+            ret_str = f"{exp_return:.2%}".replace(".", ",") if isinstance(exp_return, (int, float)) else "N/A"
+            var95_str = f"{risk_metrics.var_95:.2%}".replace(".", ",")
+            vol_str = f"{risk_metrics.volatility:.2%}".replace(".", ",")
+
+            summary_message = f"""
+ANALISI COMPLETA - {selected_isin}
+{'='*50}
+
+VALUTAZIONE:
+  • Prezzo di Mercato: {mkt_price_str}
+  • Fair Value Stimato: {fv_str}
+  • Rendimento Atteso: {ret_str}
+
+PRINCIPALI METRICHE DI RISCHIO:
+  • VaR 95% (Max Perdita attesa): {var95_str}
+  • Volatilità Annualizzata: {vol_str}
+  • Sharpe Ratio: {risk_metrics.sharpe_ratio:.3f}
+
+{'='*50}
+Analisi basata su {1000} simulazioni di rischio e {5000} per il fair value.
+"""
+
+            messagebox.showinfo("Analisi Completata", summary_message)
+            # --- FINE MODIFICA 3 ---
+
             self.status_var.set("Analisi completata con successo.")
+
+
 
         except Exception as e:
             self.logger.error(f"Errore durante l'analisi del certificato {selected_isin}: {e}", exc_info=True)

@@ -228,38 +228,64 @@ class YahooFinanceDataProvider:
         print(f"📊 Ticker fallback per {asset}: {asset}")
         return asset
     
-    def fetch_market_data_safe(self, assets: List[str], 
-                              yahoo_tickers: Optional[List[str]] = None,
+     # --- INIZIO MODIFICA: CORREZIONE NAMEERROR ---
+    def fetch_market_data_safe(self, config: EnhancedCertificateConfig,                              yahoo_tickers: Optional[List[str]] = None,
                               start_date: datetime = None,
                               end_date: datetime = None) -> Dict:
-        """*** VERSIONE CORRETTA *** - Fetch con gestione yahoo_ticker e errori"""
-        
+        """
+        Recupera i dati di mercato sia per i sottostanti che per il certificato stesso.
+        *** MODIFICATO PER INCLUDERE IL PREZZO DEL CERTIFICATO ***
+        """
+      
         if not start_date:
             start_date = datetime.now() - timedelta(days=252)  # 1 anno
         if not end_date:
             end_date = datetime.now()
         
+        # ---> INIZIO NUOVA LOGICA <---
+        base_config = config.base_config
+        assets = base_config.underlying_assets or [] 
         market_data = {
             'spots': {},
             'volatilities': {},
             'returns': {},
             'error_assets': [],
-            'warnings': []
+            'warnings': [],
+            'certificate_market_price': None
         }
+
+       #Recupera il prezzo di mercato del certificato stesso, se ha un ticker   
+        certificate_ticker = getattr(base_config,'certificate_instrument_ticker', None)
+
+        if certificate_ticker:
+            try:
+                cert_stock = yf.Ticker(certificate_ticker)
+                info = cert_stock.info
+                # Prova diversi campi per massima compatibilità
+                price = info.get('currentPrice') or info.get('regularMarketPrice') or info.get('bid')
+                if not price:
+                    hist = cert_stock.history(period="2d")
+                    if not hist.empty:
+                        price = hist['Close'].iloc[-1]
+                market_data['certificate_market_price'] = price
+                print(f"✅ Prezzo di mercato per {certificate_ticker}: {price}")
+            except Exception as e:
+                print(f"⚠️ Impossibile recuperare il prezzo di mercato per {certificate_ticker}: {e}")
+        # ---> FINE NUOVA LOGICA <---
+ 
+        # Recupera i dati per i sottostanti
+        if not assets:
+            print("⚠️ Nessun sottostante da analizzare.")
+            return market_data
         
         print(f"📊 Fetch market data per {len(assets)} assets...")
-        
+        yahoo_tickers = getattr(base_config, 'yahoo_ticker', [])        
         for i, asset in enumerate(assets):
             try:
                 # *** GESTIONE YAHOO_TICKER *** - Priorità intelligente
-                if yahoo_tickers and i < len(yahoo_tickers) and yahoo_tickers[i]:
-                    yahoo_ticker = yahoo_tickers[i]
-                elif yahoo_tickers and len(yahoo_tickers) == 1 and len(assets) == 1:
-                    yahoo_ticker = yahoo_tickers[0]
-                else:
-                    yahoo_ticker = None
+                ticker_specifico = yahoo_tickers[i] if yahoo_tickers and i < len(yahoo_tickers) and yahoo_tickers[i] else None
                 
-                ticker = self.get_ticker_for_asset(asset, yahoo_ticker)
+                ticker = self.get_ticker_for_asset(asset, ticker_specifico)
                 
                 # Download dati con timeout
                 print(f"   🔄 Downloading {asset} ({ticker})...")
@@ -280,14 +306,22 @@ class YahooFinanceDataProvider:
                 
                 # Calcola metriche
                 current_price = float(hist['Close'].iloc[-1])
-                returns = hist['Close'].pct_change().dropna()
+                returns = hist['Close'].pct_change() #Calcola i ritorni
                 
-                if len(returns) > 0:
-                    volatility = float(returns.std() * np.sqrt(252))  # Annualizzata
+                # Pulisci i ritorni da valori estremi (outliers)
+                # Rimuoviamo i giorni con variazioni superiori al 50% (o inferiori al -50%)
+                returns_cleaned = returns[returns.abs() < 0.5].dropna()
+
+                if len(returns_cleaned) > 1:
+                    # Calcola la volatilità sui dati PULITI 
+                    volatility = float(returns_cleaned.std() * np.sqrt(252))  # Annualizzata
                 else:
                     volatility = 0.20  # Default fallback
-                    market_data['warnings'].append(f"Volatilità default per {asset}")
+                    market_data['warnings'].append(f"Volatilità default per {asset}. Dati di mercato insufficienti ")
                 
+                # Salva i ritorni originali (non puliti) per altri usi se necessario
+                market_data['returns'][asset] = returns.dropna().tolist()
+
                 market_data['spots'][asset] = current_price
                 market_data['volatilities'][asset] = volatility
                 market_data['returns'][asset] = returns.tolist()
@@ -306,43 +340,22 @@ class YahooFinanceDataProvider:
         
         return market_data
 
-    # NEW CODE v16.1 - con debug tracciamento dati:
+ 
     def update_certificate_market_data(self, config: 'EnhancedCertificateConfig') -> bool:
-        """*** VERSIONE CORRETTA V16.1*** - Update con debug tracciamento dati"""
+        """*** VERSIONE CORRETTA V16.1 *** - Update con debug tracciamento dati"""
         
         try:
-            assets = config.base_config.underlying_assets
-
-            # *** DEBUG v16.1 *** - Stato PRIMA del fetch
+ 
             print(f"🔍 DEBUG v16.1 - PRIMA del fetch Yahoo:")
             if hasattr(config.base_config, 'current_spots') and config.base_config.current_spots:
                 print(f"   Current spots esistenti: {config.base_config.current_spots}")
             else:
                 print(f"   Current spots: Non definiti")
     
-
+            # La chiamata ora passa l'intero oggetto 'config', risolvendo il NameError
             
-            # *** GESTIONE YAHOO_TICKER FLESSIBILE ***
-            yahoo_ticker = getattr(config.base_config, 'yahoo_ticker', None)
-            
-            # Converte yahoo_ticker in lista se necessario
-            yahoo_tickers = None
-            if yahoo_ticker:
-                if isinstance(yahoo_ticker, str):
-                    # Singolo ticker - potrebbe essere per tutti gli asset o solo il primo
-                    if len(assets) == 1:
-                        yahoo_tickers = [yahoo_ticker]
-                    else:
-                        # Assume che sia per il primo asset
-                        yahoo_tickers = [yahoo_ticker] + [None] * (len(assets) - 1)
-                elif isinstance(yahoo_ticker, list):
-                    yahoo_tickers = yahoo_ticker
-                else:
-                    print(f"⚠️  Formato yahoo_ticker non riconosciuto: {type(yahoo_ticker)}")
-            
-            # Fetch dati
-            market_data = self.fetch_market_data_safe(assets, yahoo_tickers)
-            # *** DEBUG v16.1 *** - Stato DOPO il fetch
+            market_data = self.fetch_market_data_safe(config)
+ 
             print(f"🔍 DEBUG v16.1 - DOPO il fetch Yahoo:")
             print(f"   Dati scaricati spots: {market_data.get('spots', {})}")
 
@@ -353,7 +366,7 @@ class YahooFinanceDataProvider:
                 config.base_config.current_spots = []
                 config.base_config.volatilities = []
                 
-                for asset in assets:
+                for asset in config.base_config.underlying_assets:
                     if asset in market_data['spots']:
                         config.base_config.current_spots.append(market_data['spots'][asset])
                         config.base_config.volatilities.append(market_data['volatilities'][asset])
@@ -369,26 +382,23 @@ class YahooFinanceDataProvider:
                 config.metadata['last_updated'] = datetime.now()
                 
                 # Statistiche finali
-                errors = len(market_data['error_assets'])
-                warnings = len(market_data['warnings'])
+                #errors = len(market_data['error_assets'])
+                #warnings = len(market_data['warnings'])
                 
                 # *** DEBUG v16.1 *** - Stato FINALE
                 print(f"🔍 DEBUG v16.1 - STATO FINALE:")
                 print(f"   Current spots finali: {config.base_config.current_spots}")                
                 
+                errors = len(market_data['error_assets'])
                 if errors == 0:
-                    print(f"✅ Market data aggiornati completamente")
                     return True
-                elif errors < len(assets):
-                    print(f"⚠️  Market data aggiornati parzialmente ({errors} errori, {warnings} warnings)")
+                elif errors < len(config.base_config.underlying_assets):
                     return True
                 else:
-                    print(f"❌ Tutti i fetch falliti")
                     return False
             else:
                 print("❌ Nessun dato market recuperato")
                 return False
-           
     
         except Exception as e:
             print(f"❌ Errore update market data: {e}")
@@ -453,11 +463,12 @@ class DateCalculationUtils:
                 
                 current_date = datetime(current_year, current_month, actual_day)
                 
-                print(f"   Data generata: {current_date.strftime('%Y-%m-%d')}")
+                # Rimuovo la stampa per non affollare il log
+                # print(f"   Data generata: {current_date.strftime('%Y-%m-%d')}")
                 
                 # Verifica se supera la data di fine
                 if current_date > end_date:
-                    print(f"   Fermato: data supera end_date")
+                    # print(f"   Fermato: data supera end_date")
                     break
                 
                 coupon_dates.append(current_date)
@@ -542,9 +553,9 @@ class DateCalculationUtils:
 class EnhancedCertificateManagerV15:
     """*** VERSIONE CORRETTA v15 *** - Manager completo con tutte le correzioni"""
     
-    def __init__(self, config_dir="D:/Doc/File python/Finanza/Certificates/Revisione2/src/app/data"):
+    def __init__(self, config_dir="src/app/data"):
         self.config_dir = Path(config_dir)
-        self.config_dir.mkdir(exist_ok=True)
+        self.config_dir.mkdir(exist_ok=True, parents=True)
         
         # Storage
         self.configurations = {}  # Dict[str, EnhancedCertificateConfig]
@@ -580,14 +591,11 @@ class EnhancedCertificateManagerV15:
     # ========================================
     # NUOVI METODI DI GESTIONE CENTRALE v16   
     # ========================================
-    # Time stamp 07/07/2025
     
     def get_certificate_data_for_gui(self, cert_id: str) -> Optional[Dict]:
         """Restituisce i dati di un certificato in formato dizionario, pronto per la GUI."""
         if cert_id in self.configurations:
-            # Per la GUI, è più semplice lavorare con il dizionario base
             enhanced_config = self.configurations[cert_id]
-            # Assicuriamo che tutti i campi siano presenti per evitare errori nel dialog
             base_data = self._enhanced_config_to_dict_v15(enhanced_config)
             return base_data.get('base_config', {})
         return None
@@ -596,8 +604,7 @@ class EnhancedCertificateManagerV15:
         """Elimina un certificato dalla gestione."""
         if cert_id in self.configurations:
             del self.configurations[cert_id]
-            self._save_configurations()
-            print(f"🗑️ Certificato {cert_id} eliminato dal manager.")
+            print(f"🗑️ Certificato {cert_id} rimosso dalla memoria.")
             return True
         return False
 
@@ -623,8 +630,7 @@ class EnhancedCertificateManagerV15:
         
         if not success:
             print(f"⚠️  Impossibile aggiornare i dati di mercato per {cert_id}. L'analisi procederà con i dati esistenti.")
-            # Non blocchiamo l'analisi, ma usiamo i dati che abbiamo.
-
+ 
         # 2. (Opzionale ma consigliato) Salva la configurazione aggiornata
         self._save_configurations()
 
@@ -665,12 +671,8 @@ class EnhancedCertificateManagerV15:
             # Auto-update market data con supporto yahoo_ticker
             if config_dict.get('auto_update_market_data', True):
                 print(f"📊 Auto-updating market data per {cert_id}...")
-                success = self.yahoo_provider.update_certificate_market_data(enhanced_config)
-                if success:
-                    print(f"✅ Market data aggiornati da Yahoo Finance")
-                else:
-                    print(f"⚠️  Alcuni dati market falliti, usando defaults")
-            
+                self.yahoo_provider.update_certificate_market_data(enhanced_config)
+       
             # Salva
             self.configurations[cert_id] = enhanced_config
             self._save_configurations()
@@ -687,7 +689,6 @@ class EnhancedCertificateManagerV15:
     def update_certificate_from_dict(self, cert_id: str, update_data: Dict):
         """
         Aggiorna un certificato esistente con i dati forniti in un dizionario.
-        Non crea un nuovo certificato, ma modifica quello esistente.
         """
         if cert_id not in self.configurations:
             print(f"❌ Impossibile aggiornare: certificato {cert_id} non trovato.")
@@ -719,8 +720,7 @@ class EnhancedCertificateManagerV15:
     def _dict_to_real_config_safe_v15(self, config_dict: Dict) -> RealCertificateConfig:
         """
         *** VERSIONE CORRETTA v17 ***
-        Converte un dizionario in un oggetto RealCertificateConfig,
-        gestendo 'underlying_names' sia come stringa che come lista.
+        Converte un dizionario in un oggetto RealCertificateConfig.
         """
         print(f"🔄 === CONVERSIONE SAFE v17 (Manager) ===")
         
@@ -740,20 +740,25 @@ class EnhancedCertificateManagerV15:
             'dynamic_barrier_end_level', 'observation_delay_months'
         }
 
-        filtered_config = {}
-        for key, value in config_dict.items():
-            if key in supported_fields:
-                filtered_config[key] = value
+        filtered_config = {k: v for k, v in config_dict.items() if k in supported_fields}
 
         # Gestione date
-        for date_field in ['issue_date', 'maturity_date']:
-            if date_field in filtered_config and isinstance(filtered_config[date_field], str):
-                try:
-                    filtered_config[date_field] = datetime.fromisoformat(filtered_config[date_field])
-                except (ValueError, TypeError):
-                    filtered_config[date_field] = None
+        for date_field in ['issue_date', 'maturity_date', 'coupon_dates', 'autocall_dates']:
+            if date_field in filtered_config and filtered_config[date_field]:
+                # Se è una lista di date (es. coupon_dates)
+                if isinstance(filtered_config[date_field], list):
+                    try:
+                        # Converte ogni stringa nella lista in un oggetto datetime
+                        filtered_config[date_field] = [datetime.fromisoformat(d) for d in filtered_config[date_field] if d]
+                    except (ValueError, TypeError):
+                        print(f"⚠️ Formato data non valido per la lista {date_field}, lasciata come stringa.")
+                # Se è una data singola (es. issue_date)
+                elif isinstance(filtered_config[date_field], str):
+                    try:
+                        filtered_config[date_field] = datetime.fromisoformat(filtered_config[date_field])
+                    except (ValueError, TypeError):
+                        filtered_config[date_field] = None
 
-        # === LA CORREZIONE È QUI ===
         # Gestione UNDERLYING_ASSETS in modo robusto
         if 'underlying_names' in filtered_config and filtered_config['underlying_names']:
              # Se è già una lista (dal nuovo dialog), la usiamo direttamente.
@@ -767,14 +772,10 @@ class EnhancedCertificateManagerV15:
         try:
             return RealCertificateConfig(**filtered_config)
         except TypeError as e:
-            print(f"❌ ERRORE CRITICO creazione RealCertificateConfig: {e}")
-            print(f"   Dati passati al costruttore: {filtered_config.keys()}")
-            raise 
-
+            raise TypeError(f"Errore creazione RealCertificateConfig: {e}. Dati passati: {filtered_config.keys()}")
     def calculate_coupon_dates_for_certificate(self, cert_id: str, 
                                              frequency: str, 
                                              period_rate: float) -> Dict:
-        """*** NUOVO METODO v15 *** - Calcola date cedole per certificato esistente"""
         
         if cert_id not in self.configurations:
             raise ValueError(f"Certificato {cert_id} non trovato")
@@ -782,9 +783,9 @@ class EnhancedCertificateManagerV15:
         enhanced_config = self.configurations[cert_id]
         base_config = enhanced_config.base_config
         
-        print(f"📅 Calcolo date cedole v15 per {cert_id}")
-        print(f"   Frequency: {frequency}")
-        print(f"   Period rate: {period_rate:.4f}")
+        #print(f"📅 Calcolo date cedole v15 per {cert_id}")
+        #print(f"   Frequency: {frequency}")
+        #print(f"   Period rate: {period_rate:.4f}")
         
         try:
             # Usa il calcolo robusto
@@ -796,12 +797,12 @@ class EnhancedCertificateManagerV15:
             
             # Crea rates array
             coupon_rates = [period_rate] * len(coupon_dates)
-            autocall_levels = [1.0] * len(coupon_dates)  # Default 100%
+            autocall_levels = [1.0] * len(coupon_dates)  
             
             # Calcola tasso annuo equivalente
             frequency_map = {'M': 12, 'Mensile': 12, 'Q': 4, 'Trimestrale': 4, 
                            'S': 2, 'Semestrale': 2, 'A': 1, 'Annuale': 1,
-                           'Bimestrale': 6, 'Quadrimestrale': 3} # Aggiunti
+                           'Bimestrale': 6, 'Quadrimestrale': 3}
             periods_per_year = frequency_map.get(frequency, 4)
             annual_equivalent = period_rate * periods_per_year
             
@@ -817,25 +818,14 @@ class EnhancedCertificateManagerV15:
             # Salva
             self._save_configurations()
             
-            result = {
-                'coupon_dates': coupon_dates,
-                'coupon_rates': coupon_rates,
-                'autocall_levels': autocall_levels,
-                'frequency': frequency,
-                'period_rate': period_rate,
-                'annual_equivalent': annual_equivalent,
+            return {
+                'coupon_dates': coupon_dates, 'coupon_rates': coupon_rates, 'autocall_levels': autocall_levels,
+                'frequency': frequency, 'period_rate': period_rate, 'annual_equivalent': annual_equivalent,
                 'calculation_method': 'robust_v15'
             }
             
-            print(f"✅ Calcolate {len(coupon_dates)} date cedole")
-            print(f"   Tasso periodo: {period_rate:.2%}")
-            print(f"   Tasso annuo equivalente: {annual_equivalent:.2%}")
-            
-            return result
-            
         except Exception as e:
-            print(f"❌ Errore calcolo date cedole: {e}")
-            raise
+            raise e
     
     def update_certificate_in_life_state_v15(self, cert_id: str,
                                            valuation_date: datetime = None,
@@ -851,19 +841,11 @@ class EnhancedCertificateManagerV15:
         # Converti date strings
         paid_coupon_dates = []
         if paid_coupons:
-            for date_str in paid_coupons:
-                try:
-                    paid_coupon_dates.append(datetime.fromisoformat(date_str))
-                except ValueError as e:
-                    print(f"⚠️  Errore parsing paid coupon date '{date_str}': {e}")
+           paid_coupon_dates = [datetime.fromisoformat(d) for d in paid_coupons if d]
         
         memory_coupon_dates = []
         if memory_coupons:
-            for date_str in memory_coupons:
-                try:
-                    memory_coupon_dates.append(datetime.fromisoformat(date_str))
-                except ValueError as e:
-                    print(f"⚠️  Errore parsing memory coupon date '{date_str}': {e}")
+            memory_coupon_dates = [datetime.fromisoformat(d) for d in memory_coupons if d]
         
         # Aggiorna stato
         config.update_in_life_state(
@@ -875,10 +857,10 @@ class EnhancedCertificateManagerV15:
         # Salva
         self._save_configurations()
         
-        print(f"✅ Stato in-life aggiornato per {cert_id} (v15)")
-        print(f"   Valuation Date: {config.in_life_state.valuation_date.strftime('%Y-%m-%d')}")
-        print(f"   Paid Coupons: {len(config.in_life_state.paid_coupons)}")
-        print(f"   Memory Coupons: {len(config.in_life_state.memory_coupons_due)}")
+        #print(f"✅ Stato in-life aggiornato per {cert_id} (v15)")
+        #print(f"   Valuation Date: {config.in_life_state.valuation_date.strftime('%Y-%m-%d')}")
+        #print(f"   Paid Coupons: {len(config.in_life_state.paid_coupons)}")
+        #print(f"   Memory Coupons: {len(config.in_life_state.memory_coupons_due)}")
     
     def process_certificate_in_life_v15(self, cert_id: str, 
                                       create_excel: bool = True) -> Tuple:
@@ -888,11 +870,10 @@ class EnhancedCertificateManagerV15:
             raise ValueError(f"Certificato {cert_id} non trovato")
         
         enhanced_config = self.configurations[cert_id]
-        base_config = enhanced_config.base_config
         
-        print(f"🔄 Processamento in-life v15: {cert_id}")
-        print(f"   Valuation Date: {enhanced_config.in_life_state.valuation_date.strftime('%Y-%m-%d')}")
-        print(f"   Yahoo Ticker: {getattr(base_config, 'yahoo_ticker', 'None')}")
+        #print(f"🔄 Processamento in-life v15: {cert_id}")
+        #print(f"   Valuation Date: {enhanced_config.in_life_state.valuation_date.strftime('%Y-%m-%d')}")
+        #print(f"   Yahoo Ticker: {getattr(base_config, 'yahoo_ticker', 'None')}")
         
         # Aggiusta config per in-life valuation
         adjusted_config = self._adjust_config_for_in_life_v15(enhanced_config)
@@ -906,12 +887,12 @@ class EnhancedCertificateManagerV15:
             # Aggiusta risultati per memoria
             adjusted_results = self._adjust_results_for_memory_v15(enhanced_config, results)
             
-            print(f"✅ Processamento in-life v15 {cert_id} completato")
+            #print(f"✅ Processamento in-life v15 {cert_id} completato")
             
             return certificate, adjusted_results
             
         except Exception as e:
-            print(f"❌ Errore processamento {cert_id}: {e}")
+            #print(f"❌ Errore processamento {cert_id}: {e}")
             raise
     
     def _adjust_config_for_in_life_v15(self, enhanced_config: EnhancedCertificateConfig) -> RealCertificateConfig:
@@ -920,90 +901,29 @@ class EnhancedCertificateManagerV15:
         base_config = enhanced_config.base_config
         in_life_state = enhanced_config.in_life_state
         
-        # Crea nuova config aggiustata con tutti i campi
-        adjusted_dict = {
-            'isin': base_config.isin,
-            'name': f"{base_config.name} (In-Life v15)",
-            'certificate_type': base_config.certificate_type,
-            'issuer': base_config.issuer,
-            'underlying_assets': base_config.underlying_assets,
-            'issue_date': in_life_state.valuation_date,  # *** KEY CHANGE ***
-            'maturity_date': base_config.maturity_date,
-            'notional': base_config.notional,
-            'currency': base_config.currency,
-            
-            # *** NUOVO *** - Mantieni yahoo_ticker
-            'yahoo_ticker': getattr(base_config, 'yahoo_ticker', None),
-            'certificate_instrument_ticker': getattr(base_config, 'certificate_instrument_ticker', None), # Nuovo
-            'underlying_currencies': getattr(base_config, 'underlying_currencies', None), # Nuovo
-            'underlying_names': getattr(base_config, 'underlying_names', None), # Nuovo
-            'underlying_dependency_type': getattr(base_config, 'underlying_dependency_type', None), # Nuovo
-            'dynamic_barrier_feature': getattr(base_config, 'dynamic_barrier_feature', None), # Nuovo
-            'dynamic_barrier_start_level': getattr(base_config, 'dynamic_barrier_start_level', None), # Nuovo
-            'step_down_rate': getattr(base_config, 'step_down_rate', None), # Nuovo
-            'dynamic_barrier_end_level': getattr(base_config, 'dynamic_barrier_end_level', None), # Nuovo
-
-            # Adjusted dates - Solo date future
-            'coupon_dates': enhanced_config.get_remaining_coupon_dates(),
-            'coupon_rates': base_config.coupon_rates,
-            
-            # Market data (possibilmente aggiornati)
-            'current_spots': base_config.current_spots,
-            'volatilities': base_config.volatilities,
-            'correlations': base_config.correlations,
-            'risk_free_rate': base_config.risk_free_rate,
-            'dividend_yields': base_config.dividend_yields,
-            
-            # Altri parametri
-            'autocall_levels': base_config.autocall_levels,
-            'barrier_levels': base_config.barrier_levels,
-            'memory_feature': base_config.memory_feature
-        }
-        
-        # Aggiusta lunghezza coupon_rates se necessario
+        adjusted_dict = vars(base_config).copy()
+        adjusted_dict['issue_date'] = in_life_state.valuation_date
+        adjusted_dict['coupon_dates'] = enhanced_config.get_remaining_coupon_dates()
         remaining_dates = adjusted_dict['coupon_dates']
         if remaining_dates and base_config.coupon_rates:
-            # Usa i rate rimanenti
             original_dates = base_config.coupon_dates or []
-            if len(original_dates) == len(base_config.coupon_rates):
-                # Trova indice di partenza
-                start_index = 0
-                for i, orig_date in enumerate(original_dates):
-                    if orig_date > in_life_state.valuation_date:
-                        start_index = i
-                        break
-                
-                adjusted_dict['coupon_rates'] = base_config.coupon_rates[start_index:start_index + len(remaining_dates)]
-            else:
-                # Usa primo rate per tutte le date rimanenti
-                adjusted_dict['coupon_rates'] = [base_config.coupon_rates[0]] * len(remaining_dates)
-        
+            start_index = next((i for i, d in enumerate(original_dates) if d > in_life_state.valuation_date), 0)
+            adjusted_dict['coupon_rates'] = base_config.coupon_rates[start_index : start_index + len(remaining_dates)]
+
         return RealCertificateConfig(**adjusted_dict)
     
     def _adjust_results_for_memory_v15(self, enhanced_config: EnhancedCertificateConfig, 
                                      results: Dict) -> Dict:
-        """*** VERSIONE CORRETTA v15 *** - Aggiusta risultati per cedole memoria"""
         
-        if not results:
-            return results
+        if not results: return results
+            
         
         # Calcola valore cedole memoria
         memory_value = enhanced_config.get_memory_coupon_amount()
         
-        if memory_value > 0:
-            # Aggiusta fair value
-            fair_value = results.get('fair_value', {})
-            current_fv = fair_value.get('fair_value', 0)
-            
-            fair_value['fair_value'] = current_fv + memory_value
-            fair_value['memory_coupon_value'] = memory_value
-            fair_value['base_fair_value'] = current_fv
-            fair_value['adjustment_note'] = 'Cedole memoria aggiunte (v15)'
-            
-            results['fair_value'] = fair_value
-            
-            print(f"   💰 Cedole memoria aggiunte v15: €{memory_value:.2f}")
-        
+        if memory_value > 0 and 'fair_value' in results:
+            results['fair_value']['fair_value'] += memory_value
+         
         return results
     
     # ========================================
@@ -1011,31 +931,24 @@ class EnhancedCertificateManagerV15:
     # ========================================
     
     def _save_configurations(self):
-        """*** VERSIONE CORRETTA v15 *** - Salva enhanced configurations"""
         try:
-            configs_dict = {}
-            for cert_id, enhanced_config in self.configurations.items():
-                # Serializza enhanced config
-                config_dict = self._enhanced_config_to_dict_v15(enhanced_config)
-                configs_dict[cert_id] = config_dict
-            
+            configs_dict = {cert_id: self._enhanced_config_to_dict_v15(cfg) for cert_id, cfg in self.configurations.items()}
+             
             # Backup automatico
             if self.config_file.exists():
                 backup_file = self.config_file.with_suffix(f'.backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
                 import shutil
                 shutil.copy2(self.config_file, backup_file)
-                print(f"🔄 Backup creato: {backup_file.name}")
+                #print(f"🔄 Backup creato: {backup_file.name}")
             
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(configs_dict, f, indent=2, default=str, ensure_ascii=False)
                 
-            print(f"💾 Configurazioni v15 salvate: {len(configs_dict)} certificati")
+            # print(f"💾 Configurazioni v15 salvate: {len(configs_dict)} certificati")
                 
         except Exception as e:
             print(f"❌ Errore salvataggio enhanced configs v15: {e}")
-            import traceback
-            traceback.print_exc()
-    
+     
     def _load_configurations(self):
         """*** VERSIONE CORRETTA v15 *** - Carica enhanced configurations"""
         try:
@@ -1047,9 +960,9 @@ class EnhancedCertificateManagerV15:
                 
                 for cert_id, config_dict in configs_dict.items():
                     try:
-                        enhanced_config = self._dict_to_enhanced_config_v15(config_dict)
-                        self.configurations[cert_id] = enhanced_config
-                        print(f"   ✅ {cert_id} caricato")
+                       self.configurations[cert_id] = self._dict_to_enhanced_config_v15(config_dict)
+                         
+                       print(f"   ✅ {cert_id} caricato")
                     except Exception as e:
                         print(f"   ❌ Errore caricamento {cert_id}: {e}")
             
@@ -1057,8 +970,7 @@ class EnhancedCertificateManagerV15:
             if self.portfolio_file.exists():
                 with open(self.portfolio_file, 'r', encoding='utf-8') as f:
                     self.portfolio_configs = json.load(f)
-                    print(f"📊 Portfolio caricati: {len(self.portfolio_configs)}")
-                    
+                print(f"📊 Portfolio caricati: {len(self.portfolio_configs)}")
         except Exception as e:
             print(f"❌ Errore caricamento configurazioni v15: {e}")
     
@@ -1069,80 +981,51 @@ class EnhancedCertificateManagerV15:
         base_dict = self._real_config_to_dict_v15(enhanced_config.base_config)
         
         # In-life state
-        in_life_dict = {
-            'valuation_date': enhanced_config.in_life_state.valuation_date.isoformat(),
-            'paid_coupons': [d.isoformat() for d in enhanced_config.in_life_state.paid_coupons],
-            'memory_coupons_due': [d.isoformat() for d in enhanced_config.in_life_state.memory_coupons_due],
-            'is_active': enhanced_config.in_life_state.is_active,
-            'was_autocalled': enhanced_config.in_life_state.was_autocalled
-        }
-        
+        in_life_dict = enhanced_config.in_life_state.__dict__.copy()
+        for key, value in in_life_dict.items():
+            if isinstance(value, list) and value and isinstance(value[0], datetime):
+                in_life_dict[key] = [d.isoformat() for d in value]
+            elif isinstance(value, datetime):
+                in_life_dict[key] = value.isoformat()       
+       
         # Metadata
         metadata_dict = enhanced_config.metadata.copy()
-        for key, value in metadata_dict.items():
-            if isinstance(value, datetime):
-                metadata_dict[key] = value.isoformat()
-        
-        return {
-            'base_config': base_dict,
-            'in_life_state': in_life_dict,
-            'metadata': metadata_dict,
-            'status': getattr(enhanced_config, 'status', 'unknown'),
-            'enhanced_version': 'v15'  # *** VERSIONE CORRETTA ***
-        }
-    
+        if 'last_updated' in metadata_dict and isinstance(metadata_dict['last_updated'], datetime):
+            metadata_dict['last_updated'] = metadata_dict['last_updated'].isoformat()
+        if 'created_date' in metadata_dict and isinstance(metadata_dict['created_date'], datetime):
+            metadata_dict['created_date'] = metadata_dict['created_date'].isoformat()
+        return {'base_config': base_dict, 'in_life_state': in_life_dict, 'metadata': metadata_dict, 'status': enhanced_config.status, 'enhanced_version': 'v15'}
+
+
     def _dict_to_enhanced_config_v15(self, config_dict: Dict) -> EnhancedCertificateConfig:
-        """*** VERSIONE CORRETTA v15 *** - Deserializza enhanced config"""
-        
-        # Backward compatibility
-        enhanced_version = config_dict.get('enhanced_version', 'unknown')
-        
-        if enhanced_version == 'unknown' or 'base_config' not in config_dict:
-            # Old format - converti direttamente
-            print(f"   🔄 Conversione da formato legacy")
+        if 'base_config' not in config_dict:
             base_config = self._dict_to_real_config_safe_v15(config_dict)
-            enhanced_config = EnhancedCertificateConfig(base_config)
-            # Mantieni come legacy in metadata
-            enhanced_config.metadata['migrated_from'] = 'legacy'
-            enhanced_config.metadata['version'] = 'v15'
-            return enhanced_config
-        
-        # New format
-        base_dict = config_dict['base_config']
-        base_config = self._dict_to_real_config_safe_v15(base_dict)
-        
+            return EnhancedCertificateConfig(base_config)
+        base_config = self._dict_to_real_config_safe_v15(config_dict['base_config'])
         enhanced_config = EnhancedCertificateConfig(base_config)
+ 
         
         # In-life state
         in_life_dict = config_dict.get('in_life_state', {})
-        if 'valuation_date' in in_life_dict:
-            enhanced_config.in_life_state.valuation_date = datetime.fromisoformat(
-                in_life_dict['valuation_date']
-            )
+        if 'valuation_date' in in_life_dict and in_life_dict['valuation_date']:
+            enhanced_config.in_life_state.valuation_date = datetime.fromisoformat(in_life_dict['valuation_date'])
+        if 'paid_coupons' in in_life_dict and in_life_dict['paid_coupons']:
+            enhanced_config.in_life_state.paid_coupons = [datetime.fromisoformat(d) for d in in_life_dict['paid_coupons']]
+        if 'memory_coupons_due' in in_life_dict and in_life_dict['memory_coupons_due']:
+            enhanced_config.in_life_state.memory_coupons_due = [datetime.fromisoformat(d) for d in in_life_dict['memory_coupons_due']]
         
-        if 'paid_coupons' in in_life_dict:
-            enhanced_config.in_life_state.paid_coupons = [
-                datetime.fromisoformat(d) for d in in_life_dict['paid_coupons']
-            ]
         
-        if 'memory_coupons_due' in in_life_dict:
-            enhanced_config.in_life_state.memory_coupons_due = [
-                datetime.fromisoformat(d) for d in in_life_dict['memory_coupons_due']
-            ]
         
         # Metadata
         metadata_dict = config_dict.get('metadata', {})
         for key, value in metadata_dict.items():
             if key in ['created_date', 'last_updated'] and isinstance(value, str):
                 try:
-                    enhanced_config.metadata[key] = datetime.fromisoformat(value)
+                    metadata_dict[key] = datetime.fromisoformat(value)
                 except ValueError:
-                    enhanced_config.metadata[key] = datetime.now()
-            else:
-                enhanced_config.metadata[key] = value
-        
-        # Assicura versione v15
-        enhanced_config.metadata['version'] = 'v15'
+                    metadata_dict[key] = datetime.now()
+        enhanced_config.metadata.update(metadata_dict)
+
         
         return enhanced_config
     
@@ -1152,15 +1035,15 @@ class EnhancedCertificateManagerV15:
         
         # Copia tutti gli attributi
         for key, value in config.__dict__.items():
-            if isinstance(value, datetime):
+            if isinstance(value, list) and value and isinstance(value[0], datetime):
+                config_dict[key] = [d.isoformat() for d in value]
+            elif isinstance(value, datetime):
                 config_dict[key] = value.isoformat()
-            elif isinstance(value, list) and value and isinstance(value[0], datetime):
-                config_dict[key] = [date.isoformat() for date in value]
             elif isinstance(value, np.ndarray):
                 config_dict[key] = value.tolist()
             else:
                 config_dict[key] = value
-        
+              
         return config_dict
     
     def _save_portfolios(self):
@@ -1191,8 +1074,8 @@ class EnhancedCertificateManagerV15:
                 'Type': base_config.certificate_type,
                 'Issuer': base_config.issuer,
                 'Yahoo Ticker': getattr(base_config, 'yahoo_ticker', 'N/A'),
-                'Issue Date': base_config.issue_date.strftime('%Y-%m-%d'),
-                'Maturity Date': base_config.maturity_date.strftime('%Y-%m-%d'),
+                'Issue Date': base_config.issue_date.strftime('%Y-%m-%d') if base_config.issue_date else 'N/A',
+                'Maturity Date': base_config.maturity_date.strftime('%Y-%m-%d') if base_config.maturity_date else 'N/A',
                 'Valuation Date': in_life.valuation_date.strftime('%Y-%m-%d'),
                 'Paid Coupons': len(in_life.paid_coupons),
                 'Memory Coupons': len(in_life.memory_coupons_due),
@@ -1206,38 +1089,26 @@ class EnhancedCertificateManagerV15:
         return pd.DataFrame(data)
     
     def refresh_all_market_data_v15(self):
-        """*** VERSIONE CORRETTA v15 *** - Aggiorna dati mercato per tutti i certificati"""
+        """ Aggiorna dati mercato per tutti i certificati"""
+        updated, failed, warnings = 0, 0, 0
         
         print("🔄 Aggiornamento dati mercato v15 per tutti i certificati...")
         
-        updated = 0
-        failed = 0
-        warnings = 0
-        
+ 
         for cert_id, enhanced_config in self.configurations.items():
             try:
-                print(f"   📊 Aggiornamento {cert_id}...")
-                
-                success = self.yahoo_provider.update_certificate_market_data(enhanced_config)
-                
-                if success:
+                if self.yahoo_provider.update_certificate_market_data(enhanced_config):
                     updated += 1
-                    print(f"   ✅ {cert_id} aggiornato completamente")
                 else:
                     warnings += 1
-                    print(f"   ⚠️  {cert_id} aggiornato parzialmente")
-                    
-            except Exception as e:
+            except Exception:
                 failed += 1
-                print(f"   ❌ {cert_id} fallito: {e}")
-        
-        # Salva tutte le modifiche
         self._save_configurations()
-        
-        print(f"📊 Aggiornamento v15 completato:")
-        print(f"   ✅ Successi: {updated}")
-        print(f"   ⚠️  Warnings: {warnings}")
-        print(f"   ❌ Falliti: {failed}")
+
+        #print(f"📊 Aggiornamento v15 completato:")
+        #print(f"   ✅ Successi: {updated}")
+        #print(f"   ⚠️  Warnings: {warnings}")
+        #print(f"   ❌ Falliti: {failed}")
         
         return updated, warnings, failed
 
@@ -1256,15 +1127,15 @@ class CalculoDateAutoDialogV15:
         # *** FIX DIMENSIONI *** - Finestra più grande e ridimensionabile
         self.dialog = tk.Toplevel(parent)
         self.dialog.title("Calcolo Automatico Date Cedole v15")
-        self.dialog.geometry("700x600")  # *** DIMENSIONI MAGGIORI ***
-        self.dialog.resizable(True, True)  # *** RIDIMENSIONABILE ***
+        self.dialog.geometry("700x600")
+        self.dialog.resizable(True, True)
         self.dialog.transient(parent)
         self.dialog.grab_set()
         
         # Centra finestra
         self.dialog.update_idletasks()
-        x = (self.dialog.winfo_screenwidth() // 2) - (700 // 2)
-        y = (self.dialog.winfo_screenheight() // 2) - (600 // 2)
+        x = (self.dialog.winfo_screenwidth() // 2) - 350
+        y = (self.dialog.winfo_screenheight() // 2) - 300
         self.dialog.geometry(f"700x600+{x}+{y}")
         
         # *** CARICA VALORI DAL CERTIFICATO SELEZIONATO ***
@@ -1314,18 +1185,12 @@ class CalculoDateAutoDialogV15:
                         print(f"   📅 Delta tra cedole: {delta_days} giorni")
                         
                         # Mappa a frequenza
-                        if 25 <= delta_days <= 35:
-                            self.default_frequency = "Mensile"
-                        elif 55 <= delta_days <= 65: # Bimestrale
-                            self.default_frequency = "Bimestrale"
-                        elif 85 <= delta_days <= 95:
-                            self.default_frequency = "Trimestrale"
-                        elif 115 <= delta_days <= 125: # Quadrimestrale
-                            self.default_frequency = "Quadrimestrale"
-                        elif 170 <= delta_days <= 190:
-                            self.default_frequency = "Semestrale"
-                        elif 350 <= delta_days <= 380:
-                            self.default_frequency = "Annuale"
+                        if 25 <= delta_days <= 35: self.default_frequency = "Mensile"
+                        elif 55 <= delta_days <= 65: self.default_frequency = "Bimestrale"
+                        elif 85 <= delta_days <= 95: self.default_frequency = "Trimestrale"
+                        elif 115 <= delta_days <= 125: self.default_frequency = "Quadrimestrale"
+                        elif 170 <= delta_days <= 190: self.default_frequency = "Semestrale"
+                        elif 350 <= delta_days <= 380: self.default_frequency = "Annuale"
                         
                     except Exception as e:
                         print(f"   ⚠️  Errore calcolo frequenza: {e}")
@@ -1334,17 +1199,9 @@ class CalculoDateAutoDialogV15:
             if 'coupon_rate' in cert_data: # Usiamo coupon_rate direttamente
                 coupon_rate_value = cert_data['coupon_rate']
                 if isinstance(coupon_rate_value, (int, float)):
-                    # Converti in percentuale per display (se è in decimale)
-                    if coupon_rate_value <= 1.0 and coupon_rate_value != 0:
-                        self.default_rate = coupon_rate_value * 100
-                        # Assicurati che sia almeno 3 decimali per 0.667%
-                        if self.default_rate < 1.0: # Se è un piccolo valore percentuale
-                            self.default_rate = round(self.default_rate, 3)
-                        else:
-                            self.default_rate = round(self.default_rate, 2) # Altrimenti 2 decimali
-                    else:
-                        self.default_rate = round(coupon_rate_value, 2) # Già in percentuale, 2 decimali
-                        
+                    self.default_rate = coupon_rate_value * 100 if coupon_rate_value <= 1.0 and coupon_rate_value != 0 else coupon_rate_value
+                    self.default_rate = round(self.default_rate, 3)
+                    
                     print(f"   💰 Tasso default dal certificato: {self.default_rate:.2f}%")
             
             # Info certificato
@@ -1360,9 +1217,6 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
             print(f"   ✅ Defaults caricati: {self.default_frequency}, {self.default_rate}%")
     
     def _setup_form_v15(self):
-        """*** VERSIONE CORRETTA v15 *** - Setup form con tutte le correzioni"""
-        
-        # --- NEW: Main container for scrollable area and fixed bottom frame ---
         main_container = ttk.Frame(self.dialog)
         main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
@@ -1370,28 +1224,21 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
         canvas = tk.Canvas(main_container, highlightthickness=0)
         v_scrollbar = ttk.Scrollbar(main_container, orient="vertical", command=canvas.yview)
         
-        # Frame inside canvas to hold all scrollable content
         scrollable_content_frame = ttk.Frame(canvas)
+        scrollable_content_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         
-        # Configure scroll region when content changes size
-        scrollable_content_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        
+
         # Create window in canvas
         canvas_window = canvas.create_window((0, 0), window=scrollable_content_frame, anchor="nw")
         
         # Bind canvas to resize its internal window
         def on_canvas_configure(event):
             canvas.configure(scrollregion=canvas.bbox("all"))
-            canvas_width = event.width
-            canvas.itemconfig(canvas_window, width=canvas_width)
+            canvas.itemconfig(canvas_window, width=event.width)
         
         canvas.bind('<Configure>', on_canvas_configure)
         canvas.configure(yscrollcommand=v_scrollbar.set)
         
-        # Mouse wheel scroll
         def on_mousewheel(event):
             canvas.yview_scroll(int(-1*(event.delta/120)), "units")
         canvas.bind("<MouseWheel>", on_mousewheel)
@@ -1407,20 +1254,16 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
         button_frame = ttk.Frame(fixed_bottom_frame)
         button_frame.pack(fill=tk.X)
         
-        # --- END NEW LAYOUT ---
 
         # *** TITOLO PROMINENTE ***
-        title_label = ttk.Label(scrollable_content_frame, 
-                               text="Calcolo Automatico Date Cedole v15", 
-                               font=("Arial", 16, "bold"))
+        title_label = ttk.Label(scrollable_content_frame, text="Calcolo Automatico Date Cedole v15", font=("Arial", 16, "bold"))
+
         title_label.pack(pady=(0, 20))
         
         # *** INFORMAZIONI CERTIFICATO ***
         info_frame = ttk.LabelFrame(scrollable_content_frame, text="Certificato Selezionato", padding="15")
         info_frame.pack(fill=tk.X, pady=(0, 20))
-        
-        info_text = tk.Text(info_frame, height=5, width=60, wrap=tk.WORD, # Altezza aumentata
-                           font=("Arial", 10), state=tk.DISABLED, bg="#f0f0f0")
+        info_text = tk.Text(info_frame, height=5, width=60, wrap=tk.WORD, font=("Arial", 10), state=tk.DISABLED, bg="#f0f0f0")
         info_text.pack(fill=tk.X)
         
         # Popola info
@@ -1432,56 +1275,39 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
         freq_frame = ttk.LabelFrame(scrollable_content_frame, text="Frequenza Cedole", padding="15")
         freq_frame.pack(fill=tk.X, pady=(0, 20))
         
-        self.frequency_var = tk.StringVar(value=self.default_frequency)  # *** VALORE DAL CERTIFICATO ***
+        self.frequency_var = tk.StringVar(value=self.default_frequency)
         
-        freq_options = ["Mensile", "Bimestrale", "Trimestrale", "Quadrimestrale", "Semestrale", "Annuale"] # Aggiunti
-        freq_columns = 2
+        freq_options = ["Mensile", "Bimestrale", "Trimestrale", "Quadrimestrale", "Semestrale", "Annuale"]
         
         for i, freq in enumerate(freq_options):
-            row = i // freq_columns
-            col = i % freq_columns
-            
-            radio = ttk.Radiobutton(freq_frame, text=freq, 
-                                   variable=self.frequency_var, value=freq)
-            radio.grid(row=row, column=col, sticky=tk.W, padx=10, pady=5)
-        
+            ttk.Radiobutton(freq_frame, text=freq, variable=self.frequency_var, value=freq).grid(row=i // 2, column=i % 2, sticky=tk.W, padx=10, pady=5)
+
         # Configura grid
-        for i in range(freq_columns):
+        for i in range(2):
             freq_frame.columnconfigure(i, weight=1)
         
         # *** TASSO PERIODO v15 ***
-        rate_frame = ttk.LabelFrame(scrollable_content_frame, 
-                                   text="🎯 Tasso Periodo (NON Annuale)", 
-                                   padding="15")
+        rate_frame = ttk.LabelFrame(scrollable_content_frame, text="🎯 Tasso Periodo (NON Annuale)", padding="15")
+ 
         rate_frame.pack(fill=tk.X, pady=(0, 20))
         
         # Info tasso
-        info_label = ttk.Label(rate_frame, 
-                              text="ℹ️ Inserisci il tasso del periodo di pagamento (come sui siti finanziari)",
-                              font=("Arial", 10, "italic"),
-                              foreground="blue")
-        info_label.pack(anchor=tk.W, pady=(0, 10))
-        
+        ttk.Label(rate_frame, text="ℹ️ Inserisci il tasso del periodo di pagamento (come sui siti finanziari)", font=("Arial", 10, "italic"), foreground="blue").pack(anchor=tk.W, pady=(0, 10))
+       
         rate_input_frame = ttk.Frame(rate_frame)
         rate_input_frame.pack(fill=tk.X)
-        
-        ttk.Label(rate_input_frame, 
-                 text="Tasso Periodo (%):", 
-                 font=("Arial", 11, "bold")).pack(side=tk.LEFT)
-        
-        self.rate_var = tk.DoubleVar(value=self.default_rate)  # *** VALORE DAL CERTIFICATO ***
-        self.rate_entry = ttk.Entry(rate_input_frame, textvariable=self.rate_var, 
-                                   width=15, font=("Arial", 11))
+        ttk.Label(rate_input_frame, text="Tasso Periodo (%):", font=("Arial", 11, "bold")).pack(side=tk.LEFT)
+         
+        self.rate_var = tk.DoubleVar(value=self.default_rate)
+        self.rate_entry = ttk.Entry(rate_input_frame, textvariable=self.rate_var, width=15, font=("Arial", 11))
         self.rate_entry.pack(side=tk.LEFT, padx=(10, 0))
         
         # Esempio dinamico
         example_frame = ttk.Frame(rate_frame)
         example_frame.pack(fill=tk.X, pady=(10, 0))
+        self.example_label = ttk.Label(example_frame, text="", font=("Arial", 9), foreground="gray")
         
-        self.example_label = ttk.Label(example_frame, 
-                                      text="", 
-                                      font=("Arial", 9), 
-                                      foreground="gray")
+ 
         self.example_label.pack(anchor=tk.W)
         
         # Bind per aggiornamento esempio
@@ -1502,44 +1328,23 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
         ttk.Label(method_frame, text="Metodo Calcolo:").pack(side=tk.LEFT)
         
         self.method_var = tk.StringVar(value="robust_v15")
-        method_combo = ttk.Combobox(method_frame, textvariable=self.method_var,
-                                   values=["robust_v15", "legacy"], 
-                                   state="readonly", width=15)
-        method_combo.pack(side=tk.LEFT, padx=(10, 0))
-        
+        ttk.Combobox(method_frame, textvariable=self.method_var, values=["robust_v15", "legacy"], state="readonly", width=15).pack(side=tk.LEFT, padx=(10, 0))
+       
         # Info metodo
-        method_info = ttk.Label(advanced_frame,
-                               text="• robust_v15: Gestione intelligente date (raccomandato)\n• legacy: Metodo tradizionale",
-                               font=("Arial", 9),
-                               foreground="gray")
-        method_info.pack(anchor=tk.W)
-        
-        # --- Buttons are now in fixed_bottom_frame ---
-        # Pack canvas and scrollbar into main_container
+        ttk.Label(advanced_frame, text="• robust_v15: Gestione intelligente date (raccomandato)\n• legacy: Metodo tradizionale", font=("Arial", 9), foreground="gray").pack(anchor=tk.W)
+         
         canvas.pack(side="left", fill="both", expand=True)
         v_scrollbar.pack(side="right", fill="y")
         
         # Bottone Annulla
-        cancel_button = ttk.Button(button_frame, # Reparented
-                                  text="❌ Annulla", 
-                                  command=self._cancel,
-                                  width=15)
-        cancel_button.pack(side=tk.RIGHT, padx=(10, 0))
-        
+        ttk.Button(button_frame, text="❌ Annulla", command=self._cancel, width=15).pack(side=tk.RIGHT, padx=(10, 0))
+      
         # Bottone Calcola
-        calc_button = ttk.Button(button_frame, # Reparented
-                                text="🧮 Calcola Date v15", 
-                                command=self._calculate_dates_v15,
-                                width=20)
-        calc_button.pack(side=tk.RIGHT)
-        
+        ttk.Button(button_frame, text="🧮 Calcola Date v15", command=self._calculate_dates_v15, width=20).pack(side=tk.RIGHT)
+       
         # Bottone Preview
-        preview_button = ttk.Button(button_frame, # Reparented
-                                   text="👁️ Anteprima", 
-                                   command=self._preview_calculation,
-                                   width=15)
-        preview_button.pack(side=tk.RIGHT, padx=(0, 10))
-        
+        ttk.Button(button_frame, text="👁️ Anteprima", command=self._preview_calculation, width=15).pack(side=tk.RIGHT, padx=(0, 10))
+       
         # Focus su rate entry
         self.rate_entry.focus()
     
@@ -1548,33 +1353,21 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
         try:
             frequency = self.frequency_var.get()
             period_rate = self.rate_var.get()
+            freq_map = {"Mensile": 12, "Bimestrale": 6, "Trimestrale": 4, "Quadrimestrale": 3, "Semestrale": 2, "Annuale": 1}
             
             # Calcola tasso annuo
-            freq_map = {
-                "Mensile": 12,
-                "Bimestrale": 6,
-                "Trimestrale": 4,
-                "Quadrimestrale": 3,
-                "Semestrale": 2,
-                "Annuale": 1
-            }
+            annual_rate = period_rate * freq_map.get(frequency, 4)
+            self.example_label.config(text=f"📊 Es: {frequency} {period_rate:.2f}% → Tasso Annuo {annual_rate:.2f}%")
             
-            periods_per_year = freq_map.get(frequency, 4)
-            annual_rate = period_rate * periods_per_year
-            
-            example_text = f"📊 Es: {frequency} {period_rate:.2f}% → Tasso Annuo {annual_rate:.2f}%"
-            self.example_label.config(text=example_text)
-            
+           
         except:
             self.example_label.config(text="📊 Esempio: inserisci valori validi")
     
     def _preview_calculation(self):
         """*** NUOVO v15 *** - Anteprima calcolo senza salvare"""
         try:
-            if not self.selected_certificate_id or self.selected_certificate_id not in self.configurations:
-                messagebox.showwarning("Attenzione", "Nessun certificato selezionato")
-                return
-            
+            if not self.selected_certificate_id or self.selected_certificate_id not in self.configurations: return
+          
             # Parametri
             frequency = self.frequency_var.get()
             period_rate = self.rate_var.get() / 100
@@ -1582,154 +1375,57 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
             cert_data = self.configurations[self.selected_certificate_id]
             
             # Parse date
-            issue_date_str = cert_data.get('issue_date', '')
-            maturity_date_str = cert_data.get('maturity_date', '')
+            issue_date = datetime.fromisoformat(cert_data['issue_date']) if isinstance(cert_data.get('issue_date'), str) else cert_data.get('issue_date')
+
+            maturity_date = datetime.fromisoformat(cert_data['maturity_date']) if isinstance(cert_data.get('maturity_date'), str) else cert_data.get('maturity_date')
             
-            if isinstance(issue_date_str, str):
-                issue_date = datetime.fromisoformat(issue_date_str)
-            else:
-                issue_date = issue_date_str
-                
-            if isinstance(maturity_date_str, str):
-                maturity_date = datetime.fromisoformat(maturity_date_str)
-            else:
-                maturity_date = maturity_date_str
-            
+           
             # Calcola date con metodo robusto
-            date_utils = DateCalculationUtils()
-            coupon_dates = date_utils.calculate_coupon_dates_robust(
-                issue_date, maturity_date, frequency
-            )
+            coupon_dates = DateCalculationUtils.calculate_coupon_dates_robust(issue_date, maturity_date, frequency)
+
             
             # Crea preview
-            preview_text = f"ANTEPRIMA CALCOLO DATE v15\n{'='*50}\n\n"
-            preview_text += f"Certificato: {cert_data.get('name', 'N/A')}\n"
-            preview_text += f"Frequenza: {frequency}\n"
-            preview_text += f"Tasso Periodo: {period_rate:.3f}%\n" # Display con 3 decimali
-            preview_text += f"Date Generate: {len(coupon_dates)}\n\n"
-            
-            preview_text += "DATE CEDOLE:\n"
-            for i, date in enumerate(coupon_dates[:10]):  # Prime 10
-                preview_text += f"  {i+1:2d}. {date.strftime('%Y-%m-%d')}\n"
-            
-            if len(coupon_dates) > 10:
-                preview_text += f"  ... e altre {len(coupon_dates)-10} date\n"
+            preview_text = f"ANTEPRIMA CALCOLO DATE v15\n{'='*50}\n\nCertificato: {cert_data.get('name', 'N/A')}\nFrequenza: {frequency}\nTasso Periodo: {period_rate*100:.3f}%\nDate Generate: {len(coupon_dates)}\n\nDATE CEDOLE:\n"
+            preview_text += "\n".join([f"  {i+1:2d}. {date.strftime('%Y-%m-%d')}" for i, date in enumerate(coupon_dates[:10])])
+            if len(coupon_dates) > 10: preview_text += f"\n  ... e altre {len(coupon_dates)-10} date"
             
             # Mostra preview
             PreviewDialog(self.dialog, "Anteprima Calcolo Date", preview_text)
-            
-        except Exception as e:
-            messagebox.showerror("Errore", f"Errore anteprima:\n{e}")
-    
+        except Exception as e: messagebox.showerror("Errore", f"Errore anteprima:\n{e}")
+  
     def _calculate_dates_v15(self):
         """*** VERSIONE CORRETTA v15 *** - Calcolo date con gestione errori completa"""
         
         try:
-            print(f"🧮 === INIZIO CALCOLO DATE v15 ===")
-            
-            # Validazione input
-            if not self.selected_certificate_id:
-                messagebox.showerror("Errore", "Nessun certificato selezionato")
-                return
-            
-            if not self.selected_certificate_id: # This check is redundant if the dialog is opened from a selection
-                messagebox.showerror("Errore", "Nessun certificato selezionato per il calcolo delle date.")
-                return            
-            
-            if self.selected_certificate_id not in self.configurations:
-                messagebox.showerror("Errore", f"Certificato {self.selected_certificate_id} non trovato")
-                return
-            
-            # Parametri
+           # Validazione input
+            if not self.selected_certificate_id: return
+            if self.selected_certificate_id not in self.configurations: return
+           
             frequency = self.frequency_var.get()
-            try:
-                raw_period_rate_input = self.rate_var.get()
-                # Aggiungi un avviso se l'input sembra essere un decimale invece di una percentuale
-                if raw_period_rate_input > 0 and raw_period_rate_input < 0.1: # es. 0.007 inserito
-                    response = messagebox.askyesno(
-                        "Attenzione: Tasso Periodo Basso",
-                        f"Hai inserito {raw_period_rate_input}%. Intendevi {raw_period_rate_input * 100:.3f}%?\n\n"
-                        "Il campo 'Tasso Periodo (%)' si aspetta un valore come '0.67' per 0.67%.\n"
-                        "Se hai inserito un valore decimale (es. 0.0067), il risultato sarà molto piccolo.\n\n"
-                        "Vuoi continuare con il valore inserito (che verrà diviso per 100)?\n"
-                        "Clicca 'No' per modificare il valore."
-                    )
-                    if not response:
-                        return # L'utente vuole modificare il valore
-
-                period_rate = raw_period_rate_input / 100.0  # Converti in decimale
-            except (ValueError, tk.TclError):
-                messagebox.showerror("Errore", "Tasso periodo deve essere un numero")
-                return
-            
-            if period_rate <= 0 or period_rate > 1:
-                messagebox.showerror("Errore", "Tasso periodo deve essere tra 0% e 100%")
-                return
+            period_rate = self.rate_var.get() / 100.0
             
             method = self.method_var.get()
-            
-            print(f"   Frequency: {frequency}")
-            print(f"   Period rate: {period_rate:.4f}")
-            print(f"   Method: {method}")
             
             # Dati certificato
             cert_data = self.configurations[self.selected_certificate_id]
             
-            # Parse date con gestione errori
-            try:
-                issue_date_str = cert_data.get('issue_date', '')
-                maturity_date_str = cert_data.get('maturity_date', '')
+            issue_date = datetime.fromisoformat(cert_data['issue_date']) if isinstance(cert_data.get('issue_date'), str) else cert_data.get('issue_date')
+            maturity_date = datetime.fromisoformat(cert_data['maturity_date']) if isinstance(cert_data.get('maturity_date'), str) else cert_data.get('maturity_date')
+
+            if method == "robust_v15":
+                coupon_dates = DateCalculationUtils.calculate_coupon_dates_robust(issue_date, maturity_date, frequency)
+            else:
+                coupon_dates = self._calculate_dates_legacy(issue_date, maturity_date, frequency)
                 
-                if isinstance(issue_date_str, str):
-                    issue_date = datetime.fromisoformat(issue_date_str)
-                else:
-                    issue_date = issue_date_str
-                    
-                if isinstance(maturity_date_str, str):
-                    maturity_date = datetime.fromisoformat(maturity_date_str)
-                else:
-                    maturity_date = maturity_date_str
-                
-                print(f"   Issue: {issue_date.strftime('%Y-%m-%d')}")
-                print(f"   Maturity: {maturity_date.strftime('%Y-%m-%d')}")
-                
-            except Exception as date_error:
-                messagebox.showerror("Errore", f"Errore parsing date certificato:\n{date_error}")
-                return
-            
-            # *** CALCOLO ROBUSTO v15 ***
-            try:
-                if method == "robust_v15":
-                    date_utils = DateCalculationUtils()
-                    coupon_dates = date_utils.calculate_coupon_dates_robust(
-                        issue_date, maturity_date, frequency
-                    )
-                else:
-                    # Metodo legacy (fallback)
-                    coupon_dates = self._calculate_dates_legacy(issue_date, maturity_date, frequency)
-                
-                print(f"   ✅ Calcolate {len(coupon_dates)} date cedole")
-                
-            except Exception as calc_error:
-                print(f"   ❌ Errore calcolo date: {calc_error}")
-                messagebox.showerror("Errore Calcolo", 
-                                   f"Errore nel calcolo date cedole:\n{calc_error}")
-                return
-            
             # Crea array rates e autocall
             coupon_rates = [period_rate] * len(coupon_dates)
-            autocall_levels = [1.0] * len(coupon_dates)  # Default 100%
+            autocall_levels = [1.0] * len(coupon_dates)
             
             # Calcola tasso annuo equivalente
-            frequency_map = {
-                "Mensile": 12, "Bimestrale": 6, "Trimestrale": 4, "Quadrimestrale": 3,
-                "Semestrale": 2, "Annuale": 1
-            }
-            periods_per_year = frequency_map.get(frequency, 4)
-            annual_equivalent = period_rate * periods_per_year
+            freq_map = {"Mensile": 12, "Bimestrale": 6, "Trimestrale": 4, "Quadrimestrale": 3, "Semestrale": 2, "Annuale": 1}
+            annual_equivalent = period_rate * freq_map.get(frequency, 4)
             
             # *** RISULTATO COMPLETO v15 ***
-           
 
             self.result = {
                 'coupon_dates': [d.isoformat() for d in coupon_dates],
@@ -1744,11 +1440,11 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
                 'calculation_timestamp': datetime.now().isoformat()
             }
             
-            print(f"🧮 === CALCOLO DATE v15 COMPLETATO ===")
-            print(f"   Risultato impostato: {self.result is not None}")
-            print(f"   Date generate: {len(coupon_dates)}")
-            print(f"   Tasso periodo: {period_rate * 100:.3f}%") # Display con 3 decimali
-            print(f"   Tasso annuo equivalente: {annual_equivalent * 100:.3f}%") # Display con 3 decimali
+            #print(f"🧮 === CALCOLO DATE v15 COMPLETATO ===")
+            #print(f"   Risultato impostato: {self.result is not None}")
+            #print(f"   Date generate: {len(coupon_dates)}")
+            #print(f"   Tasso periodo: {period_rate * 100:.3f}%") # Display con 3 decimali
+            #print(f"   Tasso annuo equivalente: {annual_equivalent * 100:.3f}%") # Display con 3 decimali
             
             # Feedback all'utente
             messagebox.showinfo("Calcolo Completato v15", 
@@ -1760,14 +1456,8 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
             
             # Chiudi dialog
             self.dialog.destroy()
-            
-        except Exception as e:
-            print(f"🧮 === ERRORE CALCOLO DATE v15 ===")
-            print(f"❌ Errore: {e}")
-            import traceback
-            traceback.print_exc()
-            messagebox.showerror("Errore", f"Errore durante il calcolo:\n{e}")
-    
+        except Exception as e: messagebox.showerror("Errore", f"Errore durante il calcolo:\n{e}")
+             
     def _calculate_dates_legacy(self, issue_date, maturity_date, frequency):
         """Metodo legacy per calcolo date (fallback)"""
         
@@ -1789,22 +1479,20 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
             if month > 12:
                 year += (month - 1) // 12
                 month = ((month - 1) % 12) + 1
-            
             try:
                 next_date = datetime(year, month, day)
                 if next_date <= maturity_date:
                     coupon_dates.append(next_date)
-                else:
-                    break
+                else:break
+
             except ValueError:
                 # Giorno non esiste, usa ultimo giorno del mese
-                import calendar
+                #import calendar
                 last_day = calendar.monthrange(year, month)[1]
                 next_date = datetime(year, month, min(day, last_day))
                 if next_date <= maturity_date:
                     coupon_dates.append(next_date)
-                else:
-                    break
+                else: break
             
             month += months_inc
         
@@ -1816,7 +1504,7 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
     
     def _cancel(self):
         """Annulla dialog"""
-        print("❌ Dialog calcolo date v15 annullato")
+        #print("❌ Dialog calcolo date v15 annullato")
         self.result = None
         self.dialog.destroy()
 
@@ -1830,29 +1518,28 @@ class PreviewDialog:
         self.dialog.geometry("500x600")
         self.dialog.transient(parent)
         self.dialog.grab_set()
+        text_area = tk.Text(self.dialog, wrap=tk.WORD, font=("Courier", 10))
         
         # Main frame
-        main_frame = ttk.Frame(self.dialog, padding="20")
-        main_frame.pack(fill=tk.BOTH, expand=True)
+        #main_frame = ttk.Frame(self.dialog, padding="20")
+        #main_frame.pack(fill=tk.BOTH, expand=True)
         
         # Text area con scroll
-        text_frame = ttk.Frame(main_frame)
-        text_frame.pack(fill=tk.BOTH, expand=True)
+        #text_frame = ttk.Frame(main_frame)
+        #text_frame.pack(fill=tk.BOTH, expand=True)
         
-        text_area = tk.Text(text_frame, wrap=tk.WORD, font=("Courier", 10))
-        scrollbar = ttk.Scrollbar(text_frame, orient=tk.VERTICAL, command=text_area.yview)
-        text_area.configure(yscrollcommand=scrollbar.set)
+        #text_area = tk.Text(text_frame, wrap=tk.WORD, font=("Courier", 10))
+        #scrollbar = ttk.Scrollbar(text_frame, orient=tk.VERTICAL, command=text_area.yview)
+        #text_area.configure(yscrollcommand=scrollbar.set)
         
-        text_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        #text_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        #scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        text_area.insert(1.0, content)
-        text_area.config(state=tk.DISABLED)  # Read-only
+        t#ext_area.insert(1.0, content)
+        #text_area.config(state=tk.DISABLED)  # Read-only
         
         # Chiudi
-        ttk.Button(main_frame, text="Chiudi", 
-                  command=self.dialog.destroy).pack(pady=(10, 0))
-
+        ttk.Button(self.dialog, text="Chiudi", command=self.dialog.destroy).pack(pady=10) 
 
 # ========================================
 # ESEMPIO INTEGRAZIONE CON GUI ESISTENTE
@@ -2028,18 +1715,18 @@ if __name__ == "__main__":
     if success:
         print("\n✅ ENHANCED CERTIFICATE MANAGER v15 PRONTO!")
         print("\nCORREZIONI INTEGRATE:")
-        print("✅ yahoo_ticker opzionale supportato")
         print("✅ Fix errore 'day out of range' nel calcolo date")
         print("✅ Dimensioni finestre calcolo date corrette")
         print("✅ Valori default caricati dal certificato selezionato")
         print("✅ Gestione robusta errori Yahoo Finance")
         print("✅ Validazione completa dati input")
-        print("✅ Backward compatibility con configurazioni esistenti")
         
         print("\n🔗 INTEGRAZIONE CON GUI v14:")
-        print("# Sostituisci _auto_calculate_dates nel tuo GUI v14")
         print("enhanced_manager = EnhancedCertificateManagerV15()")
         print("# Usa CalculoDateAutoDialogV15 invece del dialog esistente")
     
     else:
         print("\n❌ ERRORI NEL SISTEMA v15")
+
+integrate_with_fixed_gui_v14()
+test_enhanced_certificate_manager_v15()         
