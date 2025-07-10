@@ -1,9 +1,9 @@
-# Diario di bordo Sistema Certificati. Aggiornamento riferito al 09/07/2025 (mattino) 
+# Diario di bordo Sistema Certificati. Aggiornamento riferito al 10/07/2025 (sera) 
 
-# Link al repo github: https://github.com/EmmeGasp/Revisione2 (mio branch refactoring-struttura)
+# Link al repo github: https://github.com/EmmeGasp/Revisione2 (branch refactoring-struttura)
 
 
-## Stato attuale
+## Aggiornamento sullo stato attuale
 
 - ** Creata struttura di base del progetto (src, data, logs, tests)
 - ** Creato e attivato l'ambiente virtuale venv 
@@ -30,14 +30,17 @@
 - ** Diversi interventi su main_window.py e enhance_certificate_manager_fixed.py per miglorare la struttura di delega, il colloquio fra i file e sulla esposizione dei dati
 - ** L'analisi dei dati viene ultimata. Adesso è necessario lavorare sulla qualità del dato estratto. Un primo intervento è stato effettuato sulla pulizia dei dati passati per il calcolo della volatilità omettendo i valori estremi
 - ** Fra i dati esposti incluso anche il prezzo di mercato (ma attualmente la routine produce un errore da sistemare)
+- ** inserito passaggio per eliminare gli outlier ai fini del calcolo della volatilità
+- ** sostituito messagebox con finestra di dialogo per la esposizione dei risultati derivanti dall'utilizzo dei dati di mercato
+- ** allo scopo di ridurre la differenza fra fair value e prezzo di mercato inserita la 'Correlazione tra i sottosanti' e 'Dividend Yield'
+- ** 
 
 
 
 ## Obiettivo corrente
 
-  - ** Inserire la routine per la pulizia dei dati di mercato ai fini della determinazione della volatilità
-  - ** Inserimento del prezzo di mercato del certificato oggetto di valutazione (fatto ma c'è un errore)
-  - ** Aprire una finestra in luogo del box per esporre i risultati
+  - ** Individiduare un certificato in circolazione per il quale sia possibile recuperare la maggiore quantità possibile di dati relativi ad una valutazione del rischio esperta confrontare con l'output del nostro modello. Ottimale sarebbe il recupero di Fair Value, Prob. autocall, Volatilità (media)
+ 
 
 ## Passi completati. Note  
 
@@ -59,7 +62,12 @@
   ### Data di riferimento 08/07/2025
 - ** Dopo l'attività di refactoring ed il riprisitino della operatività CRUD, deve essere avviata la fase di lavorazione dei dati di mercato  
 
-  ### Data du riferimento 09/07/2025 (mattino, prima delle lavorazioni delle giornata)
+  ### Data di riferimento 09/07/2025 (mattino, prima delle lavorazioni delle giornata)
 - ** Inserita senza problemi la routine di pulizia dei dati
 - ** Modificato main_window.py per recepire il prezzo di mercato. Generato errore da 'analysis_results' che risulta non definita
 - ** I dati di mercato sono recuperati correttamente. È continuata l'attività di pulizia e raccordo. Ad esempio inserita routine per convertire le date delle scadenze da stringhe appunto a date, come si aspetta la routine che deve analizzare il rischio.  
+
+  ### Data di riferimento 10/07/2025 (sera; questa data non ho lavorato sul progetto)
+- ** I valori di Dividend Yeld sono recuperati da Yahoo finance ma modificabili
+- ** È stato necessario lavorare sulla modalità di acquiszione proprio dei Dividend Yield per gestire correttamente i valori percentuali
+- ** Gli interventi effettuati hanno modificato il valore di Fair Value che, nella sua versione definitiva, è ancora lontano dal prezzo di mercato. Aspetto che dovrà essere oggetto di ulteriore analisi (prossimo obiettivo)  

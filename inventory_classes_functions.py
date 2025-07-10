@@ -4,6 +4,8 @@ import ast
 def scan_py_files(directory):
     inventory = []
     for root, _, files in os.walk(directory):
+        if 'venv' in root:  # Se la cartella contiene 'venv', salta i file
+            continue
         for fname in files:
             # Escludi file che contengono 'backup' (case-insensitive)
             if fname.endswith('.py') and 'backup' not in fname.lower():

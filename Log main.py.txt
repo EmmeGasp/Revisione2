@@ -1,17 +1,15 @@
 Log main.py
 PS D:\Doc\File python\Finanza\Certificates\Revisione2> & "D:/Doc/File python/Finanza/Certificates/Revisione2/venv/Scripts/python.exe" "d:/Doc/File python/Finanza/Certificates/Revisione2/src/main.py"
 ✅ Import sistema esistente OK
-✅ Import enhanced manager v15 OK
-Avvio dell'applicazione Certificati Finanziari...
-▶️  Inizializzazione del Manager Enhanced come sorgente dati principale...
-2025-07-08 18:53:36,386 - INFO - EnhancedExcelExporter inizializzato
-2025-07-08 18:53:36,386 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-08 18:53:36,386 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-08 18:53:36,386 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-08 18:53:36,386 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-08 18:53:36,386 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-08 18:53:36,386 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-08 18:53:36,386 - INFO - UnifiedRiskDashboard inizializzato
+🔗 Integrazione Enhanced Certificate Manager v15 con GUI v14
+2025-07-09 16:30:40,746 - INFO - EnhancedExcelExporter inizializzato
+2025-07-09 16:30:40,746 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-09 16:30:40,747 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-09 16:30:40,747 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-09 16:30:40,747 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-09 16:30:40,747 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-09 16:30:40,747 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-09 16:30:40,747 - INFO - UnifiedRiskDashboard inizializzato
 🚀 Sistema Certificati Integrato inizializzato
 📁 Output Excel: D:/Doc/File python/
 📂 Caricamento configurazioni v15: 6 certificati
@@ -26,7 +24,125 @@ Avvio dell'applicazione Certificati Finanziari...
 🔄 === CONVERSIONE SAFE v17 (Manager) ===
    ✅ XS2705561756 caricato
 🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ IT0012453645 caricato
+   ✅ TEST123456789 caricato
+📊 Portfolio caricati: 2
+🚀 Enhanced Certificate Manager v15 inizializzato
+   Directory: src\app\data
+   Certificati: 6
+   Portfolio: 2
+   Versione: v15 (CORRETTA)
+✅ Integrazione pronta - sostituisci _auto_calculate_dates nel GUI
+
+🧪 TEST ENHANCED CERTIFICATE MANAGER v15
+============================================================
+1. Inizializzazione manager v15...
+2025-07-09 16:30:40,752 - INFO - EnhancedExcelExporter inizializzato
+2025-07-09 16:30:40,753 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-09 16:30:40,753 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-09 16:30:40,753 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-09 16:30:40,753 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-09 16:30:40,753 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-09 16:30:40,753 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-09 16:30:40,754 - INFO - UnifiedRiskDashboard inizializzato
+🚀 Sistema Certificati Integrato inizializzato
+📁 Output Excel: D:/Doc/File python/
+📂 Caricamento configurazioni v15: 6 certificati
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ IT0006767872 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ XS3031184206 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ DE000VK2NM23 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ XS2902921233 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ XS2705561756 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ TEST123456789 caricato
+📊 Portfolio caricati: 2
+🚀 Enhanced Certificate Manager v15 inizializzato
+   Directory: src\app\data
+   Certificati: 6
+   Portfolio: 2
+   Versione: v15 (CORRETTA)
+2. Test aggiunta certificato con yahoo_ticker...
+🆕 Aggiunta certificato v15: TEST123456789
+   Dati ricevuti: ['isin', 'name', 'certificate_type', 'issuer', 'yahoo_ticker', 'underlying_assets', 'issue_date', 'maturity_date', 'notional', 'currency', 'memory_feature', 'auto_update_market_data', 'current_spots', 'volatilities', 'risk_free_rate', 'coupon_rate', 'coupon_dates', 'barrier_levels']
+   📊 Yahoo ticker specificato: TEST.MI
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+✅ Certificato enhanced TEST123456789 aggiunto (v15)
+   ✅ Yahoo ticker salvato: TEST.MI
+3. Test calcolo date robusto...
+📅 Calcolo date robusto v15:
+   Start: 2024-01-15
+   End: 2029-01-15
+   Frequency: Trimestrale
+   Primo periodo: 2024-04-15
+📊 Totale 20 date cedole generate (robusto v15)
+   ✅ Generate 20 date cedole
+4. Test stato in-life...
+   ✅ Stato in-life aggiornato
+5. Test lista dettagliata...
+   ✅ Lista dettagliata: 6 certificati
+6. Test save/load...
+2025-07-09 16:30:40,767 - INFO - EnhancedExcelExporter inizializzato
+2025-07-09 16:30:40,767 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-09 16:30:40,767 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-09 16:30:40,767 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-09 16:30:40,768 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-09 16:30:40,768 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-09 16:30:40,768 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-09 16:30:40,768 - INFO - UnifiedRiskDashboard inizializzato
+🚀 Sistema Certificati Integrato inizializzato
+📁 Output Excel: D:/Doc/File python/
+📂 Caricamento configurazioni v15: 6 certificati
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ IT0006767872 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ XS3031184206 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ DE000VK2NM23 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ XS2902921233 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ XS2705561756 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ TEST123456789 caricato
+📊 Portfolio caricati: 2
+🚀 Enhanced Certificate Manager v15 inizializzato
+   Directory: src\app\data
+   Certificati: 6
+   Portfolio: 2
+   Versione: v15 (CORRETTA)
+   ✅ Certificato caricato con yahoo_ticker: TEST.MI
+
+🎉 TUTTI I TEST v15 PASSATI!
+✅ Import enhanced manager v15 OK
+Avvio dell'applicazione Certificati Finanziari...
+▶️  Inizializzazione del Manager Enhanced come sorgente dati principale...
+2025-07-09 16:30:40,829 - INFO - EnhancedExcelExporter inizializzato
+2025-07-09 16:30:40,829 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-09 16:30:40,829 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-09 16:30:40,830 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-09 16:30:40,830 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-09 16:30:40,830 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
+2025-07-09 16:30:40,830 - INFO - UnifiedComplianceChecker inizializzato
+2025-07-09 16:30:40,830 - INFO - UnifiedRiskDashboard inizializzato
+🚀 Sistema Certificati Integrato inizializzato
+📁 Output Excel: D:/Doc/File python/
+📂 Caricamento configurazioni v15: 6 certificati
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ IT0006767872 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ XS3031184206 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ DE000VK2NM23 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ XS2902921233 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ XS2705561756 caricato
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+   ✅ TEST123456789 caricato
 📊 Portfolio caricati: 2
 🚀 Enhanced Certificate Manager v15 inizializzato
    Directory: src\app\data
@@ -34,56 +150,106 @@ Avvio dell'applicazione Certificati Finanziari...
    Portfolio: 2
    Versione: v15 (CORRETTA)
 ✅ Enhanced Manager v15 inizializzato con 6 certificati.
-2025-07-08 18:53:36,392 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-08 18:53:36,393 - INFO - EnhancedExcelExporter inizializzato
-2025-07-08 18:53:36,393 - INFO - Caricati 2 portafogli
-2025-07-08 18:53:36,394 - INFO - Caricati positions per 1 portafogli
-2025-07-08 18:53:36,394 - INFO - Portfolio Manager inizializzato
+2025-07-09 16:30:40,836 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-09 16:30:40,837 - INFO - EnhancedExcelExporter inizializzato
+2025-07-09 16:30:40,838 - INFO - Caricati 2 portafogli
+2025-07-09 16:30:40,838 - INFO - Caricati positions per 1 portafogli
+2025-07-09 16:30:40,838 - INFO - Portfolio Manager inizializzato
 ✅ Portfolio Manager e GUI Manager inizializzati.
 🚀 === GUI MANAGER v15.1 CORRECTED INIZIALIZZATO ===
 🔄 Aggiornamento dati di mercato on-demand per IT0006767872...
 🔍 DEBUG v16.1 - PRIMA del fetch Yahoo:
-   Current spots esistenti: [24.985000610351562, 49.9900016784668, 58.439998626708984, 10.489999771118164]
-✅ Prezzo di mercato per I76787.TI: 1002.21
+   Current spots esistenti: [25.700000762939453, 51.599998474121094, 60.84000015258789, 10.699999809265137]
+✅ Prezzo di mercato per I76787.TI: 1003.01
 📊 Fetch market data per 4 assets...
 📊 Usando ticker specificato per Deutsche Bank AG: DBK.DE
    🔄 Downloading Deutsche Bank AG (DBK.DE)...
-   ✅ Deutsche Bank AG: €24.99, Vol=38.56%
+   ⚠️  Dividend yield (2.62) interpretato come percentuale. Correzione in corso...
+   ✅ Deutsche Bank AG: €25.65, Vol=38.56%, Div=2.62%
 📊 Usando ticker specificato per Società Generale: GLE.PA
    🔄 Downloading Società Generale (GLE.PA)...
-   ✅ Società Generale: €49.99, Vol=38.53%
+   ⚠️  Dividend yield (2.25) interpretato come percentuale. Correzione in corso...
+   ✅ Società Generale: €51.44, Vol=38.63%, Div=2.25%
 📊 Usando ticker specificato per Unicredit: UCG.MI
    🔄 Downloading Unicredit (UCG.MI)...
-   ✅ Unicredit: €58.44, Vol=35.21%
+   ⚠️  Dividend yield (4.22) interpretato come percentuale. Correzione in corso...
+   ✅ Unicredit: €60.70, Vol=35.48%, Div=4.22%
 📊 Usando ticker specificato per Banco BPM: BAMI.MI
    🔄 Downloading Banco BPM (BAMI.MI)...
-   ✅ Banco BPM: €10.49, Vol=32.53%
+   ⚠️  Dividend yield (10.09) interpretato come percentuale. Correzione in corso...
+   ✅ Banco BPM: €10.65, Vol=32.55%, Div=10.09%
+✅ Matrice di correlazione calcolata.
 📊 Fetch completato: 4/4 successi
 🔍 DEBUG v16.1 - DOPO il fetch Yahoo:
-   Dati scaricati spots: {'Deutsche Bank AG': 24.985000610351562, 'Società Generale': 49.9900016784668, 'Unicredit': 58.439998626708984, 'Banco BPM': 10.489999771118164}    
+   Dati scaricati spots: {'Deutsche Bank AG': 25.645000457763672, 'Società Generale': 51.439998626708984, 'Unicredit': 60.70000076293945, 'Banco BPM': 10.654999732971191}
 🔍 DEBUG v16.1 - STATO FINALE:
-   Current spots finali: [24.985000610351562, 49.9900016784668, 58.439998626708984, 10.489999771118164]
-2025-07-08 18:53:47,241 - INFO - Importazione certificato reale: IT0006767872
+   Current spots finali: [25.645000457763672, 51.439998626708984, 60.70000076293945, 10.654999732971191]
+2025-07-09 16:30:52,280 - INFO - Importazione certificato reale: IT0006767872
 🎯 Certificate IT0006767872 configurato con evaluation: worst_of
-2025-07-08 18:53:47,242 - INFO - Date non ordinate - applicazione ordinamento automatico
-2025-07-08 18:53:47,242 - WARNING - Dati di mercato con problemi: ['Rilevate variazioni di prezzo estreme (>50%)']
-2025-07-08 18:53:47,242 - INFO - Parametri mercato Express configurati: 4 assets
-2025-07-08 18:53:47,242 - INFO - Certificato IT0006767872 importato con successo
-2025-07-08 18:53:47,242 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-08 18:53:47,243 - INFO - Analisi rischio per Autocallable Worst-of Reverse Convertible Certificate correlato a un paniere di azioni ordinarie
-2025-07-08 18:53:47,243 - INFO - Avvio simulazione MC: 1000 paths, 252 steps
-2025-07-08 18:53:47,250 - INFO - Simulazione MC completata
+2025-07-09 16:30:52,281 - INFO - Date non ordinate - applicazione ordinamento automatico
+2025-07-09 16:30:52,282 - WARNING - Dati di mercato con problemi: ['Rilevate variazioni di prezzo estreme (>50%)']
+2025-07-09 16:30:52,282 - INFO - Parametri mercato Express configurati: 4 assets
+2025-07-09 16:30:52,282 - INFO - Certificato IT0006767872 importato con successo
+2025-07-09 16:30:52,282 - INFO - UnifiedRiskAnalyzer inizializzato
+2025-07-09 16:30:52,282 - INFO - Analisi rischio per Autocallable Worst-of Reverse Convertible Certificate correlato a un paniere di azioni ordinarie
+2025-07-09 16:30:52,282 - INFO - Avvio simulazione MC: 1000 paths, 252 steps
+2025-07-09 16:30:52,291 - INFO - Simulazione MC completata
 🎯 Risk analysis con underlying evaluation: worst_of
-2025-07-08 18:53:47,254 - INFO - Analisi rischio completata per IT0006767872
-2025-07-08 18:53:47,254 - INFO - Analisi di rischio completata. VaR 95%: -101.70%
-2025-07-08 18:53:47,254 - INFO - 💰 Calcolo del Fair Value in corso...
-2025-07-08 18:53:47,255 - INFO - Calcolo fair value per ExpressCertificate
-2025-07-08 18:53:47,255 - INFO - Simulazione Express: 5,000 percorsi, 1169 steps
-2025-07-08 18:53:54,998 - INFO - Simulazione Express completata
+2025-07-09 16:30:52,295 - INFO - Analisi rischio completata per IT0006767872
+2025-07-09 16:30:52,295 - INFO - Analisi di rischio completata. VaR 95%: -101.42%
+2025-07-09 16:30:52,296 - INFO - 💰 Calcolo del Fair Value in corso...
+2025-07-09 16:30:52,296 - INFO - Calcolo fair value per ExpressCertificate
+2025-07-09 16:30:52,296 - INFO - Simulazione Express: 5,000 percorsi, 1168 steps
+2025-07-09 16:30:59,948 - INFO - Simulazione Express completata
 🎯 Express payoffs con evaluation type: worst_of
-2025-07-08 18:53:54,998 - INFO - Calcolo payoff Express...
-2025-07-08 18:54:01,712 - INFO - Payoff Express calcolati - Prob autocall: 52.74%
-2025-07-08 18:54:01,713 - INFO - ✅ Fair Value calcolato: 719.27
+2025-07-09 16:30:59,948 - INFO - Calcolo payoff Express...
+2025-07-09 16:31:06,820 - INFO - Payoff Express calcolati - Prob autocall: 63.52%
+2025-07-09 16:31:06,820 - INFO - ✅ Fair Value calcolato: 772.28
+✏️ === MODIFICA CERTIFICATO IT0006767872 v15.1 CORRECTED ===
+📊 Risk-Free Rate originale: 0.035
+📝 === APERTURA DIALOG v15.1 CORRECTED ===
+📝 Title: Modifica IT0006767872
+📝 Dati esistenti per l'oggetto con ISIN: IT0006767872
+🏗️ === CREAZIONE FORM COMPLETO v15.1 CORRECTED ===
+📊 === CARICAMENTO DATI (Logica Combobox corretta) ===
+✅ Form completo v15.1 CORRECTED creato con successo
+💾 === INIZIO SALVATAGGIO v16 (Logica con ';') ===
+💾 === SALVATAGGIO v16 COMPLETATO CON SUCCESSO ===
+🆕 Aggiunta certificato v15: IT0006767872
+   Dati ricevuti: ['isin', 'name', 'certificate_instrument_ticker', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 'notional', 'risk_free_rate', 'coupon_rate', 'coupon_frequency', 'currency', 'memory_feature', 'airbag_feature', 'airbag_level', 'airbag_notes', 'coupon_barrier', 'coupon_barrier_type', 'capital_barrier', 'capital_barrier_type', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level', 'observation_delay_months', 'note_barriere', 'yahoo_ticker', 'prezzi_iniziali_sottostanti', 'underlying_names', 'underlying_currencies', 'underlying_dependency_type', 'dividend_yields']
+   📊 Yahoo ticker specificato: ['DBK.DE', 'GLE.PA', 'UCG.MI', 'BAMI.MI']
+🔄 === CONVERSIONE SAFE v17 (Manager) ===
+📊 Auto-updating market data per IT0006767872...
+🔍 DEBUG v16.1 - PRIMA del fetch Yahoo:
+   Current spots: Non definiti
+✅ Prezzo di mercato per I76787.TI: 1003.12
+📊 Fetch market data per 4 assets...
+📊 Usando ticker specificato per Deutsche Bank AG: DBK.DE
+   🔄 Downloading Deutsche Bank AG (DBK.DE)...
+   ⚠️  Dividend yield (2.62) interpretato come percentuale. Correzione in corso...
+   ✅ Deutsche Bank AG: €25.66, Vol=38.56%, Div=2.62%
+📊 Usando ticker specificato per Società Generale: GLE.PA
+   🔄 Downloading Società Generale (GLE.PA)...
+   ⚠️  Dividend yield (2.25) interpretato come percentuale. Correzione in corso...
+   ✅ Società Generale: €51.48, Vol=38.64%, Div=2.25%
+📊 Usando ticker specificato per Unicredit: UCG.MI
+   🔄 Downloading Unicredit (UCG.MI)...
+   ⚠️  Dividend yield (4.22) interpretato come percentuale. Correzione in corso...
+   ✅ Unicredit: €60.69, Vol=35.48%, Div=4.22%
+📊 Usando ticker specificato per Banco BPM: BAMI.MI
+   🔄 Downloading Banco BPM (BAMI.MI)...
+   ⚠️  Dividend yield (10.09) interpretato come percentuale. Correzione in corso...
+   ✅ Banco BPM: €10.66, Vol=32.56%, Div=10.09%
+✅ Matrice di correlazione calcolata.
+📊 Fetch completato: 4/4 successi
+🔍 DEBUG v16.1 - DOPO il fetch Yahoo:
+   Dati scaricati spots: {'Deutsche Bank AG': 25.655000686645508, 'Società Generale': 51.47999954223633, 'Unicredit': 60.689998626708984, 'Banco BPM': 10.65999984741211}
+🔍 DEBUG v16.1 - STATO FINALE:
+   Current spots finali: [25.655000686645508, 51.47999954223633, 60.689998626708984, 10.65999984741211]
+✅ Certificato enhanced IT0006767872 aggiunto (v15)
+💾 Tutti i certificati sono stati salvati dal manager.
+✅ Salvataggio delegato al manager completato.
+✅ Certificato IT0006767872 modificato e salvato.
 🚪 Chiusura GUI Certificate Manager v15.1 CORRECTED
 Applicazione terminata.
 PS D:\Doc\File python\Finanza\Certificates\Revisione2> 

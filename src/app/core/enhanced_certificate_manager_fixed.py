@@ -229,12 +229,12 @@ class YahooFinanceDataProvider:
         return asset
     
      # --- INIZIO MODIFICA: CORREZIONE NAMEERROR ---
-    def fetch_market_data_safe(self, config: EnhancedCertificateConfig,                              yahoo_tickers: Optional[List[str]] = None,
+    def fetch_market_data_safe(self, config: EnhancedCertificateConfig,
+                              yahoo_tickers: Optional[List[str]] = None,
                               start_date: datetime = None,
                               end_date: datetime = None) -> Dict:
         """
-        Recupera i dati di mercato sia per i sottostanti che per il certificato stesso.
-        *** MODIFICATO PER INCLUDERE IL PREZZO DEL CERTIFICATO ***
+        Recupera i dati di mercato, INCLUSA LA MATRICE DI CORRELAZIONE
         """
       
         if not start_date:
@@ -242,13 +242,14 @@ class YahooFinanceDataProvider:
         if not end_date:
             end_date = datetime.now()
         
-        # ---> INIZIO NUOVA LOGICA <---
         base_config = config.base_config
         assets = base_config.underlying_assets or [] 
         market_data = {
             'spots': {},
             'volatilities': {},
             'returns': {},
+            'correlation_matrix': None, 
+            'dividend_yields': {},  # <-- NUOVO DIZIONARIO PER I DIVIDENDI
             'error_assets': [],
             'warnings': [],
             'certificate_market_price': None
@@ -272,7 +273,9 @@ class YahooFinanceDataProvider:
             except Exception as e:
                 print(f"⚠️ Impossibile recuperare il prezzo di mercato per {certificate_ticker}: {e}")
         # ---> FINE NUOVA LOGICA <---
- 
+
+        all_returns = {}   
+
         # Recupera i dati per i sottostanti
         if not assets:
             print("⚠️ Nessun sottostante da analizzare.")
@@ -292,7 +295,20 @@ class YahooFinanceDataProvider:
                 
                 ticker_obj = yf.Ticker(ticker)
                 hist = ticker_obj.history(start=start_date, end=end_date, timeout=10)
-                
+
+                info = ticker_obj.info #Dividend Yield
+                dividend_yield = info.get('dividendYield', 0.0) 
+ 
+                if dividend_yield is None:
+                    dividend_yield = 0.0
+                 
+                if dividend_yield > 1:
+                    print(f"   ⚠️  Dividend yield ({dividend_yield}) interpretato come percentuale. Correzione in corso...")
+                    dividend_yield = dividend_yield / 100.0
+
+                market_data['dividend_yields'][asset] = float(dividend_yield)
+
+
                 if hist.empty:
                     print(f"   ⚠️  Nessun dato per {asset} ({ticker})")
                     market_data['error_assets'].append(asset)
@@ -308,9 +324,11 @@ class YahooFinanceDataProvider:
                 current_price = float(hist['Close'].iloc[-1])
                 returns = hist['Close'].pct_change() #Calcola i ritorni
                 
+                all_returns[asset] = returns #CORRELAZIONE
+
                 # Pulisci i ritorni da valori estremi (outliers)
                 # Rimuoviamo i giorni con variazioni superiori al 50% (o inferiori al -50%)
-                returns_cleaned = returns[returns.abs() < 0.5].dropna()
+                returns_cleaned = returns[returns.abs() < 0.5]
 
                 if len(returns_cleaned) > 1:
                     # Calcola la volatilità sui dati PULITI 
@@ -326,13 +344,22 @@ class YahooFinanceDataProvider:
                 market_data['volatilities'][asset] = volatility
                 market_data['returns'][asset] = returns.tolist()
                 
-                print(f"   ✅ {asset}: €{current_price:.2f}, Vol={volatility:.2%}")
+                print(f"   ✅ {asset}: €{current_price:.2f}, Vol={volatility:.2%}, Div={dividend_yield:.2%}")
+
                 
             except Exception as e:
                 print(f"   ❌ Errore fetch {asset}: {e}")
                 market_data['error_assets'].append(asset)
                 market_data['warnings'].append(f"Errore {asset}: {str(e)}")
         
+        if len(all_returns) > 1:
+            returns_df = pd.DataFrame(all_returns).dropna()
+            if not returns_df.empty:
+                correlation_matrix = returns_df.corr().to_numpy()
+                market_data['correlation_matrix'] = correlation_matrix
+                print("✅ Matrice di correlazione calcolata.")
+         
+
         # Summary
         success_count = len(market_data['spots'])
         total_count = len(assets)
@@ -362,10 +389,14 @@ class YahooFinanceDataProvider:
 
             # Aggiorna config con dati disponibili
             if market_data['spots']:
-                # Usa dati fetch o fallback
+                
+                # --- AGGIUNTA PER CORRELAZIONE ---
+                if market_data['correlation_matrix'] is not None:
+                    config.base_config.correlations = market_data['correlation_matrix']
+
                 config.base_config.current_spots = []
                 config.base_config.volatilities = []
-                
+
                 for asset in config.base_config.underlying_assets:
                     if asset in market_data['spots']:
                         config.base_config.current_spots.append(market_data['spots'][asset])
@@ -375,6 +406,15 @@ class YahooFinanceDataProvider:
                         config.base_config.current_spots.append(100.0)
                         config.base_config.volatilities.append(0.25)
                         print(f"   ⚠️  Usando default per {asset}")
+                
+                # --- MODIFICA AGGIORNAMENTO DIVIDENDI (incondizionato) ---
+                # Sovrascrive sempre i dividend yields con i valori appena scaricati e corretti.
+                config.base_config.dividend_yields = []
+                for asset in config.base_config.underlying_assets:
+                    # Aggiungi il dividend yield recuperato o 0.0 come fallback
+                    yield_value = market_data.get('dividend_yields', {}).get(asset, 0.0)
+                    config.base_config.dividend_yields.append(yield_value)
+
                 
                 # Aggiorna metadata
                 config.in_life_state.current_market_data = market_data
@@ -1510,36 +1550,59 @@ Tasso Cedola: {self.default_rate:.3f}% (Frequenza: {self.default_frequency})"""
 
 
 class PreviewDialog:
-    """Dialog per anteprima risultati"""
+    """Dialog per anteprima risultati, con scrollbar e testo selezionabile"""
     
     def __init__(self, parent, title, content):
         self.dialog = tk.Toplevel(parent)
         self.dialog.title(title)
-        self.dialog.geometry("500x600")
+        self.dialog.geometry("550x450") # Leggermente più compatto
         self.dialog.transient(parent)
         self.dialog.grab_set()
-        text_area = tk.Text(self.dialog, wrap=tk.WORD, font=("Courier", 10))
+
+        # Centra la finestra rispetto al genitore (parent)
+        self.dialog.update_idletasks()
+        parent_x = parent.winfo_x()
+        parent_y = parent.winfo_y()
+        parent_width = parent.winfo_width()
+        parent_height = parent.winfo_height()
+        dialog_width = self.dialog.winfo_width()
+        dialog_height = self.dialog.winfo_height()
         
-        # Main frame
-        #main_frame = ttk.Frame(self.dialog, padding="20")
-        #main_frame.pack(fill=tk.BOTH, expand=True)
+        x = parent_x + (parent_width // 2) - (dialog_width // 2)
+        y = parent_y + (parent_height // 2) - (dialog_height // 2)
+        self.dialog.geometry(f'+{x}+{y}')
+
+        # --- INIZIO CODICE DA RIPRISTINARE ---
+
+        # 1. Frame principale con padding
+        main_frame = ttk.Frame(self.dialog, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Text area con scroll
-        #text_frame = ttk.Frame(main_frame)
-        #text_frame.pack(fill=tk.BOTH, expand=True)
+        # 2. Frame per contenere l'area di testo e la scrollbar
+        text_frame = ttk.Frame(main_frame)
+        text_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+
+        # 3. Area di testo per mostrare il contenuto
+        text_area = tk.Text(text_frame, wrap=tk.WORD, font=("Courier", 10), height=15)
         
-        #text_area = tk.Text(text_frame, wrap=tk.WORD, font=("Courier", 10))
-        #scrollbar = ttk.Scrollbar(text_frame, orient=tk.VERTICAL, command=text_area.yview)
-        #text_area.configure(yscrollcommand=scrollbar.set)
+        # 4. Scrollbar verticale
+        scrollbar = ttk.Scrollbar(text_frame, orient=tk.VERTICAL, command=text_area.yview)
         
-        #text_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        #scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        # 5. Collega la scrollbar all'area di testo
+        text_area.configure(yscrollcommand=scrollbar.set)
         
-        t#ext_area.insert(1.0, content)
-        #text_area.config(state=tk.DISABLED)  # Read-only
+        # 6. Posiziona gli elementi nel text_frame
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        text_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
-        # Chiudi
-        ttk.Button(self.dialog, text="Chiudi", command=self.dialog.destroy).pack(pady=10) 
+        # 7. Inserisci il contenuto (i risultati dell'analisi)
+        text_area.insert(1.0, content)
+        text_area.config(state=tk.DISABLED)  # Rendi il testo in sola lettura
+
+        # --- FINE CODICE DA RIPRISTINARE ---
+        
+        # 8. Pulsante per chiudere la finestra
+        ttk.Button(main_frame, text="Chiudi", command=self.dialog.destroy).pack()
 
 # ========================================
 # ESEMPIO INTEGRAZIONE CON GUI ESISTENTE

@@ -11,3 +11,4 @@ certificates_v15_1_corrected.backup
 certificates_v15_1_corrected.backup210625
 *.png
 **/__pycache__/
+*backup*.json

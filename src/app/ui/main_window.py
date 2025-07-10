@@ -538,6 +538,18 @@ class EnhancedCertificateDialogV15_1_Corrected:
         # Aggiorna descrizione iniziale
         self._update_dependency_description()    
 
+        # NUOVO: Dividend Yields
+        dividend_frame = ttk.Frame(underlying_frame)
+        dividend_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(dividend_frame, text="Dividend Yields (%; ';' sep.):", width=35).pack(side=tk.LEFT)
+        self.fields['dividend_yields'] = ttk.Entry(dividend_frame, width=40)
+        self.fields['dividend_yields'].pack(side=tk.LEFT, padx=(5, 5))
+        ttk.Label(
+            dividend_frame,
+            text="(es: 2.5; 0.0; 3.1)", 
+            font=('Arial', 8), foreground='gray'
+        ).pack(side=tk.LEFT, padx=(5, 0))
+
         # =======================================
         # CARICA DATI ESISTENTI v15.1
         # =======================================
@@ -598,7 +610,8 @@ class EnhancedCertificateDialogV15_1_Corrected:
             'currency': 'currency', 'dynamic_barrier_start_level': 'dynamic_barrier_start_level',
             'step_down_rate': 'step_down_rate', 'dynamic_barrier_end_level': 'dynamic_barrier_end_level',
             'observation_delay_months': 'observation_delay_months', 'prezzi_iniziali_sottostanti': 'prezzi_iniziali_sottostanti',
-            'note_barriere': 'note_barriere', 'risk_free_rate': 'risk_free_rate'
+            'note_barriere': 'note_barriere', 'risk_free_rate': 'risk_free_rate',
+            'dividend_yields': 'dividend_yields'
         }
 
         # Loop principale di caricamento
@@ -608,7 +621,10 @@ class EnhancedCertificateDialogV15_1_Corrected:
                 continue
 
             display_value = ''
-            if field_name in ['yahoo_ticker', 'underlying_names', 'underlying_currencies'] and isinstance(value, list):
+            if field_name == 'dividend_yields' and isinstance(value, list):
+                yield_strings = [f"{(y * 100):.2f}" for y in value]
+                display_value = '; '.join(yield_strings)
+            elif field_name in ['yahoo_ticker', 'underlying_names', 'underlying_currencies'] and isinstance(value, list):
                 display_value = '; '.join(value)
             elif field_name == 'prezzi_iniziali_sottostanti' and isinstance(value, list):
                 price_strings = [f"{price:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.') for price in value]
@@ -679,7 +695,15 @@ class EnhancedCertificateDialogV15_1_Corrected:
                             clean_str = p_str.strip().replace('.', '').replace(',', '.')
                             prices.append(float(clean_str))
                         result_data[field_name] = prices
-                
+
+                # NUOVO: Lista di percentuali per i dividendi
+                elif field_name == 'dividend_yields':
+                    if not value:
+                        result_data[field_name] = []
+                    else:
+                        yields = [float(y.strip().replace(',', '.')) / 100.0 for y in value.split(';')]
+                        result_data[field_name] = yields
+                 
                 # Campi percentuali (formato anglosassone con '.')
                 elif field_name in ['risk_free_rate', 'coupon_rate', 'coupon_barrier', 'capital_barrier', 'airbag_level', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']:
                     result_data[field_name] = float(value.replace(',', '.')) / 100.0 if value is not None else None
@@ -1530,8 +1554,10 @@ Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
             fair_value = fair_value_results.get('fair_value', 'N/A')
             exp_return = fair_value_results.get('expected_return', 'N/A')
 
-            # Recupera il prezzo di mercato dai risultati (il manager lo mette lì)
-            market_price = analysis_results.get('market_data', {}).get('certificate_market_price', 'N/A')
+            # Recuperiamo l'intero oggetto aggiornato dal manager per accedere ai dati di mercato
+            enhanced_config_aggiornato = self.enhanced_manager.configurations[selected_isin]
+            market_data = enhanced_config_aggiornato.in_life_state.current_market_data
+            market_price = market_data.get('certificate_market_price', 'N/A')
 
             """"
             # 4. Mostra i risultati (questa funzione andrà creata o migliorata)
@@ -1569,8 +1595,10 @@ PRINCIPALI METRICHE DI RISCHIO:
 Analisi basata su {1000} simulazioni di rischio e {5000} per il fair value.
 """
 
-            messagebox.showinfo("Analisi Completata", summary_message)
-            # --- FINE MODIFICA 3 ---
+            #messagebox.showinfo("Analisi Completata", summary_message)
+            from app.core.enhanced_certificate_manager_fixed import PreviewDialog 
+            PreviewDialog(self.root, f"Analisi Completa - {selected_isin}", summary_message)
+
 
             self.status_var.set("Analisi completata con successo.")
 
