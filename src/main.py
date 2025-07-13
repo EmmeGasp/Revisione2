@@ -55,7 +55,7 @@ def start_application():
         app = SimpleCertificateGUIManagerV15_1_Corrected()
 
         # Chiama il metodo run() dell'applicazione per avviare il ciclo di eventi
-        # e mostrare la finestra.
+        # e mostrare la finestra.   
         app.run()
 
     except Exception as e:

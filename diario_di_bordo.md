@@ -1,4 +1,4 @@
-# Diario di bordo Sistema Certificati. Aggiornamento riferito al 10/07/2025 (sera) 
+# Diario di bordo Sistema Certificati. Data di riferimento 12/07/2025 (mattina) 
 
 # Link al repo github: https://github.com/EmmeGasp/Revisione2 (branch refactoring-struttura)
 
@@ -33,13 +33,19 @@
 - ** inserito passaggio per eliminare gli outlier ai fini del calcolo della volatilità
 - ** sostituito messagebox con finestra di dialogo per la esposizione dei risultati derivanti dall'utilizzo dei dati di mercato
 - ** allo scopo di ridurre la differenza fra fair value e prezzo di mercato inserita la 'Correlazione tra i sottosanti' e 'Dividend Yield'
-- ** 
+- ** Diversi interventi sui parametri utilizzati per la determinazione dei valori finali (fair value, Var, etc.). Inseriti i prezzi iniziali/strike in luogo dei prezzi correnti; migliorata la gestione del valore delle barriere fino a questo momento considerata fissa e pari a 100, ma da completare per tener conto di valori dinamici
+- ** Chiarita l'origine del warning in merito alle eccessive variazioni di prezzo. Aspetto sistemato (vedi note per dettagli)
+- ** Chiarito che il calcolo di alcune metriche puntava ad una funzione in versione semplificata rispetto a quella effettivamnete da utilizzare. 
+- ** Pur tradendo il modello di valutazione che per sua natura è di tipo probabilistico, è stato forzato un seed per ottenere dati confrontabili e quindi capire meglio come i dati influenzano il risultato finale
+- ** Fatti vari tentativi per scrivere correttamente il livello di airbag e il campo note dello stesso. Allo stato viene salvato e caricato correttamente ma non scritto nei campi della finestra della modifica.
+- ** Dopo tutte queste modifiche i risultati ottenuti cominciano ad essere almeno significativi 
 
 
 
 ## Obiettivo corrente
 
-  - ** Individiduare un certificato in circolazione per il quale sia possibile recuperare la maggiore quantità possibile di dati relativi ad una valutazione del rischio esperta confrontare con l'output del nostro modello. Ottimale sarebbe il recupero di Fair Value, Prob. autocall, Volatilità (media)
+  - ** Sistemare definitivamente la gestione del livello di airbag e le note associate
+  - ** Migliorare ancora l'approccio di determinazione dei vari valori che ci interessano applicando ad esempio la logica dell'airbag,  introducendo il Credit Spread dell'emittente, valutando altri aspetti che possono incidere sulla determinazione dei valori finali
  
 
 ## Passi completati. Note  
@@ -62,7 +68,7 @@
   ### Data di riferimento 08/07/2025
 - ** Dopo l'attività di refactoring ed il riprisitino della operatività CRUD, deve essere avviata la fase di lavorazione dei dati di mercato  
 
-  ### Data di riferimento 09/07/2025 (mattino, prima delle lavorazioni delle giornata)
+  ### Data di riferimento 09/07/2025 (mattino, prima delle lavorazioni della giornata)
 - ** Inserita senza problemi la routine di pulizia dei dati
 - ** Modificato main_window.py per recepire il prezzo di mercato. Generato errore da 'analysis_results' che risulta non definita
 - ** I dati di mercato sono recuperati correttamente. È continuata l'attività di pulizia e raccordo. Ad esempio inserita routine per convertire le date delle scadenze da stringhe appunto a date, come si aspetta la routine che deve analizzare il rischio.  
@@ -71,3 +77,9 @@
 - ** I valori di Dividend Yeld sono recuperati da Yahoo finance ma modificabili
 - ** È stato necessario lavorare sulla modalità di acquiszione proprio dei Dividend Yield per gestire correttamente i valori percentuali
 - ** Gli interventi effettuati hanno modificato il valore di Fair Value che, nella sua versione definitiva, è ancora lontano dal prezzo di mercato. Aspetto che dovrà essere oggetto di ulteriore analisi (prossimo obiettivo)  
+
+  ### Data di riferimento 13/07/2025 (mattino, prima delle lavorazioni della giornata)
+- ** Passi decisivi nella determinazione del FV, Var e gli altri parametri (puntamento alla funzione corretta, considerati i prezzi iniziali/strike anziché spot, si è iniziato a tener conto dei valori di barriera). Per le barriere risolto anche un problema di visualizzazione che non gestiva correttamente la presenza/assenza di barriere dinamiche. Per queste ultime deve essere introdotta la gestione appunto delle barriere dinamiche
+- ** Ancora irrisolto il problema della mancata riproposizione in modifica dei valori del livello di airbag e delle note associate. Proposta modifica da verificare
+- ** Il warning presente nel log in merito alla presenza di variazioni di prezzo superiori al 50% è stato finalmente risolto. Di fatto veniva passato un dato non formattato come atteso dalla procedura ricevente e come stringa anzichè come valore. Viste anche le modifiche introdotte sulla validazione dei prezzi semplicemente la riga che dava origine all'errore è stata per adesso commentata (#)   
+- ** Alla fine della giornata, le varie modifiche apportate hanno evidenziato un notevole miglioramento nella determinazione dei valori dei vari parametri.

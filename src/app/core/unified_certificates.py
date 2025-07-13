@@ -110,9 +110,9 @@ class CouponSchedule:
 # ========================================
 
 class ExpressCertificate(CertificateBase):
-    """Certificato Express - UNIFICAZIONE Parte 3 + Parte 5a"""
-    
+   
     def __init__(self, specs: CertificateSpecs, underlying_assets: List[str],
+                 initial_prices: List[float],
                  coupon_schedule: CouponSchedule, autocall_levels: List[float],
                  autocall_dates: List[datetime], barrier: Barrier,
                  memory_coupon: bool = True, notional: float = 100.0):
@@ -122,6 +122,7 @@ class ExpressCertificate(CertificateBase):
         super().__init__(specs)
         
         self.underlying_assets = underlying_assets
+        self.initial_prices = initial_prices
         self.coupon_schedule = coupon_schedule
         self.autocall_levels = autocall_levels
         self.autocall_dates = autocall_dates
@@ -175,16 +176,19 @@ class ExpressCertificate(CertificateBase):
             risk_free_rate=risk_free_rate,
             dividend_yield=np.mean(dividends)
         )
-        self.set_market_data(market_data)
+        #self.set_market_data(market_data)
         
         logger.info(f"Parametri mercato Express configurati: {len(spot_prices)} assets")
     
-    def simulate_price_paths(self, n_simulations: int = 10000, n_steps: int = None) -> np.ndarray:
+    def simulate_price_paths(self, n_simulations: int = 10000, n_steps: int = None, seed: int=None) -> np.ndarray:
         """Simula percorsi prezzo multi-asset (da EsempioCompletoExpress)"""
         
         if not self.parametri_mercato:
             raise ValueError("Parametri mercato non configurati. Usa setup_market_parameters()")
-        
+
+        if seed is not None:
+            np.random.seed(seed)
+
         if n_steps is None:
             years_to_maturity = self.get_time_to_maturity()
             n_steps = int(years_to_maturity * 252)
@@ -251,8 +255,15 @@ class ExpressCertificate(CertificateBase):
         logger.info("Calcolo payoff Express...")
         
         n_sim, n_assets, n_steps = percorsi.shape
-        S0 = np.array(self.parametri_mercato['spot_prices'])
         
+        # >>> MODIFICA FONDAMENTALE <<<
+        S0 = np.array(self.initial_prices)
+
+        #S0 = np.array(self.parametri_mercato['spot_prices'])
+
+        # Creiamo una nuova variabile per i prezzi di strike iniziali
+        #S_initial_strike = np.array(self.initial_prices)
+
         payoffs = np.zeros(n_sim)
         tempi_uscita = np.full(n_sim, self.get_time_to_maturity())
         autocall_flags = np.zeros(n_sim, dtype=bool)
@@ -267,7 +278,6 @@ class ExpressCertificate(CertificateBase):
         
         for sim in range(n_sim):
             # Performance worst-of
-            # *** AGGIORNATO v14.11 *** - Performance con evaluation type
             # *** AGGIORNATO v14.11 *** - Performance con evaluation type  
             from app.core.real_certificate_integration import UnderlyingEvaluationEngine
 
@@ -318,8 +328,9 @@ class ExpressCertificate(CertificateBase):
                     payoffs[sim] = self.notional * (1 + coupon_totale)
                     coupon_pagati[sim] = coupon_totale * self.notional
                 else:
-                    # Perdita proporzionale
-                    payoffs[sim] = self.notional * perf_finale
+                    # Perdita proporzionale (con salvaguardia)
+                    # max(0, perf_finale) assicura che il payoff minimo sia 0.
+                    payoffs[sim] = self.notional * max(0, perf_finale)
                     coupon_pagati[sim] = 0
         
         risultati = {
@@ -436,9 +447,10 @@ class ExpressCertificate(CertificateBase):
 # ========================================
 
 class PhoenixCertificate(CertificateBase):
-    """Certificato Phoenix - UNIFICAZIONE da Parte 5a"""
+
     
     def __init__(self, specs: CertificateSpecs, underlying_assets: List[str],
+                 initial_prices: List[float],
                  coupon_schedule: CouponSchedule, barrier_coupon: float,
                  barrier_capitale: float, memory_coupon: bool = True,
                  notional: float = 100.0):
@@ -449,6 +461,7 @@ class PhoenixCertificate(CertificateBase):
         
         self.underlying_assets = underlying_assets
         self.coupon_schedule = coupon_schedule
+        self.initial_prices = initial_prices
         self.barrier_coupon = barrier_coupon
         self.barrier_capitale = barrier_capitale
         self.memory_coupon = memory_coupon
@@ -499,16 +512,19 @@ class PhoenixCertificate(CertificateBase):
             risk_free_rate=risk_free_rate,
             dividend_yield=np.mean(dividends)
         )
-        self.set_market_data(market_data)
+        #self.set_market_data(market_data)
         
         logger.info(f"Parametri mercato Phoenix configurati: {len(spot_prices)} assets")
     
-    def simulate_price_paths(self, n_simulations: int = 10000) -> np.ndarray:
+    def simulate_price_paths(self, n_simulations: int = 10000, seed: int = None) -> np.ndarray:
         """Simula percorsi prezzo Phoenix (osservazioni annuali)"""
         
         if not self.parametri_mercato:
             raise ValueError("Parametri mercato non configurati")
-        
+
+        if seed is not None:
+            np.random.seed(seed)
+
         n_assets = len(self.parametri_mercato['spot_prices'])
         n_years = len(self.coupon_schedule.payment_dates)
         dt = 1.0  # Step annuali
@@ -567,7 +583,11 @@ class PhoenixCertificate(CertificateBase):
         logger.info("Calcolo payoff Phoenix...")
         
         n_sim, n_assets, n_steps = percorsi.shape
-        S0 = np.array(self.parametri_mercato['spot_prices'])
+
+        # >>> MODIFICA FONDAMENTALE <<<
+        S0 = np.array(self.initial_prices)
+
+        #S0 = np.array(self.parametri_mercato['spot_prices'])
         
         payoffs = np.zeros(n_sim)
         coupon_totali = np.zeros(n_sim)
@@ -631,7 +651,7 @@ class PhoenixCertificate(CertificateBase):
                 final_performance = UnderlyingEvaluationEngine.calculate_performance(
                     final_prices, S0, evaluation_type
                 )
-                capitale_finale = self.notional * final_performance
+                capitale_finale = self.notional * max(0, final_performance)
                 payoffs[sim] = capitale_finale + coupon_sim    
 
             coupon_totali[sim] = coupon_sim

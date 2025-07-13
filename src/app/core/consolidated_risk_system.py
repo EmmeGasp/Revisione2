@@ -179,6 +179,11 @@ class UnifiedRiskAnalyzer:
     
     def calculate_var(self, returns: np.ndarray, confidence_level: float = 0.95) -> float:
         """Calcola Value at Risk - METODO CONSOLIDATO"""
+
+        # Filtra via eventuali valori non numerici (NaN, inf) che possono corrompere i calcoli
+        returns = returns[np.isfinite(returns)]
+        
+
         if len(returns) == 0:
             return 0.0
         
@@ -203,6 +208,10 @@ class UnifiedRiskAnalyzer:
     
     def calculate_cvar(self, returns: np.ndarray, confidence_level: float = 0.95) -> float:
         """Calcola Conditional Value at Risk (Expected Shortfall)"""
+
+        # Filtra via eventuali valori non numerici (NaN, inf) che possono corrompere i calcoli
+        returns = returns[np.isfinite(returns)]
+
         if len(returns) == 0:
             return 0.0
         
@@ -227,6 +236,10 @@ class UnifiedRiskAnalyzer:
         if risk_free_rate is None:
             risk_free_rate = self.risk_free_rate
         
+        # Filtra via eventuali valori non numerici (NaN, inf) che possono corrompere i calcoli
+        returns = returns[np.isfinite(returns)]
+
+
         if len(returns) == 0 or np.std(returns) == 0:
             return 0.0
         
@@ -238,6 +251,9 @@ class UnifiedRiskAnalyzer:
         if risk_free_rate is None:
             risk_free_rate = self.risk_free_rate
         
+        # Filtra via eventuali valori non numerici (NaN, inf) che possono corrompere i calcoli
+        returns = returns[np.isfinite(returns)]
+
         if len(returns) == 0:
             return 0.0
         
@@ -299,18 +315,25 @@ class UnifiedRiskAnalyzer:
             # Usa UnifiedCertificateAnalyzer per ottenere payoffs
             analyzer = UnifiedCertificateAnalyzer(certificate)
             
-            # Ottieni fair value e risk metrics
-            if hasattr(certificate, 'risultati_simulazione') and certificate.risultati_simulazione:
-                # Usa risultati esistenti se disponibili
-                if isinstance(certificate, (ExpressCertificate, PhoenixCertificate)):
-                    payoffs = certificate.risultati_simulazione.get('payoffs', {}).get('payoffs', [])
-                    if len(payoffs) == 0:
-                        payoffs = self._simulate_certificate_payoffs(certificate, n_simulations)
+            # Determina il metodo di calcolo corretto in base al tipo di certificato
+
+            if hasattr(certificate, 'simulate_price_paths'):
+                # Per certificati complessi come Express e Phoenix che hanno una simulazione dedicata
+                percorsi = certificate.simulate_price_paths(n_simulations=n_simulations, seed=42)
+
+                if isinstance(certificate, ExpressCertificate):
+                    payoff_results = certificate.calculate_express_payoffs(percorsi)
+                    payoffs = payoff_results['payoffs']
+                elif isinstance(certificate, PhoenixCertificate):
+                    payoff_results = certificate.calculate_phoenix_payoffs(percorsi)
+                    payoffs = payoff_results['payoffs']
                 else:
+                    # Fallback per altri tipi di certificati complessi non ancora gestiti
                     payoffs = self._simulate_certificate_payoffs(certificate, n_simulations)
             else:
+                # Per certificati semplici che usano il metodo di payoff standard
                 payoffs = self._simulate_certificate_payoffs(certificate, n_simulations)
-            
+         
             # Calcola rendimenti
             notional = getattr(certificate, 'notional', certificate.specs.strike)
             returns = (payoffs - notional) / notional

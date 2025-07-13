@@ -1113,7 +1113,7 @@ class RealCertificateConfig:
 
     # Campi Tecnici e di Mercato
     certificate_instrument_ticker: Optional[str] = None # *** CAMPO CHIAVE AGGIUNTO ***
-    prezzi_iniziali_sottostanti: Optional[str] = None
+    prezzi_iniziali_sottostanti: List[float] = field(default_factory=list)
     autocall_levels: List[float] = field(default_factory=list)
     autocall_dates: List[datetime] = field(default_factory=list)
     current_spots: Optional[List[float]] = None
@@ -1141,6 +1141,17 @@ class RealCertificateConfig:
         elif self.underlying_assets and not self.underlying_names:
             self.underlying_names = ", ".join(self.underlying_assets)
 
+    def to_dict(self):
+        """Converte l'oggetto dataclass in un dizionario, gestendo le date."""
+        from dataclasses import asdict, is_dataclass
+        result = {}
+        for f in self.__dataclass_fields__:
+            value = getattr(self, f.name)
+            if isinstance(value, datetime):
+                result[f.name] = value.strftime('%Y-%m-%d')
+            else:
+                result[f.name] = value
+        return result
 
 class UnderlyingEvaluationEngine:
     """*** NUOVO v14.11 *** - Engine per calcolo performance multi-asset basato su evaluation type"""
@@ -1308,14 +1319,15 @@ class RealCertificateImporter:
         autocall_levels = config.autocall_levels or [1.0] * len(config.coupon_dates)
         autocall_dates = config.autocall_dates or config.coupon_dates
 
-        # Barrier (default = 65% se non specificato)
-        barrier_level = config.barrier_levels.get('capital', 0.65) if config.barrier_levels else 0.65
+        # Barrier (usa il campo corretto 'capital barrier' con un fallback)
+        barrier_level = config.capital_barrier if config.capital_barrier is not None else 0.65
         barrier = Barrier(level=barrier_level, type=BarrierType.EUROPEAN)
 
         # Crea certificate
         certificate = ExpressCertificate(
             specs=specs,
             underlying_assets=config.underlying_assets,
+            initial_prices=config.prezzi_iniziali_sottostanti,
             coupon_schedule=coupon_schedule,
             autocall_levels=autocall_levels,
             autocall_dates=autocall_dates,
@@ -1384,12 +1396,14 @@ class RealCertificateImporter:
 
         # Barriers
         barrier_coupon = config.barrier_levels.get('coupon', 0.70) if config.barrier_levels else 0.70
-        barrier_capitale = config.barrier_levels.get('capital', 0.60) if config.barrier_levels else 0.60
+        barrier_capitale = config.capital_barrier if config.capital_barrier is not None else 0.60
+
 
         # Crea certificate
         certificate = PhoenixCertificate(
             specs=specs,
             underlying_assets=config.underlying_assets,
+            initial_prices=config.prezzi_iniziali_sottostanti,
             coupon_schedule=coupon_schedule,
             barrier_coupon=barrier_coupon,
             barrier_capitale=barrier_capitale,

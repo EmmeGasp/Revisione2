@@ -642,6 +642,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
                 widget = self.fields[field_name]
                 if isinstance(widget, ttk.Combobox):
                     widget.set(display_value) # I Combobox usano .set()
+                    self._toggle_airbag_level_field()
                 elif isinstance(widget, ttk.Entry):
                     widget.delete(0, tk.END)
                     widget.insert(0, display_value)
@@ -723,6 +724,17 @@ class EnhancedCertificateDialogV15_1_Corrected:
         except (ValueError, TypeError) as e:
             messagebox.showerror("Errore di Input", f"Il valore '{value_str}' per il campo '{field_name}' non è valido.\nErrore: {e}")
             return
+
+        # Imposta esplicitamente il flag della barriera dinamica
+        # in base alla scelta fatta nel campo del tipo di barriera.
+        if result_data.get('capital_barrier_type') == 'dynamic':
+            result_data['dynamic_barrier_feature'] = True
+        else:
+            result_data['dynamic_barrier_feature'] = False
+
+        print("---- DEBUG DIALOG SALVA ----")
+        print(result_data)
+
 
         self.result = result_data
         self.dialog.destroy()
@@ -1496,7 +1508,30 @@ Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
         if not selected_isin:
             messagebox.showwarning("Attenzione", "Seleziona un certificato da analizzare.")
             return
+        
+        # >>> INIZIO NUOVO BLOCCO DI VALIDAZIONE <<<
+        cert_obj = self.enhanced_manager.configurations.get(selected_isin)
+        if not cert_obj or not cert_obj.base_config:
+            messagebox.showerror("Errore Interno", f"Impossibile recuperare i dati per il certificato {selected_isin}.")
+            return
 
+        base_conf = cert_obj.base_config
+        # Usiamo getattr per sicurezza, nel caso gli attributi non esistessero
+        num_underlyings = len(getattr(base_conf, 'underlying_assets', []))
+        num_initial_prices = len(getattr(base_conf, 'prezzi_iniziali_sottostanti', []))
+
+        if num_initial_prices == 0:
+            messagebox.showwarning("Dati Obbligatori Mancanti",
+                                "Il campo 'Prezzi Iniziali/Strike' è obbligatorio per l'analisi.\n\n"
+                                "Per favore, modifica il certificato e inserisci i valori corretti prima di procedere.")
+            return
+
+        if num_underlyings != num_initial_prices:
+            messagebox.showwarning("Dati Incoerenti",
+                                f"Il numero di sottostanti ({num_underlyings}) non corrisponde al numero di prezzi iniziali ({num_initial_prices}).\n\n"
+                                "Per favore, controlla i dati del certificato.")
+            return
+    
         if not self.enhanced_manager:
             messagebox.showerror("Errore", "Funzionalità di analisi non disponibile. Enhanced Manager non trovato.")
             return
@@ -1548,6 +1583,10 @@ Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
                 self.logger.error(f"⚠️ Errore nel calcolo del Fair Value: {fv_error}", exc_info=True)
                 fair_value_results = {'fair_value': 0, 'error': str(fv_error)}
             # --- FINE MODIFICA 2 ---
+
+            self.logger.info(f"RISULTATI ANALISI per {selected_isin}: FV={fair_value_results.get('fair_value', 'N/A'):.2f}, VaR 95%={risk_metrics.var_95:.2%}, Volatilità={risk_metrics.volatility:.2%}") #Volatilità
+
+
 
             # --- MODIFICA 3: VISUALIZZAZIONE COMPLETA DEI RISULTATI ---
             # Prepara il messaggio formattato

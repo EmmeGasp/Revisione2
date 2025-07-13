@@ -324,6 +324,14 @@ class YahooFinanceDataProvider:
                 current_price = float(hist['Close'].iloc[-1])
                 returns = hist['Close'].pct_change() #Calcola i ritorni
                 
+                #Identifichiamo quali sono i rendimenti considerati anomali (fuori dal range +/- 50%)
+                outliers = returns[returns.abs() >= 0.5]
+                if not outliers.empty:
+                    print(f"   ⚠️ WARNING: Rilevati {len(outliers)} rendimenti anomali per {asset} ({ticker}):")
+                    # Stampiamo i primi 5 per non inondare il log
+                    for date, value in outliers.head(5).items():
+                        print(f"     - Data: {date.strftime('%Y-%m-%d')}, Variazione: {value:.2%}")                
+                
                 all_returns[asset] = returns #CORRELAZIONE
 
                 # Pulisci i ritorni da valori estremi (outliers)
@@ -808,6 +816,10 @@ class EnhancedCertificateManagerV15:
             elif isinstance(filtered_config['underlying_names'], str):
                 filtered_config['underlying_assets'] = [name.strip() for name in filtered_config['underlying_names'].split(';')]
         # === FINE CORREZIONE ===
+
+        print("---- DEBUG MANAGER CARICA ----")
+        print(filtered_config)
+        print("----------------------------")
 
         try:
             return RealCertificateConfig(**filtered_config)
@@ -1664,8 +1676,9 @@ def integrate_with_fixed_gui_v14():
 # MAIN & TESTING
 # ========================================
 
-def test_enhanced_certificate_manager_v15():
-    """Test completo Enhanced Certificate Manager v15"""
+""" def test_enhanced_certificate_manager_v15():
+    #Test completo Enhanced Certificate Manager v15
+
     
     print("\n🧪 TEST ENHANCED CERTIFICATE MANAGER v15")
     print("="*60)
@@ -1792,4 +1805,5 @@ if __name__ == "__main__":
         print("\n❌ ERRORI NEL SISTEMA v15")
 
 integrate_with_fixed_gui_v14()
-test_enhanced_certificate_manager_v15()         
+test_enhanced_certificate_manager_v15()  
+ """
