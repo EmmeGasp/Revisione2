@@ -1333,7 +1333,10 @@ class RealCertificateImporter:
             autocall_dates=autocall_dates,
             barrier=barrier,
             memory_coupon=config.memory_feature,
-            notional=config.notional
+            notional=config.notional,
+            airbag_feature=config.airbag_feature,
+            airbag_level=config.airbag_level
+
         )
 
         # *** NUOVO v14.11 *** - Setup underlying evaluation type
@@ -1408,7 +1411,10 @@ class RealCertificateImporter:
             barrier_coupon=barrier_coupon,
             barrier_capitale=barrier_capitale,
             memory_coupon=config.memory_feature,
-            notional=config.notional
+            notional=config.notional,
+            airbag_feature=config.airbag_feature,
+            airbag_level=config.airbag_level
+
         )
 
         # Setup market data

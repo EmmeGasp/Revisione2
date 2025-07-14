@@ -563,12 +563,15 @@ class EnhancedCertificateDialogV15_1_Corrected:
     
     def _load_existing_data_v15_1_corrected(self):
         """
-        Versione Completa e Corretta:
-        - Popola i default per i nuovi certificati.
-        - Carica i dati da un oggetto RealCertificateConfig per la modifica.
-        """
+        Versione Corretta e Definitiva:
+        - Carica i dati da un DIZIONARIO.
+        - Applica i toggle dei campi (airbag, barriera dinamica) nell'ordine corretto
+          per evitare di scrivere su widget disabilitati.
+
+                """
         if not self.existing_data:
             print("📝 Popolamento form con valori di default per nuovo certificato.")
+            # ... (la logica per i nuovi certificati qui rimane invariata) ...
             self.fields['issuer'].set('Vontobel')
             self.fields['certificate_type'].set('express')
             self.fields['issue_date'].insert(0, datetime.now().strftime('%Y-%m-%d'))
@@ -576,7 +579,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
             self.fields['notional'].insert(0, '1000')
             self.fields['risk_free_rate'].insert(0, '3.50')
             self.fields['coupon_rate'].insert(0, '0.70')
-            self.fields['coupon_frequency'].set('Mensile') # Come da tua modifica
+            self.fields['coupon_frequency'].set('Mensile')
             self.fields['memory_feature'].set('True')
             self.fields['airbag_feature'].set('False')
             self.fields['coupon_barrier_type'].set('european')
@@ -591,71 +594,86 @@ class EnhancedCertificateDialogV15_1_Corrected:
             self._update_dependency_description()
             return
 
-        print("📊 === CARICAMENTO DATI (Logica Combobox corretta) ===")
-        
-        # Funzione helper per l'accesso sicuro agli attributi
-        def get_attr(attr_name, default=None):
-            return getattr(self.existing_data, attr_name, default)
+        print("📊 === CARICAMENTO DATI DA DIZIONARIO (Logica Definitiva) ===")
 
-        field_mapping = {
-            'isin': 'isin', 'name': 'name', 'issuer': 'issuer', 'certificate_type': 'certificate_type', 
-            'issue_date': 'issue_date', 'maturity_date': 'maturity_date', 'notional': 'notional', 
-            'coupon_rate': 'coupon_rate', 'coupon_frequency': 'coupon_frequency', 'memory_feature': 'memory_feature', 
-            'airbag_feature': 'airbag_feature', 'airbag_level': 'airbag_level', 'airbag_notes': 'airbag_notes',
-            'coupon_barrier': 'coupon_barrier', 'coupon_barrier_type': 'coupon_barrier_type',
-            'capital_barrier': 'capital_barrier', 'capital_barrier_type': 'capital_barrier_type',
-            'certificate_instrument_ticker': 'certificate_instrument_ticker',
-            'underlying_currencies': 'underlying_currencies', 'underlying_names': 'underlying_names',
-            'underlying_dependency_type': 'underlying_dependency_type', 'yahoo_ticker': 'yahoo_ticker',
-            'currency': 'currency', 'dynamic_barrier_start_level': 'dynamic_barrier_start_level',
-            'step_down_rate': 'step_down_rate', 'dynamic_barrier_end_level': 'dynamic_barrier_end_level',
-            'observation_delay_months': 'observation_delay_months', 'prezzi_iniziali_sottostanti': 'prezzi_iniziali_sottostanti',
-            'note_barriere': 'note_barriere', 'risk_free_rate': 'risk_free_rate',
-            'dividend_yields': 'dividend_yields'
-        }
+        # Funzione helper per leggere da un DIZIONARIO in modo sicuro
+        def get_value(key, default=None):
+            val = self.existing_data.get(key, default)
+            return val if val is not None else default
 
-        # Loop principale di caricamento
-        for field_name, attr_name in field_mapping.items():
-            value = get_attr(attr_name)
+        # Funzione helper per popolare un widget
+        def set_widget_value(field_name, value):
             if value is None:
-                continue
-
-            display_value = ''
-            if field_name == 'dividend_yields' and isinstance(value, list):
-                yield_strings = [f"{(y * 100):.2f}" for y in value]
-                display_value = '; '.join(yield_strings)
-            elif field_name in ['yahoo_ticker', 'underlying_names', 'underlying_currencies'] and isinstance(value, list):
-                display_value = '; '.join(value)
-            elif field_name == 'prezzi_iniziali_sottostanti' and isinstance(value, list):
-                price_strings = [f"{price:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.') for price in value]
-                display_value = '; '.join(price_strings)
-            elif field_name in ['risk_free_rate', 'coupon_rate', 'coupon_barrier', 'capital_barrier', 'airbag_level', 'dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']:
-                display_value = f"{value * 100:.3f}" if value <= 1.0 else f"{value:.3f}"
-            elif isinstance(value, bool):
-                 display_value = str(value)
-            elif isinstance(value, datetime):
-                 display_value = value.strftime('%Y-%m-%d')
-            else:
-                display_value = str(value)
-
+                return
             try:
                 widget = self.fields[field_name]
                 if isinstance(widget, ttk.Combobox):
-                    widget.set(display_value) # I Combobox usano .set()
-                    self._toggle_airbag_level_field()
-                elif isinstance(widget, ttk.Entry):
-                    widget.delete(0, tk.END)
-                    widget.insert(0, display_value)
+                    widget.set(str(value))
                 elif isinstance(widget, tk.Text):
                     widget.delete('1.0', tk.END)
-                    widget.insert('1.0', display_value)
+                    widget.insert('1.0', str(value))
+                elif isinstance(widget, ttk.Entry):
+                    widget.delete(0, tk.END)
+                    widget.insert(0, str(value))
             except Exception as e:
-                print(f"⚠️ Errore nel caricare il campo {field_name} con valore '{display_value}': {e}")
-                      
-        
+                print(f"⚠️ Errore nel popolare il campo GUI '{field_name}' con valore '{value}': {e}")
+
+        # --- CARICAMENTO DATI IN ORDINE LOGICO ---
+
+        # 1. Carica TUTTI i campi semplici e quelli che controllano la UI
+        #    (escludendo i campi dipendenti come 'airbag_level')
+        simple_fields = [
+            'isin', 'name', 'issuer', 'certificate_type', 'issue_date', 'maturity_date', 
+            'notional', 'certificate_instrument_ticker', 'currency', 'coupon_frequency', 
+            'memory_feature', 'underlying_dependency_type', 'coupon_barrier_type',
+            'note_barriere', 'airbag_feature', 'capital_barrier_type' # I "controller"
+        ]
+        for field in simple_fields:
+            set_widget_value(field, get_value(field))
+
+        # 2. **LA TUA INTUIZIONE IN PRATICA**: Esegui i toggle SUBITO dopo aver impostato i controller
         self._toggle_airbag_level_field()
         self._on_capital_barrier_type_changed()
         self._update_dependency_description()
+
+        # 3. Ora carica i campi rimanenti, inclusi quelli che erano disabilitati
+        
+        # Campi percentuali (convertiti da float 0.035 a stringa "3.50")
+        percentage_fields = {
+            'risk_free_rate': 2, 'coupon_rate': 3, 'coupon_barrier': 2, 'capital_barrier': 2, 
+            'airbag_level': 2, 'dynamic_barrier_start_level': 2, 'step_down_rate': 3, 
+            'dynamic_barrier_end_level': 2
+        }
+        for field, decimals in percentage_fields.items():
+            val = get_value(field)
+            if val is not None:
+                # Se il campo è disabilitato (es. airbag_level), il set_widget_value non farà nulla, evitando errori.
+                set_widget_value(field, f"{(val * 100):.{decimals}f}")
+
+        # Campi lista (convertiti da lista a stringa separata da ';')
+        list_fields = ['yahoo_ticker', 'underlying_names', 'underlying_currencies']
+        for field in list_fields:
+            val = get_value(field, [])
+            set_widget_value(field, '; '.join(val))
+        
+        # Liste di numeri con formattazione speciale
+        prezzi_val = get_value('prezzi_iniziali_sottostanti', [])
+        if prezzi_val:
+            price_strings = [f"{price:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.') for price in prezzi_val]
+            set_widget_value('prezzi_iniziali_sottostanti', '; '.join(price_strings))
+
+        dividends_val = get_value('dividend_yields', [])
+        if dividends_val:
+            yield_strings = [f"{(y * 100):.2f}" for y in dividends_val]
+            set_widget_value('dividend_yields', '; '.join(yield_strings))
+
+        # Campi rimanenti (note e interi)
+        set_widget_value('airbag_notes', get_value('airbag_notes'))
+        set_widget_value('observation_delay_months', get_value('observation_delay_months'))
+
+        # Focus sul primo campo
+        self.fields['isin'].focus()
+        print("✅ Dati caricati correttamente con la nuova logica.") 
     
     def _save_v15_1_corrected(self):
         """
@@ -732,8 +750,8 @@ class EnhancedCertificateDialogV15_1_Corrected:
         else:
             result_data['dynamic_barrier_feature'] = False
 
-        print("---- DEBUG DIALOG SALVA ----")
-        print(result_data)
+        #print("---- DEBUG DIALOG SALVA ----")
+        #print(result_data)
 
 
         self.result = result_data
@@ -1127,7 +1145,8 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         print(f"📊 Risk-Free Rate originale: {original_rf}")
 
         try:
-            dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, f"Modifica {selected_isin}", cert_data_for_dialog)
+            cert_data_dict = self.enhanced_manager.get_certificate_data_for_gui(selected_isin)
+            dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, f"Modifica {selected_isin}", cert_data_dict)
             
             if hasattr(dialog, 'result') and dialog.result:
                 updated_data = dialog.result

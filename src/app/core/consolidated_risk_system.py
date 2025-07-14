@@ -297,8 +297,8 @@ class UnifiedRiskAnalyzer:
     
     def analyze_certificate_risk(self, certificate: CertificateBase, 
                                 n_simulations: int = 10000) -> RiskMetrics:
-        """Analizza rischio di un certificato - METODO CONSOLIDATO"""
-        
+        """Analizza rischio di un certificato - VERSIONE RISTRUTTURATA E CORRETTA"""
+
         cache_key = self._get_cache_key(
             type(certificate).__name__, 
             certificate.specs.isin,
@@ -312,50 +312,117 @@ class UnifiedRiskAnalyzer:
         self.logger.info(f"Analisi rischio per {certificate.specs.name}")
         
         try:
-            # Usa UnifiedCertificateAnalyzer per ottenere payoffs
-            analyzer = UnifiedCertificateAnalyzer(certificate)
-            
-            # Determina il metodo di calcolo corretto in base al tipo di certificato
-
-            if hasattr(certificate, 'simulate_price_paths'):
-                # Per certificati complessi come Express e Phoenix che hanno una simulazione dedicata
+            # =================================================================
+            # PASSO 1: Generiamo i percorsi di simulazione in modo UNIFORME
+            # =================================================================
+            if not hasattr(certificate, 'simulate_price_paths'):
+                # Per certificati semplici, creiamo un motore Monte Carlo base
+                if not certificate.market_data:
+                    raise ValueError("Market data necessari per la simulazione")
+                
+                model = BlackScholesModel(
+                    S0=certificate.get_current_spot(),
+                    r=certificate.risk_free_rate,
+                    T=certificate.get_time_to_maturity(),
+                    sigma=certificate.market_data.volatility or 0.2
+                )
+                mc_engine = MonteCarloEngine(model, n_simulations)
+                percorsi = mc_engine.run_simulation()
+            else:
+                # Per certificati complessi, usiamo il loro metodo dedicato
                 percorsi = certificate.simulate_price_paths(n_simulations=n_simulations, seed=42)
 
-                if isinstance(certificate, ExpressCertificate):
-                    payoff_results = certificate.calculate_express_payoffs(percorsi)
-                    payoffs = payoff_results['payoffs']
-                elif isinstance(certificate, PhoenixCertificate):
-                    payoff_results = certificate.calculate_phoenix_payoffs(percorsi)
-                    payoffs = payoff_results['payoffs']
-                else:
-                    # Fallback per altri tipi di certificati complessi non ancora gestiti
-                    payoffs = self._simulate_certificate_payoffs(certificate, n_simulations)
+            # =================================================================
+            # PASSO 2: Calcoliamo i payoff INIZIALI (senza airbag)
+            # =================================================================
+            if isinstance(certificate, ExpressCertificate):
+                payoff_results = certificate.calculate_express_payoffs(percorsi)
+                # Forziamo la conversione a un array NumPy
+                payoffs = np.array(payoff_results['payoffs']).copy()
+            elif isinstance(certificate, PhoenixCertificate):
+                payoff_results = certificate.calculate_phoenix_payoffs(percorsi)
+                # Forziamo la conversione a un array NumPy
+                payoffs = np.array(payoff_results['payoffs']).copy()
             else:
-                # Per certificati semplici che usano il metodo di payoff standard
-                payoffs = self._simulate_certificate_payoffs(certificate, n_simulations)
-         
-            # Calcola rendimenti
+                # Per certificati semplici, usiamo il metodo di payoff standard
+                final_prices = percorsi[:, -1]
+                payoffs = np.array([certificate.calculate_payoff(price) for price in final_prices])
+
+            # =================================================================
+            # PASSO 3: Applichiamo la logica AIRBAG (ORA CON LA CORREZIONE FINALE)
+            # =================================================================
+            print(f"DEBUG INIZIO PASSO 3: Tipo di 'percorsi'={type(percorsi)}, Shape={getattr(percorsi, 'shape', 'N/A')}") # <-- RIGA DA AGGIUNGERE
+
+            if getattr(certificate, 'airbag_feature', False):
+                self.logger.info(f"🛡️  Certificato {certificate.specs.isin} ha l'Airbag. Applico la logica di protezione.")
+
+                notional = getattr(certificate, 'notional', 1000.0)
+                capital_barrier = getattr(certificate, 'capital_barrier', 0.60)
+                airbag_level = getattr(certificate, 'airbag_level', capital_barrier)
+                initial_prices = getattr(certificate, 'initial_prices', [100.0])
+                initial_price_worst_of = min(initial_prices) if initial_prices else 100.0
+                
+                # Calcoliamo la performance basandoci SOLO sui prezzi finali di ogni percorso
+                final_prices = percorsi[:, -1]  # Seleziona l'ultimo prezzo di ogni simulazione
+                #performance = final_prices / initial_price_worst_of # Ora 'performance' è 1D
+                performance = percorsi[:, -1] / initial_price_worst_of
+
+
+                # Ora la maschera sarà 1D (shape: 1000,) e tutto funzionerà
+                breached_mask = performance < capital_barrier
+                num_breached = np.sum(breached_mask)
+
+                if num_breached > 0:
+                    self.logger.info(f"   L'Airbag si attiverà per {num_breached} su {n_simulations} simulazioni.")
+
+                    final_prices_breached = final_prices[breached_mask]
+                    prezzo_riferimento_airbag = initial_price_worst_of * airbag_level
+                    
+                    if prezzo_riferimento_airbag > 0:
+                        payoff_corretto = notional * (final_prices_breached / prezzo_riferimento_airbag)
+                        # =======================================================
+                        # <<< INIZIO BLOCCO DI DEBUG: INSERISCI QUESTO CODICE >>>
+                        # =======================================================
+                        print("\n--- DEBUG PRE-ERRORE ---")
+                        print(f"Tipo di 'payoffs': {type(payoffs)}")
+                        print(f"Shape di 'payoffs': {getattr(payoffs, 'shape', 'N/A')}")
+                        print(f"Tipo di 'breached_mask': {type(breached_mask)}")
+                        print(f"Shape di 'breached_mask': {getattr(breached_mask, 'shape', 'N/A')}")
+                        print(f"Dtype di 'breached_mask': {getattr(breached_mask, 'dtype', 'N/A')}") # Molto importante!
+                        print(f"Tipo di 'payoff_corretto': {type(payoff_corretto)}")
+                        print(f"Shape di 'payoff_corretto': {getattr(payoff_corretto, 'shape', 'N/A')}")
+                        print("--- FINE DEBUG ---\n")
+                        # =======================================================
+
+                        # Questa è la riga che attualmente causa l'errore
+                        payoffs[breached_mask] = payoff_corretto
+                    else:
+                        self.logger.warning("Prezzo di riferimento airbag è zero, impossibile calcolare il payoff corretto.")
+   
+            # =================================================================
+            # PASSO 4: Calcoliamo le metriche di rischio finali
+            # =================================================================
             notional = getattr(certificate, 'notional', certificate.specs.strike)
             returns = (payoffs - notional) / notional
             
             # Calcola tutte le metriche
             var_95 = self.calculate_var(returns, 0.95)
+            # ... (il resto della funzione da qui in poi rimane invariato) ...
             var_99 = self.calculate_var(returns, 0.99)
             cvar_95 = self.calculate_cvar(returns, 0.95)
             cvar_99 = self.calculate_cvar(returns, 0.99)
             max_drawdown = self.calculate_max_drawdown(payoffs)
             volatility = np.std(returns)
-            skewness = stats.skew(returns)
-            kurtosis = stats.kurtosis(returns)
+            skewness = stats.skew(returns) if len(returns) > 0 else 0
+            kurtosis = stats.kurtosis(returns) if len(returns) > 0 else 0
             sharpe_ratio = self.calculate_sharpe_ratio(returns)
             sortino_ratio = self.calculate_sortino_ratio(returns)
             
-            # Metriche aggiuntive per certificati multi-asset
+            # ... (tutto il resto della funzione rimane invariato)
             correlation_risk = 0.0
             concentration_risk = 0.0
             
             if hasattr(certificate, 'underlying_assets') and len(certificate.underlying_assets) > 1:
-                # Simula returns per ogni asset (semplificato)
                 n_assets = len(certificate.underlying_assets)
                 returns_matrix = np.random.multivariate_normal(
                     mean=np.zeros(n_assets),
@@ -364,41 +431,28 @@ class UnifiedRiskAnalyzer:
                 )
                 
                 correlation_risk = self.calculate_correlation_risk(returns_matrix)
-                weights = np.ones(n_assets) / n_assets  # Equal weight assumption
+                weights = np.ones(n_assets) / n_assets
                 concentration_risk = self.calculate_concentration_risk(weights)
             
-            # Liquidity risk (semplificato basato su tipo certificato)
             liquidity_risk = self._estimate_liquidity_risk(certificate)
-            
-            # Credit risk (basato su specs)
             credit_risk = self._estimate_credit_risk(certificate)
             
             risk_metrics = RiskMetrics(
-                var_95=var_95,
-                var_99=var_99,
-                cvar_95=cvar_95,
-                cvar_99=cvar_99,
-                max_drawdown=max_drawdown,
-                volatility=volatility,
-                skewness=skewness,
-                kurtosis=kurtosis,
-                sharpe_ratio=sharpe_ratio,
-                sortino_ratio=sortino_ratio,
-                correlation_risk=correlation_risk,
-                concentration_risk=concentration_risk,
-                liquidity_risk=liquidity_risk,
-                credit_risk=credit_risk
+                var_95=var_95, var_99=var_99, cvar_95=cvar_95, cvar_99=cvar_99,
+                max_drawdown=max_drawdown, volatility=volatility, skewness=skewness,
+                kurtosis=kurtosis, sharpe_ratio=sharpe_ratio, sortino_ratio=sortino_ratio,
+                correlation_risk=correlation_risk, concentration_risk=concentration_risk,
+                liquidity_risk=liquidity_risk, credit_risk=credit_risk
             )
             
-            # Cache risultato
             self._set_cache(cache_key, risk_metrics)
             
             self.logger.info(f"Analisi rischio completata per {certificate.specs.isin}")
             return risk_metrics
             
         except Exception as e:
-            self.logger.error(f"Errore analisi rischio {certificate.specs.isin}: {e}")
-            raise
+            self.logger.error(f"Errore analisi rischio {certificate.specs.isin}: {e}", exc_info=True)
+            raise        
     
     def _simulate_certificate_payoffs(self, certificate: CertificateBase, 
                                     n_simulations: int) -> np.ndarray:

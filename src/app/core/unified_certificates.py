@@ -9,7 +9,7 @@
 # Timestamp: 2025-06-16 12:01:00
 # Modifica del metodo ExpressCertificate.calculate_express_payoffs
 # per implementare la logica dei prezzi che tenga conto
-# di tutte le opioni disponibili per questa tipologia di certificato
+# di tutte le opzioni disponibili per questa tipologia di certificato
 # ========================================
 
 """
@@ -115,7 +115,10 @@ class ExpressCertificate(CertificateBase):
                  initial_prices: List[float],
                  coupon_schedule: CouponSchedule, autocall_levels: List[float],
                  autocall_dates: List[datetime], barrier: Barrier,
-                 memory_coupon: bool = True, notional: float = 100.0):
+                 memory_coupon: bool = True, notional: float = 100.0,
+                 airbag_feature: bool = False, 
+                 airbag_level: Optional[float] = None):
+        
         
         # Aggiorna specs per Express
         specs.certificate_type = CertificateType.EXPRESS.value
@@ -129,6 +132,9 @@ class ExpressCertificate(CertificateBase):
         self.barrier = barrier
         self.memory_coupon = memory_coupon
         self.notional = notional
+        self.airbag_feature = airbag_feature
+        self.airbag_level = airbag_level
+        self.capital_barrier = barrier.level # Aggiungiamo questo per coerenza con il risk analyzer
         
         # Parametri avanzati (da EsempioCompletoExpress)
         self.parametri_mercato = {}
@@ -453,7 +459,9 @@ class PhoenixCertificate(CertificateBase):
                  initial_prices: List[float],
                  coupon_schedule: CouponSchedule, barrier_coupon: float,
                  barrier_capitale: float, memory_coupon: bool = True,
-                 notional: float = 100.0):
+                 notional: float = 100.0,
+                 airbag_feature: bool = False, 
+                 airbag_level: Optional[float] = None):
         
         # Aggiorna specs per Phoenix
         specs.certificate_type = CertificateType.PHOENIX.value
@@ -466,6 +474,11 @@ class PhoenixCertificate(CertificateBase):
         self.barrier_capitale = barrier_capitale
         self.memory_coupon = memory_coupon
         self.notional = notional
+        self.airbag_feature = airbag_feature
+        self.airbag_level = airbag_level
+        self.capital_barrier = barrier_capitale # Aggiungiamo questo per coerenza con il risk analyzer
+         
+
         
         # Parametri avanzati
         self.parametri_mercato = {}

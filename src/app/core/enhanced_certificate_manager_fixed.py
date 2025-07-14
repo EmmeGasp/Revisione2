@@ -817,9 +817,9 @@ class EnhancedCertificateManagerV15:
                 filtered_config['underlying_assets'] = [name.strip() for name in filtered_config['underlying_names'].split(';')]
         # === FINE CORREZIONE ===
 
-        print("---- DEBUG MANAGER CARICA ----")
-        print(filtered_config)
-        print("----------------------------")
+        #print("---- DEBUG MANAGER CARICA ----")
+        #print(filtered_config)
+        #print("----------------------------")
 
         try:
             return RealCertificateConfig(**filtered_config)

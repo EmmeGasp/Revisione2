@@ -1,4 +1,4 @@
-# Diario di bordo Sistema Certificati. Data di riferimento 12/07/2025 (mattina) 
+# Diario di bordo Sistema Certificati. Data di riferimento 14/07/2025 (mattina) 
 
 # Link al repo github: https://github.com/EmmeGasp/Revisione2 (branch refactoring-struttura)
 
@@ -38,14 +38,15 @@
 - ** Chiarito che il calcolo di alcune metriche puntava ad una funzione in versione semplificata rispetto a quella effettivamnete da utilizzare. 
 - ** Pur tradendo il modello di valutazione che per sua natura è di tipo probabilistico, è stato forzato un seed per ottenere dati confrontabili e quindi capire meglio come i dati influenzano il risultato finale
 - ** Fatti vari tentativi per scrivere correttamente il livello di airbag e il campo note dello stesso. Allo stato viene salvato e caricato correttamente ma non scritto nei campi della finestra della modifica.
-- ** Dopo tutte queste modifiche i risultati ottenuti cominciano ad essere almeno significativi 
+- ** Dopo tutte queste modifiche i risultati ottenuti cominciano ad essere almeno significativi
+- ** Sistemato problema su corretto caricamento livello di airbag e note associate
+- ** Problema attuale: impatto dell'airbag sulla valutazione del rischio del certificato. C'è un errore nella routine per il quale non è facile individuarne la causa precisa 
 
 
 
 ## Obiettivo corrente
 
-  - ** Sistemare definitivamente la gestione del livello di airbag e le note associate
-  - ** Migliorare ancora l'approccio di determinazione dei vari valori che ci interessano applicando ad esempio la logica dell'airbag,  introducendo il Credit Spread dell'emittente, valutando altri aspetti che possono incidere sulla determinazione dei valori finali
+  - ** Continuare l'attività per sistemare il problema circa l'errore generato quando è presente e deve essere considerato il livello di airbag 
  
 
 ## Passi completati. Note  
@@ -83,3 +84,7 @@
 - ** Ancora irrisolto il problema della mancata riproposizione in modifica dei valori del livello di airbag e delle note associate. Proposta modifica da verificare
 - ** Il warning presente nel log in merito alla presenza di variazioni di prezzo superiori al 50% è stato finalmente risolto. Di fatto veniva passato un dato non formattato come atteso dalla procedura ricevente e come stringa anzichè come valore. Viste anche le modifiche introdotte sulla validazione dei prezzi semplicemente la riga che dava origine all'errore è stata per adesso commentata (#)   
 - ** Alla fine della giornata, le varie modifiche apportate hanno evidenziato un notevole miglioramento nella determinazione dei valori dei vari parametri.
+
+   ### Data di riferimento 14/07/2025 (mattino, prima delle lavorazioni della giornata)
+- ** individuata la causa che impediva il corretto rucupero del campo livello di airbag e del campo note su airbag. I due campi risultano abilitati sole se il valore di airbag = True. Nella routine predisposta questo controllo non era tempestivo e quindi quano il programma tentava di scrivere i valori recuperati non ci riusciva poichè appunto i campi non erano abilitati. La routine è stata riscritta e funziona.
+Adesso c'è da risolvere il problema dei payoff in presenza di airbag=True. Vari tentativi di soluzione per ora vani. Sto tentando di fare un debug passo passo per capire dove può risiedere effettivamente la causa scatenante dell'errore segnalato.    

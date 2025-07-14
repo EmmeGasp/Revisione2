@@ -1,207 +1,28 @@
-Log main.py
-PS D:\Doc\File python\Finanza\Certificates\Revisione2> & "D:/Doc/File python/Finanza/Certificates/Revisione2/venv/Scripts/python.exe" "d:/Doc/File python/Finanza/Certificates/Revisione2/src/main.py"
+Log main.py (parziale da DEBUG PRE-ERRORE)
+--- DEBUG PRE-ERRORE ---
+Tipo di 'payoffs': <class 'numpy.ndarray'>
+Shape di 'payoffs': (1000,)
+Tipo di 'breached_mask': <class 'numpy.ndarray'>
+Shape di 'breached_mask': (1000, 1166)
+Dtype di 'breached_mask': bool
+Tipo di 'payoff_corretto': <class 'numpy.ndarray'>
+Shape di 'payoff_corretto': (773688,)
+--- FINE DEBUG ---
 
-✅ Import sistema esistente OK
-🔗 Integrazione Enhanced Certificate Manager v15 con GUI v14
-2025-07-12 17:57:21,317 - INFO - EnhancedExcelExporter inizializzato
-2025-07-12 17:57:21,317 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-12 17:57:21,317 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-12 17:57:21,317 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-12 17:57:21,317 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-12 17:57:21,317 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-12 17:57:21,317 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-12 17:57:21,317 - INFO - UnifiedRiskDashboard inizializzato
-🚀 Sistema Certificati Integrato inizializzato
-📁 Output Excel: D:/Doc/File python/
-📂 Caricamento configurazioni v15: 6 certificati
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ IT0006767872 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS3031184206 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ DE000VK2NM23 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS2902921233 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS2705561756 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ TEST123456789 caricato
-📊 Portfolio caricati: 2
-🚀 Enhanced Certificate Manager v15 inizializzato
-   Directory: src\app\data
-   Certificati: 6
-   Portfolio: 2
-   Versione: v15 (CORRETTA)
-✅ Integrazione pronta - sostituisci _auto_calculate_dates nel GUI
-
-🧪 TEST ENHANCED CERTIFICATE MANAGER v15
-============================================================      
-1. Inizializzazione manager v15...
-2025-07-12 17:57:21,321 - INFO - EnhancedExcelExporter inizializzato
-2025-07-12 17:57:21,321 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-12 17:57:21,321 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-12 17:57:21,321 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-12 17:57:21,321 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-12 17:57:21,322 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-12 17:57:21,322 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-12 17:57:21,322 - INFO - UnifiedRiskDashboard inizializzato
-🚀 Sistema Certificati Integrato inizializzato
-📁 Output Excel: D:/Doc/File python/
-📂 Caricamento configurazioni v15: 6 certificati
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ IT0006767872 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS3031184206 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ DE000VK2NM23 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS2902921233 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS2705561756 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ TEST123456789 caricato
-📊 Portfolio caricati: 2
-🚀 Enhanced Certificate Manager v15 inizializzato
-   Directory: src\app\data
-   Certificati: 6
-   Portfolio: 2
-   Versione: v15 (CORRETTA)
-2. Test aggiunta certificato con yahoo_ticker...
-🆕 Aggiunta certificato v15: TEST123456789
-   Dati ricevuti: ['isin', 'name', 'certificate_type', 'issuer', 'yahoo_ticker', 'underlying_assets', 'issue_date', 'maturity_date', 'notional', 'currency', 'memory_feature', 'auto_update_market_data', 'current_spots', 'volatilities', 'risk_free_rate', 'coupon_rate', 'coupon_dates', 'barrier_levels']
-   📊 Yahoo ticker specificato: TEST.MI
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-✅ Certificato enhanced TEST123456789 aggiunto (v15)
-   ✅ Yahoo ticker salvato: TEST.MI
-3. Test calcolo date robusto...
-📅 Calcolo date robusto v15:
-   Start: 2024-01-15
-   End: 2029-01-15
-   Frequency: Trimestrale
-   Primo periodo: 2024-04-15
-📊 Totale 20 date cedole generate (robusto v15)
-   ✅ Generate 20 date cedole
-4. Test stato in-life...
-   ✅ Stato in-life aggiornato
-5. Test lista dettagliata...
-   ✅ Lista dettagliata: 6 certificati
-6. Test save/load...
-2025-07-12 17:57:21,335 - INFO - EnhancedExcelExporter inizializzato
-2025-07-12 17:57:21,335 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-12 17:57:21,335 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-12 17:57:21,336 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-12 17:57:21,336 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-12 17:57:21,336 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-12 17:57:21,336 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-12 17:57:21,336 - INFO - UnifiedRiskDashboard inizializzato
-🚀 Sistema Certificati Integrato inizializzato
-📁 Output Excel: D:/Doc/File python/
-📂 Caricamento configurazioni v15: 6 certificati
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ IT0006767872 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS3031184206 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ DE000VK2NM23 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS2902921233 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS2705561756 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ TEST123456789 caricato
-📊 Portfolio caricati: 2
-🚀 Enhanced Certificate Manager v15 inizializzato
-   Directory: src\app\data
-   Certificati: 6
-   Portfolio: 2
-   Versione: v15 (CORRETTA)
-   ✅ Certificato caricato con yahoo_ticker: TEST.MI
-
-🎉 TUTTI I TEST v15 PASSATI!
-✅ Import enhanced manager v15 OK
-Avvio dell'applicazione Certificati Finanziari...
-▶️  Inizializzazione del Manager Enhanced come sorgente dati princcipale...
-2025-07-12 17:57:21,404 - INFO - EnhancedExcelExporter inizializzato
-2025-07-12 17:57:21,404 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-12 17:57:21,404 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-12 17:57:21,404 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-12 17:57:21,405 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-12 17:57:21,405 - INFO - UnifiedStressTestEngine inizializzato con 7 scenari
-2025-07-12 17:57:21,405 - INFO - UnifiedComplianceChecker inizializzato
-2025-07-12 17:57:21,405 - INFO - UnifiedRiskDashboard inizializzato
-🚀 Sistema Certificati Integrato inizializzato
-📁 Output Excel: D:/Doc/File python/
-📂 Caricamento configurazioni v15: 6 certificati
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ IT0006767872 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS3031184206 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ DE000VK2NM23 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS2902921233 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ XS2705561756 caricato
-🔄 === CONVERSIONE SAFE v17 (Manager) ===
-   ✅ TEST123456789 caricato
-📊 Portfolio caricati: 2
-🚀 Enhanced Certificate Manager v15 inizializzato
-   Directory: src\app\data
-   Certificati: 6
-   Portfolio: 2
-   Versione: v15 (CORRETTA)
-✅ Enhanced Manager v15 inizializzato con 6 certificati.
-2025-07-12 17:57:21,410 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-12 17:57:21,412 - INFO - EnhancedExcelExporter inizializzato
-2025-07-12 17:57:21,412 - INFO - Caricati 2 portafogli
-2025-07-12 17:57:21,412 - INFO - Caricati positions per 1 portafogli
-2025-07-12 17:57:21,413 - INFO - Portfolio Manager inizializzato  
-✅ Portfolio Manager e GUI Manager inizializzati.
-🚀 === GUI MANAGER v15.1 CORRECTED INIZIALIZZATO ===
-🔄 Aggiornamento dati di mercato on-demand per IT0006767872...
-🔍 DEBUG v16.1 - PRIMA del fetch Yahoo:
-   Current spots esistenti: [25.385000228881836, 50.060001373291016, 57.939998626708984, 10.024999618530273]
-✅ Prezzo di mercato per I76787.TI: 992.43
-📊 Fetch market data per 4 assets...
-📊 Usando ticker specificato per Deutsche Bank AG: DBK.DE
-   🔄 Downloading Deutsche Bank AG (DBK.DE)...
-   ⚠️  Dividend yield (2.62) interpretato come percentuale. Correzzione in corso...
-   ✅ Deutsche Bank AG: €25.39, Vol=38.78%, Div=2.62%
-📊 Usando ticker specificato per Società Generale: GLE.PA
-   🔄 Downloading Società Generale (GLE.PA)...
-   ⚠️  Dividend yield (2.25) interpretato come percentuale. Correzzione in corso...
-   ✅ Società Generale: €50.06, Vol=36.62%, Div=2.25%
-📊 Usando ticker specificato per Unicredit: UCG.MI
-   🔄 Downloading Unicredit (UCG.MI)...
-   ⚠️  Dividend yield (4.22) interpretato come percentuale. Correzzione in corso...
-   ✅ Unicredit: €57.94, Vol=35.81%, Div=4.22%
-📊 Usando ticker specificato per Banco BPM: BAMI.MI
-   🔄 Downloading Banco BPM (BAMI.MI)...
-   ⚠️  Dividend yield (10.09) interpretato come percentuale. Correezione in corso...
-   ✅ Banco BPM: €10.02, Vol=33.22%, Div=10.09%
-✅ Matrice di correlazione calcolata.
-📊 Fetch completato: 4/4 successi
-🔍 DEBUG v16.1 - DOPO il fetch Yahoo:
-   Dati scaricati spots: {'Deutsche Bank AG': 25.385000228881836, 'Società Generale': 50.060001373291016, 'Unicredit': 57.939998626708984, 'Banco BPM': 10.024999618530273}
-🔍 DEBUG v16.1 - STATO FINALE:
-   Current spots finali: [25.385000228881836, 50.060001373291016, 57.939998626708984, 10.024999618530273]
-2025-07-12 17:57:26,543 - INFO - Importazione certificato reale: IT0006767872
-🎯 Certificate IT0006767872 configurato con evaluation: worst_of  
-2025-07-12 17:57:26,544 - INFO - Date non ordinate - applicazione ordinamento automatico
-2025-07-12 17:57:26,544 - WARNING - Dati di mercato con problemi: ['Rilevate variazioni di prezzo estreme (>50%)']
-2025-07-12 17:57:26,544 - INFO - Parametri mercato Express configurati: 4 assets
-2025-07-12 17:57:26,544 - INFO - Certificato IT0006767872 importato con successo
-2025-07-12 17:57:26,545 - INFO - UnifiedRiskAnalyzer inizializzato
-2025-07-12 17:57:29,667 - INFO - Analisi rischio completata per IT0006767872
-2025-07-12 17:57:29,667 - INFO - Analisi di rischio completata. VaR 95%: -76.54%
-2025-07-12 17:57:29,667 - INFO - 💰 Calcolo del Fair Value in corso...
-2025-07-12 17:57:29,667 - INFO - Calcolo fair value per ExpressCertificate
-2025-07-12 17:57:29,667 - INFO - Simulazione Express: 5,000 percorsi, 1166 steps
-2025-07-12 17:57:37,364 - INFO - Simulazione Express completata
-🎯 Express payoffs con evaluation type: worst_of
-2025-07-12 17:57:37,365 - INFO - Calcolo payoff Express...
-2025-07-12 17:57:43,948 - INFO - Payoff Express calcolati - Prob autocall: 86.78%
-2025-07-12 17:57:43,948 - INFO - ✅ Fair Value calcolato: 905.11
+2025-07-13 15:02:58,583 - ERROR - Errore analisi rischio IT0006767872: too many indices for array: array is 1-dimensional, but 2 were indexed
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\consolidated_risk_system.py", line 394, in analyze_certificate_risk
+    payoffs[breached_mask] = payoff_corretto
+    ~~~~~~~^^^^^^^^^^^^^^^
+IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed
+2025-07-13 15:02:58,585 - ERROR - Errore durante l'analisi del certificato IT0006767872: too many indices for array: array is 1-dimensional, but 2 were indexed     
+Traceback (most recent call last):
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\ui\main_window.py", line 1591, in _analyze_selected_certificate
+    risk_metrics = analyzer.analyze_certificate_risk(certificate_object, n_simulations=1000)
+  File "d:\Doc\File python\Finanza\Certificates\Revisione2\src\app\core\consolidated_risk_system.py", line 394, in analyze_certificate_risk
+    payoffs[breached_mask] = payoff_corretto
+    ~~~~~~~^^^^^^^^^^^^^^^
+IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed
 🚪 Chiusura GUI Certificate Manager v15.1 CORRECTED
 Applicazione terminata.
-PS D:\Doc\File python\Finanza\Certificates\Revisione2>
+PS D:\Doc\File python\Finanza\Certificates\Revisione2> 
