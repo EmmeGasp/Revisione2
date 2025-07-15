@@ -41,6 +41,8 @@ from pathlib import Path
 import yfinance as yf
 import threading
 import calendar
+from dateutil.relativedelta import relativedelta
+
 
 # Import dal sistema esistente
 from app.core.real_certificate_integration import (
@@ -593,6 +595,56 @@ class DateCalculationUtils:
                 return False, f"Tasso {i+1} fuori range [0,1]: {rate}"
         
         return True, "Schedule valida"
+
+    @staticmethod
+    def generate_dynamic_barrier_schedule(cert_config: RealCertificateConfig) -> dict:
+        """
+        Genera una schedule di barriere dinamiche basata sulla configurazione del certificato.
+        Restituisce un dizionario { 'YYYY-MM-DD': livello_barriera_decimale }.
+        """
+        # 1. Controlla se la funzionalità è attiva
+        if not getattr(cert_config, 'dynamic_barrier_feature', False):
+            return {}
+
+        # 2. Recupera i parametri necessari in modo sicuro
+        try:
+            issue_date = cert_config.issue_date
+            coupon_dates = cert_config.coupon_dates
+            start_level = cert_config.dynamic_barrier_start_level
+            step_rate = cert_config.step_down_rate
+            final_level = cert_config.dynamic_barrier_end_level
+            delay_months = cert_config.observation_delay_months or 0 # Default a 0 se None
+
+            if not all([issue_date, coupon_dates, start_level is not None, step_rate is not None, final_level is not None]):
+                raise ValueError("Parametri per barriera dinamica mancanti o incompleti.")
+
+        except (AttributeError, ValueError) as e:
+            print(f"⚠️  Impossibile generare schedule barriera dinamica: {e}")
+            return {}
+
+        # 3. Calcola la data di inizio per lo step-down
+        first_observation_date = issue_date + relativedelta(months=delay_months)
+        
+        schedule = {}
+        steps_taken = 0
+
+        # 4. Itera sulle date di osservazione (cedole) per costruire la schedule
+        for obs_date in sorted(coupon_dates):
+            current_level = start_level # La barriera di partenza è sempre il livello iniziale
+
+            # Lo step-down si applica solo a partire dalla data di osservazione valida
+            if obs_date >= first_observation_date:
+                # Calcola il livello corrente in base ai passi già effettuati
+                calculated_level = start_level - (steps_taken * step_rate)
+                current_level = max(calculated_level, final_level) # Assicura di non scendere sotto il livello finale
+                steps_taken += 1
+            
+            # Formatta la data come stringa 'YYYY-MM-DD' per la chiave del dizionario
+            schedule[obs_date.strftime('%Y-%m-%d')] = round(current_level, 5) # Arrotonda per precisione
+
+        print(f"✅ Schedule barriera dinamica generata con {len(schedule)} date.")
+        return schedule
+
 
 # ========================================
 # *** VERSIONE CORRETTA *** - ENHANCED CERTIFICATE MANAGER

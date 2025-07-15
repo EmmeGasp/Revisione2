@@ -55,13 +55,12 @@ try:
         CertificateType, Barrier, BarrierType, CouponSchedule
     )
 
-    from app.core.consolidated_risk_system import (
-        UnifiedRiskAnalyzer, UnifiedStressTestEngine,
-        UnifiedComplianceChecker, UnifiedRiskDashboard
-    )
 except ImportError as e:
+    #print(f"❌ ERRORE DI IMPORTAZIONE CRITICO IN 'real_certificate_integration.py': {e}")
+    #raise # righe utilizzate per intercettare il vero erroe nella eseuzione di una routine
+    # quella che segue è la struttura che consente l'esecuzione in autonomia della routine con scopi di test
     print(f"Attenzione: alcuni import potrebbero non essere risolti. Errore: {e}")
-    # Definizioni di fallback per permettere l'esecuzione in isolamento
+    #Definizioni di fallback per permettere l'esecuzione in isolamento
     class CertificateSpecs: pass
     class MarketData: pass
     class UnifiedValidator: pass
@@ -1544,6 +1543,11 @@ class IntegratedCertificateSystem:
     """Sistema integrato finale - tutto in uno"""
 
     def __init__(self, excel_output_path="D:/Doc/File python/"):
+        from app.core.consolidated_risk_system import (
+        UnifiedRiskAnalyzer, UnifiedStressTestEngine,
+        UnifiedComplianceChecker, UnifiedRiskDashboard
+    )
+
         self.importer = RealCertificateImporter()
         self.excel_exporter = EnhancedExcelExporter(excel_output_path)
         self.risk_analyzer = UnifiedRiskAnalyzer()

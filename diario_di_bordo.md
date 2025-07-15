@@ -1,4 +1,4 @@
-# Diario di bordo Sistema Certificati. Data di riferimento 14/07/2025 (mattina) 
+# Diario di bordo Sistema Certificati. Data di riferimento 15/07/2025 (prima delle lavorazioni) 
 
 # Link al repo github: https://github.com/EmmeGasp/Revisione2 (branch refactoring-struttura)
 
@@ -41,12 +41,15 @@
 - ** Dopo tutte queste modifiche i risultati ottenuti cominciano ad essere almeno significativi
 - ** Sistemato problema su corretto caricamento livello di airbag e note associate
 - ** Problema attuale: impatto dell'airbag sulla valutazione del rischio del certificato. C'è un errore nella routine per il quale non è facile individuarne la causa precisa 
+- ** Risolto il problema dell'errore generato nell'analisi di un certificato con airbag. 
+- ** Definito un piano di lavoro. Alta priorità: completare le funzionalità del motore di calcolo (ad esempio barriere dinamiche); priorità media: aggiungere effetto memoria; priorità bassa (per ora): Analisi di portafoglio ed esportazione.
+- ** L'attività in alta priorità è stata a sua suddivisa in più fasi. Consolidamento del modello dati (il blueprint); generatore di Schedule per le barriere dinamiche (motore logico); integrazione della Schedule nel motore di simulazione con intervento sul motore di calcolo in due passaggi, vale a dire prima intervento sul payoff e quindi correzione della logica di autocall. L'attività è stata completata e sembra che non ci siano errori procedurali. Rimane da verificare la validità dei concetti
 
 
 
 ## Obiettivo corrente
 
-  - ** Continuare l'attività per sistemare il problema circa l'errore generato quando è presente e deve essere considerato il livello di airbag 
+  - ** Effettuare dei test per verificare che i risultati di FV e VaR siano in linea con le attese e che quindi anche la logica di applicazione del modello rispecchi i modelli finanziari conosciuti 
  
 
 ## Passi completati. Note  
@@ -88,3 +91,6 @@
    ### Data di riferimento 14/07/2025 (mattino, prima delle lavorazioni della giornata)
 - ** individuata la causa che impediva il corretto rucupero del campo livello di airbag e del campo note su airbag. I due campi risultano abilitati sole se il valore di airbag = True. Nella routine predisposta questo controllo non era tempestivo e quindi quano il programma tentava di scrivere i valori recuperati non ci riusciva poichè appunto i campi non erano abilitati. La routine è stata riscritta e funziona.
 Adesso c'è da risolvere il problema dei payoff in presenza di airbag=True. Vari tentativi di soluzione per ora vani. Sto tentando di fare un debug passo passo per capire dove può risiedere effettivamente la causa scatenante dell'errore segnalato.    
+ 
+   ### Data di riferimento 15/07/2025 (mattino, prima delle lavorazioni della giornata)
+- ** sono già stato abbastanza analitico nella sinstesi. Qui c'è da aggiungere solo che è stato predisposto il codice ma non ancora modificato il file main_window.py con la parte che prevede una verifica di compatibilità sui valori inseriti nel caso di barriera dinamica e altre piccole verifiche sempre sulla barriere.   

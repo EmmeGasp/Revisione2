@@ -53,6 +53,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from enum import Enum
 import time
+from app.core.enhanced_certificate_manager_fixed import DateCalculationUtils
 
 # ========================================
 # RISK METRICS E DATA STRUCTURES
@@ -349,56 +350,68 @@ class UnifiedRiskAnalyzer:
                 payoffs = np.array([certificate.calculate_payoff(price) for price in final_prices])
 
             # =================================================================
-            # PASSO 3: Applichiamo la logica AIRBAG (ORA CON LA CORREZIONE FINALE)
+            # PASSO 3: Applichiamo la logica AIRBAG e BARRIERA DINAMICA
             # =================================================================
-            print(f"DEBUG INIZIO PASSO 3: Tipo di 'percorsi'={type(percorsi)}, Shape={getattr(percorsi, 'shape', 'N/A')}") # <-- RIGA DA AGGIUNGERE
+            print(f"DEBUG INIZIO PASSO 3: Tipo di 'percorsi'={type(percorsi)}, Shape={getattr(percorsi, 'shape', 'N/A')}")
+
+            # --- INIZIO MODIFICA PER BARRIERA DINAMICA ---
+
+            # 1. Genera la schedule delle barriere dinamiche se la feature è attiva
+            dynamic_barrier_schedule = {}
+            if getattr(certificate, 'dynamic_barrier_feature', False):
+                # Dobbiamo passare l'oggetto di configurazione base alla funzione
+                # Assumiamo che l'oggetto 'certificate' abbia un riferimento alla sua config
+                if hasattr(certificate, 'base_config'):
+                    dynamic_barrier_schedule = DateCalculationUtils.generate_dynamic_barrier_schedule(certificate.base_config)
+
+            # 2. Determina il livello di barriera capitale effettivo da usare
+            capital_barrier_fisso = getattr(certificate, 'capital_barrier', 0.60)
+            effective_capital_barrier = capital_barrier_fisso
+
+            if dynamic_barrier_schedule:
+                # Se la schedule esiste, usa l'ULTIMO valore come barriera finale
+                final_barrier_value = list(dynamic_barrier_schedule.values())[-1]
+                effective_capital_barrier = final_barrier_value
+                self.logger.info(f"🧬 Utilizzo Barriera Dinamica. Livello finale a scadenza: {effective_capital_barrier:.2%}")
+            else:
+                self.logger.info(f"🔒 Utilizzo Barriera Capitale Fissa: {effective_capital_barrier:.2%}")
+
+            # --- FINE MODIFICA ---
+
 
             if getattr(certificate, 'airbag_feature', False):
                 self.logger.info(f"🛡️  Certificato {certificate.specs.isin} ha l'Airbag. Applico la logica di protezione.")
 
                 notional = getattr(certificate, 'notional', 1000.0)
-                capital_barrier = getattr(certificate, 'capital_barrier', 0.60)
-                airbag_level = getattr(certificate, 'airbag_level', capital_barrier)
+                airbag_level = getattr(certificate, 'airbag_level', effective_capital_barrier)
                 initial_prices = getattr(certificate, 'initial_prices', [100.0])
                 initial_price_worst_of = min(initial_prices) if initial_prices else 100.0
                 
-                # Calcoliamo la performance basandoci SOLO sui prezzi finali di ogni percorso
-                final_prices = percorsi[:, -1]  # Seleziona l'ultimo prezzo di ogni simulazione
-                #performance = final_prices / initial_price_worst_of # Ora 'performance' è 1D
-                performance = percorsi[:, -1] / initial_price_worst_of
+                final_prices_all_assets = percorsi[:, :, -1]
+                final_performance_all_assets = final_prices_all_assets / initial_price_worst_of
+                worst_performance = np.min(final_performance_all_assets, axis=1)
 
-
-                # Ora la maschera sarà 1D (shape: 1000,) e tutto funzionerà
-                breached_mask = performance < capital_barrier
+                # Usa la barriera efficace (dinamica o fissa) per determinare la violazione
+                breached_mask = worst_performance < effective_capital_barrier
                 num_breached = np.sum(breached_mask)
 
                 if num_breached > 0:
                     self.logger.info(f"   L'Airbag si attiverà per {num_breached} su {n_simulations} simulazioni.")
 
-                    final_prices_breached = final_prices[breached_mask]
+                    worst_final_prices = np.min(final_prices_all_assets, axis=1)
+                    final_prices_breached = worst_final_prices[breached_mask]
                     prezzo_riferimento_airbag = initial_price_worst_of * airbag_level
                     
                     if prezzo_riferimento_airbag > 0:
                         payoff_corretto = notional * (final_prices_breached / prezzo_riferimento_airbag)
-                        # =======================================================
-                        # <<< INIZIO BLOCCO DI DEBUG: INSERISCI QUESTO CODICE >>>
-                        # =======================================================
-                        print("\n--- DEBUG PRE-ERRORE ---")
-                        print(f"Tipo di 'payoffs': {type(payoffs)}")
-                        print(f"Shape di 'payoffs': {getattr(payoffs, 'shape', 'N/A')}")
-                        print(f"Tipo di 'breached_mask': {type(breached_mask)}")
-                        print(f"Shape di 'breached_mask': {getattr(breached_mask, 'shape', 'N/A')}")
-                        print(f"Dtype di 'breached_mask': {getattr(breached_mask, 'dtype', 'N/A')}") # Molto importante!
-                        print(f"Tipo di 'payoff_corretto': {type(payoff_corretto)}")
-                        print(f"Shape di 'payoff_corretto': {getattr(payoff_corretto, 'shape', 'N/A')}")
-                        print("--- FINE DEBUG ---\n")
-                        # =======================================================
-
-                        # Questa è la riga che attualmente causa l'errore
                         payoffs[breached_mask] = payoff_corretto
                     else:
                         self.logger.warning("Prezzo di riferimento airbag è zero, impossibile calcolare il payoff corretto.")
-   
+
+                else:
+                    self.logger.info("   L'Airbag non si attiverà per nessuna simulazione.")
+
+    
             # =================================================================
             # PASSO 4: Calcoliamo le metriche di rischio finali
             # =================================================================
