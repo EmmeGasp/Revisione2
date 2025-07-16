@@ -1,4 +1,4 @@
-# Diario di bordo Sistema Certificati. Data di riferimento 15/07/2025 (prima delle lavorazioni) 
+# Diario di bordo Sistema Certificati. Data di riferimento 16/07/2025 (prima delle lavorazioni) 
 
 # Link al repo github: https://github.com/EmmeGasp/Revisione2 (branch refactoring-struttura)
 
@@ -44,12 +44,13 @@
 - ** Risolto il problema dell'errore generato nell'analisi di un certificato con airbag. 
 - ** Definito un piano di lavoro. Alta priorità: completare le funzionalità del motore di calcolo (ad esempio barriere dinamiche); priorità media: aggiungere effetto memoria; priorità bassa (per ora): Analisi di portafoglio ed esportazione.
 - ** L'attività in alta priorità è stata a sua suddivisa in più fasi. Consolidamento del modello dati (il blueprint); generatore di Schedule per le barriere dinamiche (motore logico); integrazione della Schedule nel motore di simulazione con intervento sul motore di calcolo in due passaggi, vale a dire prima intervento sul payoff e quindi correzione della logica di autocall. L'attività è stata completata e sembra che non ci siano errori procedurali. Rimane da verificare la validità dei concetti
+- ** Tentativo di analisi dei risultati ottenuti dai test che evidenziano risultati diversi da quelli attesi, specia nel caso di presenza contemporanea di barriera dinamica ed airbag. Gli interventi sono stati focalizzati praticamente su due file consolidated_risk_system.py e enhanced_certificate_manager_fixed.py. Di fatto le routine modificate non funzionano più.  È partito di nuovo lo schema già visto in altre occasioni: sistemazioni inefficaci - ma questo sarebbe comprensibile data la difficoltà della situazione - mediante interventi distruttivi, circolari - nel senso che si abbandona una strada per poi riprenderla - e, soprattutto con lavorazione su codice difforme da quello a mia disposizione.
 
 
 
 ## Obiettivo corrente
 
-  - ** Effettuare dei test per verificare che i risultati di FV e VaR siano in linea con le attese e che quindi anche la logica di applicazione del modello rispecchi i modelli finanziari conosciuti 
+  - ** Ripartire dai test e, come indicato nell'ultimo messaggio della giornata, recuperare la situazione aggiornata dei file da github
  
 
 ## Passi completati. Note  
@@ -94,3 +95,6 @@ Adesso c'è da risolvere il problema dei payoff in presenza di airbag=True. Vari
  
    ### Data di riferimento 15/07/2025 (mattino, prima delle lavorazioni della giornata)
 - ** sono già stato abbastanza analitico nella sinstesi. Qui c'è da aggiungere solo che è stato predisposto il codice ma non ancora modificato il file main_window.py con la parte che prevede una verifica di compatibilità sui valori inseriti nel caso di barriera dinamica e altre piccole verifiche sempre sulla barriere.   
+
+  ###  Data di riferimento 16/07/2025 (pomeriggio, prima delle lavorazioni della giornata)
+- ** la giornata è stata disastrosa sia per tipologia di interventi sia per un palese disallineamente fra codice a mia disposizione e codice sul quale lavorava gemini. Da questo punto di vists è quantomeno paradossale tentaare di ipotizzare nome di metodi/procedure nonchè di file quando sarebbe molto più semplice chiedere di metterli a disposizione. Per ripartire da una situazione almeno funzionante ho recuperato da github le versioni dei file alla sera precedente, quindi prima di tutte le modifiche apportate nella giornata. Inoltre ho inserito le due modifiche necessarie in windows_main.py per gestire il controllo sull'inserimento dei dati relativi alla barriere dinamiche. Anche per queste variazioni c'è un errore da sistemare.  
