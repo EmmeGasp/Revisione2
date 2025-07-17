@@ -65,9 +65,12 @@ import threading
 import calendar 
 import copy
 import logging
+import math
 import textwrap # Per formattare la descrizione della dipendenza
 from app.core.consolidated_risk_system import UnifiedRiskAnalyzer
 from app.core.real_certificate_integration import RealCertificateImporter
+from dateutil.relativedelta import relativedelta # Aggiungi questa riga
+
 # --- MODIFICA ---
 # Aggiunto import per UnifiedCertificateAnalyzer
 from app.core.unified_certificates import UnifiedCertificateAnalyzer
@@ -124,8 +127,9 @@ class EnhancedCertificateDialogV15_1_Corrected:
         'Basket Custom': "🌈 RAINBOW/INDIVIDUAL: Ogni asset contribuisce individualmente. Payoff calcolato per singolo sottostanti - Struttura complessa." # Mappato a Rainbow
     }
 
-    def __init__(self, parent, title, existing_data=None):
+    def __init__(self, parent, title, enhanced_manager, existing_data=None):
         self.result = None
+        self.enhanced_manager = enhanced_manager
         # Deepcopy funziona anche sugli oggetti
         self.existing_data = copy.deepcopy(existing_data) if existing_data else None
         self.dialog_closed = False
@@ -162,7 +166,59 @@ class EnhancedCertificateDialogV15_1_Corrected:
         self._setup_form_complete_v15_1_corrected()
         
         self.dialog.wait_window()
-    
+
+    def _generate_temp_coupon_dates(self, data: dict) -> list | None:
+        """
+        Genera una lista di date cedola temporanee basandosi sui dati del form,
+        per abilitare un controllo di coerenza autonomo.
+        Restituisce None se i dati di input non sono validi.
+        """
+        frequency_map = {
+            'Mensile': 1, 'Bimestrale': 2, 'Trimestrale': 3,
+            'Quadrimestrale': 4, 'Semestrale': 6, 'Annuale': 12
+        }
+        try:
+            start_str = data.get('issue_date')
+            end_str = data.get('maturity_date')
+            frequency_str = data.get('coupon_frequency')
+
+            if not all([start_str, end_str, frequency_str]):
+                return [] # Se mancano dati fondamentali, non possiamo calcolare
+
+ 
+            # --- INIZIO CORREZIONE ---
+            # Rende la lettura della data robusta, ignorando l'orario se presente (es. 'T00:00:00')
+            start_date = datetime.strptime(start_str.split('T')[0], '%Y-%m-%d')
+            end_date = datetime.strptime(end_str.split('T')[0], '%Y-%m-%d')
+            # --- FINE CORREZIONE ---
+ 
+
+            months_step = frequency_map[frequency_str]
+
+            dates = []
+            current_date = start_date + relativedelta(months=months_step)
+            while current_date <= end_date:
+                dates.append(current_date.strftime('%Y-%m-%d'))
+                current_date += relativedelta(months=months_step)
+            
+            # Aggiunge sempre la data di scadenza come ultima data di osservazione
+            if not dates or dates[-1] != end_date.strftime('%Y-%m-%d'):
+                 dates.append(end_date.strftime('%Y-%m-%d'))
+                 
+            return dates
+        except (ValueError, TypeError, KeyError) as e:
+            print(f"❌ Impossibile generare date temporanee: {e}")
+            messagebox.showwarning(
+                "Dati Insufficienti per Controllo",
+                f"Impossibile eseguire il controllo di coerenza sulla barriera.\n\n"
+                f"Verifica la correttezza dei campi:\n"
+                f" - Data Emissione\n"
+                f" - Scadenza\n"
+                f" - Frequenza\n\nErrore: {e}"
+            )
+            return None
+
+
     def _on_dialog_close(self):
         """Gestione chiusura dialog"""
         print("❌ Dialog v15.1 CORRECTED chiuso senza salvare")
@@ -588,7 +644,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
             self.fields['underlying_dependency_type'].set('Worst-Of')
             self.fields['dynamic_barrier_start_level'].insert(0, '100.00')
             self.fields['dynamic_barrier_end_level'].insert(0, '70.00')
-            self.fields['step_down_rate'].insert(0, '5.0')
+            self.fields['step_down_rate'].insert(0, '1.0')
             self._toggle_airbag_level_field()
             self._on_capital_barrier_type_changed()
             self._update_dependency_description()
@@ -674,7 +730,37 @@ class EnhancedCertificateDialogV15_1_Corrected:
         # Focus sul primo campo
         self.fields['isin'].focus()
         print("✅ Dati caricati correttamente con la nuova logica.") 
-    
+
+    def _calculate_expected_end_barrier(self, data: dict, temp_coupon_dates: list) -> float | None:
+        """
+        Calcola il livello finale atteso della barriera per il controllo di coerenza,
+        utilizzando una lista di date calcolata al volo.
+        """
+        try:
+            coupon_dates = temp_coupon_dates
+            issue_date = datetime.strptime(data['issue_date'].split('T')[0], '%Y-%m-%d')
+            delay_months = data.get('observation_delay_months', 0) or 0
+            start_level = data.get('dynamic_barrier_start_level')
+            step_rate = data.get('step_down_rate')
+
+            if start_level is None or step_rate is None:
+                 print("⚠️ Controllo barriera saltato: livello iniziale o step rate non forniti.")
+                 return None
+
+            first_obs_date = issue_date + relativedelta(months=delay_months)
+
+            # Conta quante date di osservazione attivano uno step-down
+            num_steps = sum(1 for d_str in coupon_dates if datetime.strptime(d_str, '%Y-%m-%d') > first_obs_date)
+
+            # Calcola il livello finale teorico
+            expected_level = start_level - (num_steps * step_rate)
+            return expected_level
+
+        except Exception as e:
+            print(f"⚠️ Errore nel calcolo della barriera finale attesa: {e}")
+            messagebox.showerror("Errore Calcolo Barriera", f"Si è verificato un errore nel calcolo della coerenza:\n{e}")
+            return None
+        
     def _save_v15_1_corrected(self):
         """
         Salvataggio v16 - Gestisce il separatore ';' per le liste e i numeri in formato EU.
@@ -753,7 +839,38 @@ class EnhancedCertificateDialogV15_1_Corrected:
         #print("---- DEBUG DIALOG SALVA ----")
         #print(result_data)
 
+    # --- INIZIO BLOCCO CONTROLLO COERENZA BARRIERA DINAMICA ---
+        if result_data.get('dynamic_barrier_feature'):
+            print("▶️ Esecuzione controllo coerenza barriera dinamica...")
 
+            # 1. Genera le date al volo basandosi sui dati del form
+            temp_dates = self._generate_temp_coupon_dates(result_data)
+
+            # 2. Se la generazione date fallisce (es. dati non validi), blocca il salvataggio
+            if temp_dates is None:
+                print("❌ Salvataggio annullato a causa di input non validi per il calcolo delle date.")
+                return
+
+            user_end_level = result_data.get('dynamic_barrier_end_level')
+            if user_end_level is not None:
+                # 3. Calcola il valore atteso usando le date generate
+                expected_end_level = self._calculate_expected_end_barrier(result_data, temp_dates)
+
+                # 4. Esegui il confronto solo se il calcolo è andato a buon fine
+                if expected_end_level is not None:
+                    if not math.isclose(user_end_level, expected_end_level, rel_tol=1e-5):
+                        msg = (f"ATTENZIONE: Il Livello Finale della barriera inserito è incoerente.\n\n"
+                               f" • Livello Finale Inserito: {user_end_level*100:.2f}%\n"
+                               f" • Livello Finale Calcolato: {expected_end_level*100:.2f}%\n"
+                               f"   (basato su {len(temp_dates)} date di osservazione)\n\n"
+                               f"Salvare comunque con il valore inserito?")
+
+                        if not messagebox.askyesno("Coerenza Dati Barriera", msg):
+                            print("❌ Salvataggio annullato dall'utente per incoerenza barriera.")
+                            return
+                    else:
+                        print(f"✅ Coerenza barriera dinamica verificata ({len(temp_dates)} date).")
+        # --- FINE BLOCCO CONTROLLO COERENZA ---
         self.result = result_data
         self.dialog.destroy()
         print("💾 === SALVATAGGIO v16 COMPLETATO CON SUCCESSO ===")
@@ -1070,13 +1187,15 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
             self.logger.error(f"Errore in _calculate_dates_integrated: {e}", exc_info=True)
             messagebox.showerror("Errore", f"Errore calcolo date:\n{e}")
 
+
     def _new_certificate(self):
         """Nuovo certificato con dialog v15.1 CORRECTED"""
         
         print("➕ === NUOVO CERTIFICATO v15.1 CORRECTED ===")
         
         try:
-            dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, "Nuovo Certificato")
+            dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, "Nuovo Certificato", self.enhanced_manager)
+            #dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, "Nuovo Certificato")
             
             if hasattr(dialog, 'result') and dialog.result:
                 cert_data = dialog.result
@@ -1146,7 +1265,8 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
 
         try:
             cert_data_dict = self.enhanced_manager.get_certificate_data_for_gui(selected_isin)
-            dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, f"Modifica {selected_isin}", cert_data_dict)
+            dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, f"Modifica {selected_isin}", self.enhanced_manager, cert_data_dict)
+            #dialog = EnhancedCertificateDialogV15_1_Corrected(self.root, f"Modifica {selected_isin}", cert_data_dict)
             
             if hasattr(dialog, 'result') and dialog.result:
                 updated_data = dialog.result
