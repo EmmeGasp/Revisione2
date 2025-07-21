@@ -32,7 +32,7 @@ COSA È STATO CONSOLIDATO:
 # IMPORTS (dipende da structural_cleanup.py e unified_certificates.py)
 # ========================================
 
-from app.core.structural_cleanup import (
+from .structural_cleanup import (
     UnifiedValidator, MonteCarloEngine, BlackScholesModel,
     np, pd, datetime, timedelta, Dict, List, Optional, Union,
     logger, stats, norm

@@ -9,17 +9,28 @@ def find_project_modules(directory):
     Scansiona la directory del progetto per trovare tutti i moduli Python.
     Restituisce un dizionario che mappa i nomi dei moduli ai percorsi dei file.
     """
+     
     project_modules = {}
     root_path = Path(directory).resolve()
     # Nomi delle cartelle da escludere (match esatto, case-sensitive).
     # Verranno ignorati tutti i file e le sottocartelle al loro interno.
     # Nota: __pycache__ è lo standard Python per le cache dei bytecode.
-    excluded_dirs = {'src', 'venv', '.git', '__pycache__'}
+    excluded_dirs = {'venv', '.git', '__pycache__'}
+    # Aggiungi qui i file da escludere
+    excluded_files = {'dependency_mapper.py', 'inventory_classes_functions.py','TEMPLATE.py', 'GeneraTabellaRiepilogativaCertificates.py'}  # aggiungi altri nomi se necessario
 
+ 
     for path in root_path.rglob('*.py'):
         # Escludi i file che contengono 'backup' nel nome, in modo case-insensitive
         if 'backup' in path.name.lower():
             print(f"  -> File di backup escluso: {path.name}")
+            continue
+
+        if path.name in excluded_files:
+            print(f"  -> File escluso dalla scansione: {path.name}")
+            continue
+
+        if path.name == '__init__.py':
             continue
 
         # Controlla se una delle cartelle nel percorso è nell'elenco di esclusione
@@ -30,8 +41,8 @@ def find_project_modules(directory):
             print(f"  -> File in cartella esclusa ({relative_path}): {path.name}")
             continue
 
-        # Calcola il nome del modulo relativo alla root del progetto
-        module_name = '.'.join(relative_path.with_suffix('').parts)
+        # Calcola il nome del modulo: solo il nome del file senza estensione
+        module_name = path.stem
         project_modules[module_name] = path
     return project_modules
 
@@ -41,6 +52,8 @@ def get_imports(filepath, project_modules_names):
     Utilizza l'Abstract Syntax Tree (AST) per un'analisi accurata.
     """
     local_imports = set()
+    print(f"Analizzando file {filepath}...")
+    
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -50,18 +63,23 @@ def get_imports(filepath, project_modules_names):
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
-                    if alias.name in project_modules_names:
-                        local_imports.add(alias.name)
+                    # Prendi solo la prima parte del nome importato (es. 'srl.app.modulo' -> 'modulo')
+                    imported_mod = alias.name.split('.')[-1]
+                    if imported_mod in project_modules_names:
+                        local_imports.add(imported_mod)
             elif isinstance(node, ast.ImportFrom):
                 # Gestisce import relativi (es. from . import my_module)
                 # e assoluti (es. from my_package import my_module)
-                if node.module and node.module in project_modules_names:
-                    local_imports.add(node.module)
+                if node.module:
+                    imported_mod = node.module.split('.')[-1]
+                    if imported_mod in project_modules_names:
+                        local_imports.add(imported_mod)
 
     except (UnicodeDecodeError, SyntaxError, FileNotFoundError) as e:
         print(f"Attenzione: Impossibile analizzare il file {filepath}. Errore: {e}")
     
     return local_imports
+
 
 def get_node_color(incoming_dependencies_count):
     """
@@ -104,9 +122,10 @@ def generate_dependency_graph(directory='.', output_filename='project_dependency
     print("Calcolo delle dipendenze in entrata per la colorazione...")
     incoming_counts = {name: 0 for name in dependencies}
     for imported_modules in dependencies.values():
-        for imported in imported_modules:
-            if imported in incoming_counts:
-                incoming_counts[imported] += 1
+        if dependencies[module_name] is not None:
+            for imported in imported_modules:
+                if imported in incoming_counts:
+                    incoming_counts[imported] += 1
 
     # Creazione del grafo con Graphviz
     legend = (
@@ -129,7 +148,8 @@ def generate_dependency_graph(directory='.', output_filename='project_dependency
     for module_name in dependencies.keys():
         count = incoming_counts.get(module_name, 0)
         color = get_node_color(count)
-        dot.node(module_name, module_name.replace('_', '\\n'), fillcolor=color)
+        # Mostra solo il nome del file nel nodo
+        dot.node(module_name, module_name, fillcolor=color)
 
     for module_name, imported_modules in dependencies.items():
         for imported in imported_modules:

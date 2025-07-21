@@ -1,8 +1,8 @@
-# Diario di bordo Sistema Certificati. Data di riferimento 17/07/2025 (prima delle lavorazioni) 
+# Diario di bordo Sistema Certificati. Data di riferimento 21/07/2025 (prima delle lavorazioni) 
 
 # Link al repo github: https://github.com/EmmeGasp/Revisione2 (branch refactoring-struttura)
 
-# data ultimo commit sul branch in uso:  17/07/2025 al mattino, prima delle eventuali lavorazioni della giornata.
+# data ultimo commit sul branch in uso:  21/07/2025 al mattino, prima delle eventuali lavorazioni della giornata.
 
 
 ## Storico degli interventi effettuati. 
@@ -45,9 +45,10 @@
 * Problema attuale: impatto dell'airbag sulla valutazione del rischio del certificato. C'è un errore nella routine per il quale non è facile individuarne la causa precisa 
 * Risolto il problema dell'errore generato nell'analisi di un certificato con airbag. 
 * Definito un piano di lavoro. Alta priorità: completare le funzionalità del motore di calcolo (ad esempio barriere dinamiche); priorità media: aggiungere effetto memoria; priorità bassa (per ora): Analisi di portafoglio ed esportazione.
-* L'attività in alta priorità è stata a sua suddivisa in più fasi. Consolidamento del modello dati (il blueprint); generatore di Schedule per le barriere dinamiche (motore logico); integrazione della Schedule nel motore di simulazione con intervento sul motore di calcolo in due passaggi, vale a dire prima intervento sul payoff e quindi correzione della logica di autocall. L'attività è stata completata e sembra che non ci siano errori procedurali. Rimane da verificare la validità dei concetti
+* L'attività in alta priorità è stata a sua volta suddivisa in più fasi. Consolidamento del modello dati (il blueprint); generatore di Schedule per le barriere dinamiche (motore logico); integrazione della Schedule nel motore di simulazione con intervento sul motore di calcolo in due passaggi, vale a dire prima intervento sul payoff e quindi correzione della logica di autocall. L'attività è stata completata e sembra che non ci siano errori procedurali. Rimane da verificare la validità dei concetti
 * Tentativo di analisi dei risultati ottenuti dai test che evidenziano risultati diversi da quelli attesi, specia nel caso di presenza contemporanea di barriera dinamica ed airbag. Gli interventi sono stati focalizzati praticamente su due file consolidated_risk_system.py e enhanced_certificate_manager_fixed.py. Di fatto le routine modificate non funzionano più.  È partito di nuovo lo schema già visto in altre occasioni: sistemazioni inefficaci - ma questo sarebbe comprensibile data la difficoltà della situazione - mediante interventi distruttivi, circolari - nel senso che si abbandona una strada per poi riprenderla - e, soprattutto con lavorazione su codice difforme da quello a mia disposizione.
-* Intervento su main_windows.py per gestire la fase di controllo dei valori inseriti nei campi che regolano i parametri di una barriera dinamica. Sostanzialmente in base ai dati presenti in fase di inserimento/modifica viene effettuato un controllo di coerenza fra valore iniziale barriera, valore finale barriera, passo e durata del certificato. La durata viene stimata temporaneamente con funzione dedicata. Se il valore calcolato è diverso da quello inserito viene aperto un box che fa presente la situazione ma consente di forzare/accettare la modifica/inserimento con i valori digitati. **
+* Intervento su main_windows.py per gestire la fase di controllo dei valori inseriti nei campi che regolano i parametri di una barriera dinamica. Sostanzialmente in base ai dati presenti in fase di inserimento/modifica viene effettuato un controllo di coerenza fra valore iniziale barriera, valore finale barriera, passo e durata del certificato. La durata viene stimata temporaneamente con funzione dedicata. Se il valore calcolato è diverso da quello inserito viene aperto un box che fa presente la situazione ma consente di forzare/accettare la modifica/inserimento con i valori digitati. 
+* Focalizzata l'attività sul calcolo 'statico' del payoff. Non senza fatica si è arrivati a costruire un test contenuto nel file 'test_airbag_dynamic_barrier.py'. La prova conclusiva ha confermato che il file di test alla fine è stato costruito bene e che il calcolo del payoff tiene conto della eventuale contemporanea presenza di airbag e barriera.
 
 ## Stato attuale.
 
@@ -59,11 +60,13 @@
 * La esecuzione della fase di analisi è inibita in assenza delle informazioni sul profilo temporale dalla operazione (deve essere eseguita la routine avviata tramite il pulsante Calc Date) 
 * La fase di analisi di un singolo certificato è stata completata ed è funzionante come codice ma non va bene concettualmente
 * Per quanto riguarda la gesione dei portafogli funzionano le fasi di censimento, eliminazione e modifica. Nella fase di inserimento/modifica è possibile selezionare/modificare i certificati da includere nello specifico portafoglio con controllo sulla presenza di almeno 2 certificati nell'all'interno del portafoglio. 
+* Completata la struttura del file di test per verificare la corretta gestione delle barriere e dell'airbag
  
 
 ## Obiettivo corrente
 
-  ** Dopo aver sistemato la gestione dei parametri delle barriere, è necessario riprendere la sistemazione del calcolo dei parametri di rischio/valutazione di un certificato in presenza contemporanea di airbag e barriera dinamica. 
+  ** Estendere l'intervento per il calcolo dei payoffs anche al caso di phoenix certificate e predisporre delle situazioni da testare sia per phoenix certificate, sia con airbag sia senza airbag.
+  ** Se tutto va bene, raccordare la struttura dei payoff all'ambiente di valutazione dei certificates e quindi alle routine che utilizzano le simulazioni. 
  
 
 ## Passi completati. Note  
@@ -114,3 +117,6 @@ Adesso c'è da risolvere il problema dei payoff in presenza di airbag=True. Vari
 
   ###  Data di riferimento 17/07/2025 (mattino, prima delle lavorazioni della giornata)
 ** Il controllo sulla coerenza sui parametri della barriera dinamica è soft, e quindi accetta anche valori che apparentemente potrebbero essere incoerenti, poichè le informazioni presenti nell'interfaccia, specie nella fase di inserimento, potrebbe avere natura temporanea. Quindi dati non ancora perfetti consentono di procedere nella elaborazione. Poi altre routine si preoccupano di lavorare sui dati riferiti correttamente al certificato da analizzare.  
+
+  ###  Data di riferimento 21/07/2025 (mattino, prima delle lavorazioni della giornata)
+** Predisposto file di test per gli express certificate. La difficoltà nella predisposizione è legata alla difficoltà di costruzione del contesto da parte del modello LLM. Per cui, anzichè chiedere visibilità sul codice esistente tenta di individuare la strttura sottostante, introducendo però in questo modo altri elementi di confusione e, in definitiva, di instabilità. Con molta fadica il file di test ora viene elaborato ed è quindi possibile estederlo anche alla tipologia di certificates phoenix e, fatto questo, proseguire nella elaborazione del progetto.  

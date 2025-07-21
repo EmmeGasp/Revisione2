@@ -28,12 +28,12 @@ COSA È STATO UNIFICATO:
 ✅ Factory pattern unificato
 ✅ Analyzer unificato
 """
-
+from typing import Union, List
 # ========================================
 # IMPORTS (dipende da structural_cleanup.py)
 # ========================================
 
-from app.core.structural_cleanup import (
+from .structural_cleanup import (
     CertificateBase, CertificateSpecs, MarketData, UnifiedValidator,
     MonteCarloEngine, BlackScholesModel, DateUtils,
     np, pd, datetime, timedelta, Dict, List, Optional, Union, Enum,
@@ -353,11 +353,31 @@ class ExpressCertificate(CertificateBase):
                     payoffs[sim] = self.notional * (1 + coupon_totale)
                     coupon_pagati[sim] = coupon_totale * self.notional
                 else:
-                    # Perdita proporzionale (con salvaguardia)
-                    # max(0, perf_finale) assicura che il payoff minimo sia 0.
-                    payoffs[sim] = self.notional * max(0, perf_finale)
+                    # --- INIZIO MODIFICA PER AIRBAG ---
+                    # Se la barriera è violata, calcoliamo il payoff.
+                    # Di default, la performance è quella calcolata rispetto allo strike.
+                    final_payoff_performance = perf_finale
+
+                    # Controlliamo se l'opzione Airbag è attiva tramite il protection_level.
+                    if self.specs.protection_level and self.specs.protection_level > 0:
+                        # L'Airbag è attivo. Ricalcoliamo la performance usando la barriera
+                        # come nuovo prezzo di riferimento.
+                        logger.info(f"Simulazione {sim}: Airbag attivo. Ricalcolo performance.")
+                        
+                        # Creiamo un array di prezzi di riferimento basato sul livello della barriera.
+                        airbag_reference_prices = np.full_like(S0, self.barrier.level)
+
+                        # Usiamo il motore di valutazione per calcolare la nuova performance.
+                        final_payoff_performance = UnderlyingEvaluationEngine.calculate_performance(
+                            final_prices, airbag_reference_prices, evaluation_type
+                        )
+
+                    # Usiamo la performance corretta (con o senza Airbag) per il payoff finale.
+                    # max(0, ...) assicura che il payoff minimo sia 0.
+                    payoffs[sim] = self.notional * max(0, final_payoff_performance)
                     coupon_pagati[sim] = 0
-        
+                    # --- FINE MODIFICA PER AIRBAG ---    
+
         risultati = {
             'payoffs': payoffs,
             'tempi_uscita': tempi_uscita,
@@ -374,29 +394,39 @@ class ExpressCertificate(CertificateBase):
         logger.info(f"Payoff Express calcolati - Prob autocall: {risultati['prob_autocall']:.2%}")
         return risultati
     
-    def calculate_payoff(self, spot_prices: Union[float, List[float]]) -> Union[float, List[float]]:
-        """Implementazione base per compatibilità CertificateBase"""
-        if isinstance(spot_prices, (int, float)):
-            spot_prices = [spot_prices]
-        
-        # Logica semplificata per singolo spot price
-        payoffs = []
-        for spot in spot_prices:
-            if spot >= self.specs.strike:
-                # Sopra strike - paga coupon
-                total_coupon = sum(self.coupon_schedule.rates)
-                payoff = self.notional * (1 + total_coupon)
-            else:
-                # Sotto strike - check barriera
-                if spot >= self.specs.strike * self.barrier.level:
-                    payoff = self.notional  # Capitale protetto
-                else:
-                    payoff = self.notional * (spot / self.specs.strike)  # Perdita proporzionale
+    def calculate_payoff(self, spot_prices: Union[float, List[float]]) -> float:
+        """
+        Calcola il payoff del certificato. Questa versione è pienamente compatibile
+        con la classe base e gestisce sia un prezzo singolo che una lista.
+        """
+        # Se riceviamo una lista, usiamo solo il primo valore per questo calcolo specifico
+        if isinstance(spot_prices, list):
+            final_price = spot_prices[0]
+        else:
+            final_price = spot_prices
+
+        # Assicuriamoci che face_value sia definito, con un default di 1000
+        face_value = getattr(self.specs, 'face_value', 1000.0)
+
+        # 1. Scenario sopra la barriera: rimborso del capitale
+        if final_price >= self.barrier.level:
+            return face_value
+
+        # 2. Scenario sotto la barriera: logica di perdita
+        elif final_price < self.barrier.level:
+            # Di default, il riferimento è lo strike
+            reference_price = self.specs.strike
+
+            # CONDIZIONE AIRBAG: se c'è protezione, il riferimento diventa la barriera
+            if self.specs.protection_level and self.specs.protection_level > 0:
+                reference_price = self.barrier.level
+
+            # Calcoliamo la performance rispetto al riferimento corretto
+            performance = final_price / reference_price
             
-            payoffs.append(payoff)
+            return face_value * performance
         
-        return payoffs[0] if len(payoffs) == 1 else payoffs
-    
+        return 0.0
     def get_greeks(self) -> Dict[str, float]:
         """Calcola greche per Express (semplificato)"""
         return {
