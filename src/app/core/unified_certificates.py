@@ -733,27 +733,59 @@ class PhoenixCertificate(CertificateBase):
         logger.info(f"Payoff Phoenix calcolati - Efficacia memoria: {risultati['efficacia_memoria']:.2%}")
         return risultati
     
+
     def calculate_payoff(self, spot_prices: Union[float, List[float]]) -> Union[float, List[float]]:
-        """Implementazione base per compatibilità CertificateBase"""
+        """
+        Calcola il payoff del certificato a scadenza, gestendo correttamente la logica Airbag.
+        Questa implementazione è per una valutazione statica (non include i coupon intermedi).
+        """
+        # Gestisce sia un prezzo singolo che una lista per coerenza
         if isinstance(spot_prices, (int, float)):
-            spot_prices = [spot_prices]
-        
+            spot_prices_list = [spot_prices]
+        else:
+            spot_prices_list = spot_prices
+
         payoffs = []
-        for spot in spot_prices:
-            performance = spot / self.specs.strike
-            
-            if performance >= self.barrier_capitale:
-                # Paga tutti i coupon + capitale
-                total_coupon = sum(self.coupon_schedule.rates) * self.notional
-                payoff = self.notional + total_coupon
-            else:
-                # Perdita proporzionale
-                payoff = self.notional * performance
-            
-            payoffs.append(payoff)
         
-        return payoffs[0] if len(payoffs) == 1 else payoffs
-    
+        # Assicuriamoci di usare il notional value definito nell'istanza
+        notional = self.notional
+        # Lo strike price è definito nelle specifiche
+        strike_price = self.specs.strike
+        # Il livello barriera per il capitale è un attributo della classe Phoenix
+        capital_barrier_level_ratio = self.barrier_capitale
+        
+        # Calcoliamo il valore assoluto della barriera capitale
+        capital_barrier_price = strike_price * capital_barrier_level_ratio
+
+        for final_price in spot_prices_list:
+            # 1. Scenario sopra o alla pari della barriera capitale: rimborso del capitale
+            if final_price >= capital_barrier_price:
+                payoffs.append(notional)
+                continue
+
+            # 2. Scenario sotto la barriera capitale: la perdita dipende dalla presenza dell'Airbag
+            else:
+                # Di default, il prezzo di riferimento per calcolare la perdita è lo strike
+                reference_price = strike_price
+                
+                # CONDIZIONE AIRBAG:
+                # Se l'airbag è attivo (tramite il suo attributo o protection_level),
+                # il riferimento per il calcolo della perdita diventa il livello della barriera.
+                if self.airbag_feature or (hasattr(self.specs, 'protection_level') and self.specs.protection_level > 0):
+                    print("--- Airbag ATTIVO: il riferimento per il calcolo della perdita è la barriera ---")
+                    reference_price = capital_barrier_price
+                else:
+                    print("--- Airbag NON attivo: il riferimento per il calcolo della perdita è lo strike ---")
+
+                # Calcoliamo la performance rispetto al riferimento corretto (strike o barriera)
+                performance = final_price / reference_price
+                
+                # Il payoff è proporzionale a questa performance
+                payoffs.append(notional * max(0, performance))
+
+        # Restituisce un singolo valore se l'input era singolo, altrimenti la lista
+        return payoffs[0] if isinstance(spot_prices, (int, float)) else payoffs    
+
     def get_greeks(self) -> Dict[str, float]:
         """Calcola greche per Phoenix"""
         return {
