@@ -237,16 +237,15 @@ class ExpressCertificate(CertificateBase):
         logger.info("Simulazione Express completata")
         return percorsi
     
+
     def calculate_express_payoffs(self, percorsi: np.ndarray = None) -> Dict:
 
         from app.core.enhanced_certificate_manager_fixed import DateCalculationUtils
         from app.core.real_certificate_integration import UnderlyingEvaluationEngine
 
-        # Generiamo la schedule una sola volta all'inizio
         dynamic_schedule = {}
-        if hasattr(self, 'base_config'): # Assumiamo che base_config sia disponibile
+        if hasattr(self, 'base_config'):
             dynamic_schedule = DateCalculationUtils.generate_dynamic_barrier_schedule(self.base_config)
-
 
         evaluation_type = getattr(self, 'underlying_evaluation', 'worst_of')
         if hasattr(self, 'parametri_mercato') and 'underlying_evaluation' in self.parametri_mercato:
@@ -254,9 +253,7 @@ class ExpressCertificate(CertificateBase):
         elif hasattr(self, 'config_data') and 'underlying_evaluation' in self.config_data:
             evaluation_type = self.config_data['underlying_evaluation']
         
-        print(f"🎯 Express payoffs con evaluation type: {evaluation_type}")
-
-
+        # print(f"🎯 Express payoffs con evaluation type: {evaluation_type}")
         
         if percorsi is None:
             if 'percorsi' not in self.risultati_simulazione:
@@ -267,20 +264,14 @@ class ExpressCertificate(CertificateBase):
         
         n_sim, n_assets, n_steps = percorsi.shape
         
-        # >>> MODIFICA FONDAMENTALE <<<
         S0 = np.array(self.initial_prices)
-
-        #S0 = np.array(self.parametri_mercato['spot_prices'])
-
-        # Creiamo una nuova variabile per i prezzi di strike iniziali
-        #S_initial_strike = np.array(self.initial_prices)
+        notional = self.notional
 
         payoffs = np.zeros(n_sim)
         tempi_uscita = np.full(n_sim, self.get_time_to_maturity())
         autocall_flags = np.zeros(n_sim, dtype=bool)
         coupon_pagati = np.zeros(n_sim)
         
-        # Converti date autocall in steps
         date_oss = []
         for date in self.autocall_dates:
             days_from_issue = (date - self.specs.issue_date).days
@@ -288,11 +279,6 @@ class ExpressCertificate(CertificateBase):
             date_oss.append(min(step, n_steps - 1))
         
         for sim in range(n_sim):
-            # Performance worst-of
-            # *** AGGIORNATO v14.11 *** - Performance con evaluation type  
-            from app.core.real_certificate_integration import UnderlyingEvaluationEngine
-
-            # Calcola performance per ogni step usando il metodo esistente
             performance = np.zeros(n_steps)
             for step in range(n_steps):
                 current_prices = percorsi[sim, :, step]
@@ -302,27 +288,20 @@ class ExpressCertificate(CertificateBase):
 
             autocalled = False
             
-            # Check autocall
             for i, step in enumerate(date_oss):
                 if step < n_steps and not autocalled:
                     perf_at_date = performance[step]
-                    # --- INIZIO MODIFICA FASE 3.B ---
-                    
-                    # 1. Recupera la data di osservazione corrente
+
+                    # Recupera la data di osservazione corrente
                     current_obs_date = self.autocall_dates[i]
                     current_obs_date_str = current_obs_date.strftime('%Y-%m-%d')
                     
-                    # 2. Determina il livello di autocall da usare
-                    # Se abbiamo una schedule dinamica, usiamo quella. Altrimenti, il livello fisso.
-                    autocall_level_da_usare = self.autocall_levels[i] # Default fisso
+                    # Determina il livello di autocall da usare: dinamico se disponibile, altrimenti fisso
+                    autocall_level_da_usare = self.autocall_levels[i] #Default fisso
                     if dynamic_schedule and current_obs_date_str in dynamic_schedule:
                         autocall_level_da_usare = dynamic_schedule[current_obs_date_str]
 
-                    # --- FINE MODIFICA FASE 3.B ---
-
-
-                    if perf_at_date >= self.autocall_levels[i]:
-                        # Autocall triggered
+                    if perf_at_date >= autocall_level_da_usare:
                         anni_trascorsi = (self.autocall_dates[i] - self.specs.issue_date).days / 365.25
                         
                         if self.memory_coupon:
@@ -330,53 +309,46 @@ class ExpressCertificate(CertificateBase):
                         else:
                             coupon_totale = self.coupon_schedule.rates[i]
                         
-                        payoffs[sim] = self.notional * (1 + coupon_totale)
+                        payoffs[sim] = notional * (1 + coupon_totale)
                         tempi_uscita[sim] = anni_trascorsi
                         autocall_flags[sim] = True
-                        coupon_pagati[sim] = coupon_totale * self.notional
+                        coupon_pagati[sim] = coupon_totale * notional
                         autocalled = True
                         break
             
-            # Payoff a scadenza se non autocalled
             if not autocalled:
-                perf_finale = performance[-1]
-
-                # *** AGGIORNATO v14.11 *** - Check barriera con evaluation type
                 final_prices = percorsi[sim, :, -1]
                 barrier_breached = UnderlyingEvaluationEngine.check_barrier_breach(
                     final_prices, S0, self.barrier.level, evaluation_type
                 )
 
                 if not barrier_breached:                
-                   # Capitale protetto + coupon
                     coupon_totale = sum(self.coupon_schedule.rates)
-                    payoffs[sim] = self.notional * (1 + coupon_totale)
-                    coupon_pagati[sim] = coupon_totale * self.notional
+                    payoffs[sim] = notional * (1 + coupon_totale)
+                    coupon_pagati[sim] = coupon_totale * notional
                 else:
-                    # --- INIZIO MODIFICA PER AIRBAG ---
-                    # Se la barriera è violata, calcoliamo il payoff.
-                    # Di default, la performance è quella calcolata rispetto allo strike.
-                    final_payoff_performance = perf_finale
-
-                    # Controlliamo se l'opzione Airbag è attiva tramite il protection_level.
-                    if self.specs.protection_level and self.specs.protection_level > 0:
-                        # L'Airbag è attivo. Ricalcoliamo la performance usando la barriera
-                        # come nuovo prezzo di riferimento.
-                        logger.info(f"Simulazione {sim}: Airbag attivo. Ricalcolo performance.")
+                    # ==================== INIZIO MODIFICA ====================
+                    # Se la barriera è violata, calcoliamo il payoff finale.
+                    
+                    # Di base, il prezzo di riferimento sono i prezzi iniziali (S0)
+                    reference_prices = S0
+                    
+                    # CONDIZIONE AIRBAG: Se l'opzione è attiva, il riferimento cambia!
+                    if self.airbag_feature:
+                        # Il nuovo riferimento non è lo strike, ma il livello della barriera.
+                        # Calcoliamo i prezzi di riferimento assoluti della barriera.
+                        barrier_price_level = self.barrier.level
+                        reference_prices = S0 * barrier_price_level
                         
-                        # Creiamo un array di prezzi di riferimento basato sul livello della barriera.
-                        airbag_reference_prices = np.full_like(S0, self.barrier.level)
-
-                        # Usiamo il motore di valutazione per calcolare la nuova performance.
-                        final_payoff_performance = UnderlyingEvaluationEngine.calculate_performance(
-                            final_prices, airbag_reference_prices, evaluation_type
-                        )
-
-                    # Usiamo la performance corretta (con o senza Airbag) per il payoff finale.
-                    # max(0, ...) assicura che il payoff minimo sia 0.
-                    payoffs[sim] = self.notional * max(0, final_payoff_performance)
+                    # Calcoliamo la performance finale rispetto al corretto prezzo di riferimento (strike o barriera)
+                    final_performance = UnderlyingEvaluationEngine.calculate_performance(
+                        final_prices, reference_prices, evaluation_type
+                    )
+                    
+                    # Il payoff è il nozionale moltiplicato per questa performance.
+                    payoffs[sim] = notional * max(0, final_performance)
                     coupon_pagati[sim] = 0
-                    # --- FINE MODIFICA PER AIRBAG ---    
+                    # ===================== FINE MODIFICA =====================
 
         risultati = {
             'payoffs': payoffs,
@@ -386,14 +358,14 @@ class ExpressCertificate(CertificateBase):
             'prob_autocall': np.mean(autocall_flags),
             'tempo_medio_uscita': np.mean(tempi_uscita),
             'payoff_medio': np.mean(payoffs),
-            'perdita_massima': np.min(payoffs) / self.notional - 1,
-            'prob_perdita': np.mean(payoffs < self.notional)
+            'perdita_massima': np.min(payoffs) / notional - 1,
+            'prob_perdita': np.mean(payoffs < notional)
         }
         
         self.risultati_simulazione['payoffs'] = risultati
         logger.info(f"Payoff Express calcolati - Prob autocall: {risultati['prob_autocall']:.2%}")
         return risultati
-    
+
     def calculate_payoff(self, spot_prices: Union[float, List[float]]) -> float:
         """
         Calcola il payoff del certificato. Questa versione è pienamente compatibile
@@ -628,7 +600,6 @@ class PhoenixCertificate(CertificateBase):
         from app.core.enhanced_certificate_manager_fixed import DateCalculationUtils
         from app.core.real_certificate_integration import UnderlyingEvaluationEngine
         
-        # Generiamo la schedule una sola volta all'inizio
         dynamic_schedule = {}
         if hasattr(self, 'base_config'):
             dynamic_schedule = DateCalculationUtils.generate_dynamic_barrier_schedule(self.base_config)
@@ -639,7 +610,7 @@ class PhoenixCertificate(CertificateBase):
         elif hasattr(self, 'config_data') and 'underlying_evaluation' in self.config_data:
             evaluation_type = self.config_data['underlying_evaluation']
         
-        print(f"🎯 Phoenix payoffs con evaluation type: {evaluation_type}")
+        # print(f"🎯 Phoenix payoffs con evaluation type: {evaluation_type}")
 
         if percorsi is None:
             if 'percorsi' not in self.risultati_simulazione:
@@ -650,6 +621,7 @@ class PhoenixCertificate(CertificateBase):
         
         n_sim, n_assets, n_steps = percorsi.shape
         S0 = np.array(self.initial_prices)
+        notional = self.notional
         
         payoffs = np.zeros(n_sim)
         coupon_totali = np.zeros(n_sim)
@@ -665,15 +637,16 @@ class PhoenixCertificate(CertificateBase):
 
             coupon_sim = 0
             memoria_sim = 0
-            
+            # --- INIZIO LOGICA CEDOLE CON BARRIERE DINAMICA ---
             for i, rate in enumerate(self.coupon_schedule.rates):
                 if i + 1 < n_steps:
                     current_prices = percorsi[sim, :, i + 1]
                     
-                    # --- MODIFICA CEDOLA ---
+                    # Recupera la data di osservazione per la cedola
                     current_obs_date = self.coupon_schedule.payment_dates[i]
                     current_obs_date_str = current_obs_date.strftime('%Y-%m-%d')
                     
+                    # Determina la barriera cedola efficace: dinamica se disponibile, altrimenti fissa
                     effective_coupon_barrier = self.barrier_coupon
                     if dynamic_schedule and current_obs_date_str in dynamic_schedule:
                         effective_coupon_barrier = dynamic_schedule[current_obs_date_str]
@@ -683,17 +656,19 @@ class PhoenixCertificate(CertificateBase):
                     )
                     
                     if coupon_barrier_met:                   
-                        coupon_corrente = rate * self.notional
+                        coupon_corrente = rate * notional
                         coupon_da_pagare = coupon_corrente + memoria_sim
                         coupon_sim += coupon_da_pagare
                         memoria_sim = 0
                     else:
                         if self.memory_coupon:
-                            memoria_sim += rate * self.notional
-            
+                            memoria_sim += rate * notional
+            # --- FINE LOGICA CEDOLE ---
+              
             final_prices = percorsi[sim, :, -1]
 
-            # --- MODIFICA CAPITALE ---
+            # --- INIZIO LOGICA CAPITALE CON BARRIERA DINAMICA ---
+            # Determina la barriera capitale efficace a scadenza
             effective_capital_barrier = self.barrier_capitale
             if dynamic_schedule:
                 try:
@@ -706,13 +681,28 @@ class PhoenixCertificate(CertificateBase):
             )
             
             if capital_barrier_met:
-                payoffs[sim] = self.notional + coupon_sim
+                payoffs[sim] = notional + coupon_sim
             else:
+                # ==================== INIZIO MODIFICA ====================
+                # Se la barriera capitale è violata, la perdita dipende dall'Airbag.
+                
+                # Di base, il prezzo di riferimento sono i prezzi iniziali (S0)
+                reference_prices = S0
+
+                # CONDIZIONE AIRBAG: Se l'opzione è attiva, il riferimento cambia!
+                if self.airbag_feature:
+                    # Il nuovo riferimento è il livello della barriera capitale.
+                    barrier_price_level = effective_capital_barrier
+                    reference_prices = S0 * barrier_price_level
+                
+                # Calcoliamo la performance finale rispetto al corretto prezzo di riferimento
                 final_performance = UnderlyingEvaluationEngine.calculate_performance(
-                    final_prices, S0, evaluation_type
+                    final_prices, reference_prices, evaluation_type
                 )
-                capitale_finale = self.notional * max(0, final_performance)
-                payoffs[sim] = capitale_finale + coupon_sim    
+                
+                capitale_finale = notional * max(0, final_performance)
+                payoffs[sim] = capitale_finale + coupon_sim
+                # ===================== FINE MODIFICA =====================
 
             coupon_totali[sim] = coupon_sim
             memoria_coupon[sim] = memoria_sim
@@ -723,16 +713,15 @@ class PhoenixCertificate(CertificateBase):
             'memoria_coupon_finale': memoria_coupon,
             'payoff_medio': np.mean(payoffs),
             'coupon_medio': np.mean(coupon_totali),
-            'prob_perdita_capitale': np.mean(payoffs < self.notional),
+            'prob_perdita_capitale': np.mean(payoffs < notional),
             'prob_coupon_pagato': np.mean(coupon_totali > 0),
-            'rendimento_totale_medio': np.mean(payoffs) / self.notional - 1,
-            'efficacia_memoria': np.mean(coupon_totali) / (len(self.coupon_schedule.rates) * self.notional)
+            'rendimento_totale_medio': np.mean(payoffs) / notional - 1,
+            'efficacia_memoria': np.mean(coupon_totali) / (sum(self.coupon_schedule.rates) * notional if sum(self.coupon_schedule.rates) > 0 else 1)
         }
         
         self.risultati_simulazione['payoffs'] = risultati
         logger.info(f"Payoff Phoenix calcolati - Efficacia memoria: {risultati['efficacia_memoria']:.2%}")
-        return risultati
-    
+        return risultati    
 
     def calculate_payoff(self, spot_prices: Union[float, List[float]]) -> Union[float, List[float]]:
         """

@@ -1,4 +1,4 @@
-# Diario di bordo Sistema Certificati. Data di riferimento 21/07/2025 (prima delle lavorazioni) 
+# Diario di bordo Sistema Certificati. Data di riferimento 22/07/2025 (prima delle lavorazioni) 
 
 # Link al repo github: https://github.com/EmmeGasp/Revisione2 (branch refactoring-struttura)
 
@@ -49,6 +49,7 @@
 * Tentativo di analisi dei risultati ottenuti dai test che evidenziano risultati diversi da quelli attesi, specia nel caso di presenza contemporanea di barriera dinamica ed airbag. Gli interventi sono stati focalizzati praticamente su due file consolidated_risk_system.py e enhanced_certificate_manager_fixed.py. Di fatto le routine modificate non funzionano più.  È partito di nuovo lo schema già visto in altre occasioni: sistemazioni inefficaci - ma questo sarebbe comprensibile data la difficoltà della situazione - mediante interventi distruttivi, circolari - nel senso che si abbandona una strada per poi riprenderla - e, soprattutto con lavorazione su codice difforme da quello a mia disposizione.
 * Intervento su main_windows.py per gestire la fase di controllo dei valori inseriti nei campi che regolano i parametri di una barriera dinamica. Sostanzialmente in base ai dati presenti in fase di inserimento/modifica viene effettuato un controllo di coerenza fra valore iniziale barriera, valore finale barriera, passo e durata del certificato. La durata viene stimata temporaneamente con funzione dedicata. Se il valore calcolato è diverso da quello inserito viene aperto un box che fa presente la situazione ma consente di forzare/accettare la modifica/inserimento con i valori digitati. 
 * Focalizzata l'attività sul calcolo 'statico' del payoff. Non senza fatica si è arrivati a costruire un test contenuto nel file 'test_airbag_dynamic_barrier.py'. La prova conclusiva ha confermato che il file di test alla fine è stato costruito bene e che il calcolo del payoff tiene conto della eventuale contemporanea presenza di airbag e barriera.
+* Effettuati interventi sulle routine di calcolo del payoff per strutture express e phoenix con raccordo alla routine di calcolo statico del payoff. Effettuati test sulla validità dell'approccio. L'esito è stato positivo.
 
 ## Stato attuale.
 
@@ -61,12 +62,13 @@
 * La fase di analisi di un singolo certificato è stata completata ed è funzionante come codice ma non va bene concettualmente
 * Per quanto riguarda la gesione dei portafogli funzionano le fasi di censimento, eliminazione e modifica. Nella fase di inserimento/modifica è possibile selezionare/modificare i certificati da includere nello specifico portafoglio con controllo sulla presenza di almeno 2 certificati nell'all'interno del portafoglio. 
 * Completata la struttura del file di test per verificare la corretta gestione delle barriere e dell'airbag
+* Motore di calcolo del payoff validato e verificato mediante test specifici (vedi file contenuti nella directory dedicata) sulla interazione fra barriere dinamiche e payoff
  
 
 ## Obiettivo corrente
 
-  ** Estendere l'intervento per il calcolo dei payoffs anche al caso di phoenix certificate e predisporre delle situazioni da testare sia per phoenix certificate, sia con airbag sia senza airbag.
-  ** Se tutto va bene, raccordare la struttura dei payoff all'ambiente di valutazione dei certificates e quindi alle routine che utilizzano le simulazioni. 
+  ** È possibile passare ora all'analisi dei portafogli e quindi definire come aggrgare le metriche di rischio dei singoli certificati, implementare il VaR di portafoglio, analisi dellla diversificazione nella'ambito del portafoglio, predisposizione di Report sia interni alla routine sia esterni (excel)
+  ** Piccola postilla all'obiettivo corrente. In base ad analisi effettuata su certificati esistenti è necessario accertare, prima di procedere, che ci sia, oltre che in ambito test, anche in ambito produzione la corretta relazione fra dati presenti e dati utilizzati nel calcolo dei payoff 
  
 
 ## Passi completati. Note  
@@ -120,3 +122,8 @@ Adesso c'è da risolvere il problema dei payoff in presenza di airbag=True. Vari
 
   ###  Data di riferimento 21/07/2025 (mattino, prima delle lavorazioni della giornata)
 ** Predisposto file di test per gli express certificate. La difficoltà nella predisposizione è legata alla difficoltà di costruzione del contesto da parte del modello LLM. Per cui, anzichè chiedere visibilità sul codice esistente tenta di individuare la strttura sottostante, introducendo però in questo modo altri elementi di confusione e, in definitiva, di instabilità. Con molta fadica il file di test ora viene elaborato ed è quindi possibile estederlo anche alla tipologia di certificates phoenix e, fatto questo, proseguire nella elaborazione del progetto.  
+
+  ###  Data di riferimento 22/07/2025 (mattino, prima delle lavorazioni della giornata)
+** È stato fatto anche un commit intermedio dopo aver verificato la correttezza della routine per il calcolo del payoff statico.
+Per il resto la estensione alle strutture di certificati express/phoenix è stata effettuata celeremente e senza particolari problemi
+Oltre alla sistemazione di alcuni dettagli (ad esempio l'inserimento nella finestra del dettaglio certificato dei risultati delle analisi), è possibile avviare la parte di analisi sui portafogli. In realtà, in chiusura di serata è emersa la necessità anche di verificare il corretto passaggio dei dati reali alle routine di calcolo. Da test effettuati è emersa la possibilità di qualche disallineamento. Vedi messaggio di apertura della sessione del 22/7/2025  
