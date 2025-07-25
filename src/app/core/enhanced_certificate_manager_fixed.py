@@ -97,7 +97,11 @@ class EnhancedCertificateConfig:
         
         # Stato certificato
         self.status = self._determine_status()
-    
+
+        # NUOVO: Aggiungiamo un contenitore per i risultati dell'analisi
+        self.analysis_results = None
+
+
     def _determine_status(self):
         """Determina lo stato del certificato: new, in_life, matured, autocalled"""
         today = datetime.now().date()
@@ -1098,7 +1102,7 @@ class EnhancedCertificateManagerV15:
             metadata_dict['last_updated'] = metadata_dict['last_updated'].isoformat()
         if 'created_date' in metadata_dict and isinstance(metadata_dict['created_date'], datetime):
             metadata_dict['created_date'] = metadata_dict['created_date'].isoformat()
-        return {'base_config': base_dict, 'in_life_state': in_life_dict, 'metadata': metadata_dict, 'status': enhanced_config.status, 'enhanced_version': 'v15'}
+        return {'base_config': base_dict, 'in_life_state': in_life_dict, 'metadata': metadata_dict, 'status': enhanced_config.status, 'enhanced_version': 'v15', 'analysis_results': getattr(enhanced_config, 'analysis_results', None) }
 
 
     def _dict_to_enhanced_config_v15(self, config_dict: Dict) -> EnhancedCertificateConfig:
@@ -1107,7 +1111,11 @@ class EnhancedCertificateManagerV15:
             return EnhancedCertificateConfig(base_config)
         base_config = self._dict_to_real_config_safe_v15(config_dict['base_config'])
         enhanced_config = EnhancedCertificateConfig(base_config)
- 
+
+        # Carichiamo i risultati dell'analisi se esistono nel file JSON
+        if 'analysis_results' in config_dict: # NUOVO BLOCCO
+            enhanced_config.analysis_results = config_dict['analysis_results']
+
         
         # In-life state
         in_life_dict = config_dict.get('in_life_state', {})

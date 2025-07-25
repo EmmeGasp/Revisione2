@@ -63,12 +63,14 @@
 * Per quanto riguarda la gesione dei portafogli funzionano le fasi di censimento, eliminazione e modifica. Nella fase di inserimento/modifica è possibile selezionare/modificare i certificati da includere nello specifico portafoglio con controllo sulla presenza di almeno 2 certificati nell'all'interno del portafoglio. 
 * Completata la struttura del file di test per verificare la corretta gestione delle barriere e dell'airbag
 * Motore di calcolo del payoff validato e verificato mediante test specifici (vedi file contenuti nella directory dedicata) sulla interazione fra barriere dinamiche e payoff
+* Fatti interventi per rendere effettiva l'applicazione dell'opzione airbag sui parametri valutatativi del certificato. In base al test effettuato, l'intervento è stato risolutivo
+* Fatti miglioramenti sulla GUI. I dati relativi all'analisi sul certificato sono resi disponibili nel finestra con i dati di dettaglio del certificato selezionato; i dati di analisi sono presenti solo se validi, cioè basati sui gli altri dati esposti nella stessa finestra. La modifica di uno dei parametri del certificato elimina l'informazione sul profilo di rischio dello stesso. In sostanza, in questa ipotesi il percoroso di analisi deve essere ripetuto.
  
 
 ## Obiettivo corrente
 
-  ** È possibile passare ora all'analisi dei portafogli e quindi definire come aggrgare le metriche di rischio dei singoli certificati, implementare il VaR di portafoglio, analisi dellla diversificazione nella'ambito del portafoglio, predisposizione di Report sia interni alla routine sia esterni (excel)
-  ** Piccola postilla all'obiettivo corrente. In base ad analisi effettuata su certificati esistenti è necessario accertare, prima di procedere, che ci sia, oltre che in ambito test, anche in ambito produzione la corretta relazione fra dati presenti e dati utilizzati nel calcolo dei payoff 
+  ** È stata ridefinita la road map (file allegato).  Arricchire le Metriche di Valutazione. Possiamo modificare la funzione di analisi per calcolare e restituire, insieme a FV e VaR, anche il "Costo Implicito della Protezione" e la "Probabilità di Rottura Barriera".
+  Una volta che avremo questo "cruscotto" più ricco per il singolo certificato, avremo una base solidissima per passare all'analisi di sensitività e, infine, a quella di portafoglio. Iniziamo a rendere ogni singola analisi più intelligente.
  
 
 ## Passi completati. Note  
@@ -127,3 +129,6 @@ Adesso c'è da risolvere il problema dei payoff in presenza di airbag=True. Vari
 ** È stato fatto anche un commit intermedio dopo aver verificato la correttezza della routine per il calcolo del payoff statico.
 Per il resto la estensione alle strutture di certificati express/phoenix è stata effettuata celeremente e senza particolari problemi
 Oltre alla sistemazione di alcuni dettagli (ad esempio l'inserimento nella finestra del dettaglio certificato dei risultati delle analisi), è possibile avviare la parte di analisi sui portafogli. In realtà, in chiusura di serata è emersa la necessità anche di verificare il corretto passaggio dei dati reali alle routine di calcolo. Da test effettuati è emersa la possibilità di qualche disallineamento. Vedi messaggio di apertura della sessione del 22/7/2025  
+
+###  Data di riferimento 25/07/2025 (mattino, prima delle lavorazioni della giornata)
+** Miglioramento calcolo payoff e miglioramento della GUI (arricchita la sezione sui dati disponibili per il certificato selezionato). Definita la roadmap.

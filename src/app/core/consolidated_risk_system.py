@@ -393,9 +393,13 @@ class UnifiedRiskAnalyzer:
                     
                     # Applichiamo la correzione del payoff solo a queste simulazioni
                     final_prices_breached = final_prices_all_assets[breached_mask]
-                    
+
+                    # Recupera il livello corretto dell'airbag dall'oggetto certificato
+                    airbag_level = getattr(certificate, 'airbag_level', effective_capital_barrier) # Usa airbag_level, con fallback sulla barriera per sicurezza
+                    self.logger.info(f"   🛡️ Utilizzo Airbag Level: {airbag_level:.2%}")
+
                     # Il prezzo di riferimento per l'airbag è la barriera efficace
-                    airbag_reference_prices = initial_prices * effective_capital_barrier
+                    airbag_reference_prices = initial_prices * airbag_level
                     
                     # Calcoliamo il payoff corretto per ogni scenario violato
                     for i, idx in enumerate(np.where(breached_mask)[0]):

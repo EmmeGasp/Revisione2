@@ -1272,6 +1272,14 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
                 updated_data = dialog.result
                 cert_id = updated_data['isin'] # Il risultato del dialog è un dizionario
 
+                # --- INIZIO NUOVO BLOCCO: INVALIDAZIONE RISULTATI ---
+                enhanced_config_obj = self.enhanced_manager.configurations.get(cert_id)
+                if enhanced_config_obj and hasattr(enhanced_config_obj, 'analysis_results') and enhanced_config_obj.analysis_results:
+                    print(f"✏️ Invalidazione risultati analisi per {cert_id} a seguito di modifica.")
+                    enhanced_config_obj.analysis_results['is_valid'] = False
+                # --- FINE NUOVO BLOCCO ---
+
+
                 # Deleghiamo l'aggiornamento al manager
                 self.enhanced_manager.add_certificate_from_dict_v15(cert_id, updated_data)
                 
@@ -1476,6 +1484,33 @@ DATI AVANZATI:
 Date Cedole: {len(get_attr(cert_data, 'coupon_dates', []))} date
 Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
 """
+        # --- INIZIO NUOVO BLOCCO: VISUALIZZAZIONE RISULTATI ANALISI ---
+        if hasattr(enhanced_config, 'analysis_results') and enhanced_config.analysis_results:
+            results = enhanced_config.analysis_results
+            metrics = results.get('metrics', {})
+            timestamp = results.get('timestamp', 'N/A')
+            is_valid = results.get('is_valid', True)
+
+            details += f"\n{'='*60}\n\nRISULTATI ULTIMA ANALISI (del {timestamp}):\n"
+
+            if not is_valid:
+                details += "⚠️ ATTENZIONE: I risultati potrebbero non essere aggiornati. Ricalcolare l'analisi.\n"
+
+            # Formattazione sicura dei valori
+            fv = metrics.get('fair_value', 'N/A')
+            ret = metrics.get('expected_return', 'N/A')
+            var95 = metrics.get('var_95', 'N/A')
+            
+            fv_str = f"€ {fv:,.2f}" if isinstance(fv, (int, float)) else "N/A"
+            ret_str = f"{ret:.2%}" if isinstance(ret, (int, float)) else "N/A"
+            var95_str = f"{var95:.2%}" if isinstance(var95, (int, float)) else "N/A"
+
+            details += f"""  • Fair Value Stimato: {fv_str}
+  • Rendimento Atteso: {ret_str}
+  • VaR 95% (Max Perdita attesa): {var95_str}
+"""
+        # --- FINE NUOVO BLOCCO ---
+
         self.details_text.delete(1.0, tk.END)
         self.details_text.insert(1.0, details)    
 
@@ -1725,6 +1760,29 @@ Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
 
             self.logger.info(f"RISULTATI ANALISI per {selected_isin}: FV={fair_value_results.get('fair_value', 'N/A'):.2f}, VaR 95%={risk_metrics.var_95:.2%}, Volatilità={risk_metrics.volatility:.2%}") #Volatilità
 
+            # --- INIZIO NUOVO BLOCCO: SALVATAGGIO RISULTATI ---
+            enhanced_config_obj = self.enhanced_manager.configurations[selected_isin]
+            market_data = enhanced_config_obj.in_life_state.current_market_data
+
+            analysis_data = {
+                "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                "is_valid": True,
+                "metrics": {
+                    "fair_value": fair_value_results.get('fair_value', 'N/A'),
+                    "expected_return": fair_value_results.get('expected_return', 'N/A'),
+                    "market_price": market_data.get('certificate_market_price', 'N/A'),
+                    "var_95": risk_metrics.var_95,
+                    "volatility": risk_metrics.volatility,
+                    "sharpe_ratio": risk_metrics.sharpe_ratio
+                }
+            }
+            
+            # Imposta l'attributo sull'oggetto in memoria
+            enhanced_config_obj.analysis_results = analysis_data
+            
+            # Salva le modifiche su file
+            self._save_certificates()
+            # --- FINE NUOVO BLOCCO ---
 
 
             # --- MODIFICA 3: VISUALIZZAZIONE COMPLETA DEI RISULTATI ---
@@ -1776,6 +1834,9 @@ Analisi basata su {1000} simulazioni di rischio e {5000} per il fair value.
             #messagebox.showinfo("Analisi Completata", summary_message)
             from app.core.enhanced_certificate_manager_fixed import PreviewDialog 
             PreviewDialog(self.root, f"Analisi Completa - {selected_isin}", summary_message)
+
+
+            self._display_certificate_details(selected_isin) 
 
 
             self.status_var.set("Analisi completata con successo.")
