@@ -53,7 +53,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from enum import Enum
 import time
-from app.core.enhanced_certificate_manager_fixed import DateCalculationUtils
+from app.utils.date_utils import DateCalculationUtils
 
 # ========================================
 # RISK METRICS E DATA STRUCTURES
@@ -61,7 +61,9 @@ from app.core.enhanced_certificate_manager_fixed import DateCalculationUtils
 
 @dataclass
 class RiskMetrics:
-    """Struttura unificata per metriche di rischio - CONSOLIDATA"""
+    """Struttura unificata per metriche di rischio - POTENZIATA"""
+    fair_value: float              # NUOVO: Il valore del certificato
+    barrier_breach_probability: float # NUOVO: La probabilità di rottura barriera
     var_95: float
     var_99: float
     cvar_95: float
@@ -82,6 +84,8 @@ class RiskMetrics:
     def to_dict(self) -> Dict:
         """Converte in dizionario per serializzazione"""
         return {
+            'fair_value': self.fair_value,
+            'barrier_breach_probability': self.barrier_breach_probability,
             'var_95': self.var_95,
             'var_99': self.var_99,
             'cvar_95': self.cvar_95,
@@ -306,18 +310,20 @@ class UnifiedRiskAnalyzer:
         
         return hhi
     
-    def analyze_certificate_risk(self, certificate: CertificateBase, 
-                                n_simulations: int = 10000) -> RiskMetrics:
+
+    def analyze_certificate_risk(self, certificate: CertificateBase,
+                                n_simulations: int = 10000,
+                                apply_protection: bool = True) -> RiskMetrics: # <-- MODIFICATO
         """
         Analizza il rischio di un certificato gestendo correttamente
-        l'interazione tra barriere dinamiche e opzione Airbag.
+        l'interazione tra barriere dinamiche, opzione Airbag e la loro disattivazione.
         """
-        cache_key = self._get_cache_key(type(certificate).__name__, certificate.specs.isin, n_simulations)
+        cache_key = self._get_cache_key(type(certificate).__name__, certificate.specs.isin, n_simulations, apply_protection) # MODIFICATO per includere la flag
         if self._is_cache_valid(cache_key):
-            self.logger.info(f"Usando cache per analisi rischio {certificate.specs.isin}")
+            self.logger.info(f"Usando cache per analisi rischio {certificate.specs.isin} (Protezione: {apply_protection})")
             return self._cache[cache_key]
 
-        self.logger.info(f"Analisi rischio per {certificate.specs.name}")
+        self.logger.info(f"Analisi rischio per {certificate.specs.name} (Protezione: {apply_protection})") # <-- MODIFICATO
 
         try:
             # --- PASSO 1: SIMULAZIONE PERCORSI ---
@@ -340,83 +346,81 @@ class UnifiedRiskAnalyzer:
                 final_prices = percorsi[:, -1]
                 payoffs = np.array([certificate.calculate_payoff(price) for price in final_prices])
 
-            # ==================== INIZIO LOGICA CHIAVE ====================
+            # ==================== INIZIO LOGICA CHIAVE MODIFICATA ====================
 
-            # --- PASSO 3: DETERMINA LA BARRIERA CAPITALE EFFICACE ---
-            # Questa è la barriera che verrà usata per il controllo a scadenza.
-            
+            # --- PASSO 3: DETERMINA BARRIERA EFFICACE E PROBABILITA' DI ROTTURA ---
             dynamic_barrier_schedule = {}
-            # La feature deve essere esplicitamente True nel certificato
             if getattr(certificate, 'dynamic_barrier_feature', False):
-                # Assumiamo che il certificato abbia un riferimento alla sua config
                 if hasattr(certificate, 'base_config'):
                     dynamic_barrier_schedule = DateCalculationUtils.generate_dynamic_barrier_schedule(certificate.base_config)
-
-            # Di default, usiamo la barriera capitale fissa
-            effective_capital_barrier = getattr(certificate, 'capital_barrier', 0.60) 
             
+            effective_capital_barrier = getattr(certificate, 'capital_barrier', 0.60)
             if dynamic_barrier_schedule:
-                # Se la schedule esiste, la barriera efficace a scadenza è l'ULTIMO valore
                 try:
                     final_barrier_value = list(dynamic_barrier_schedule.values())[-1]
                     effective_capital_barrier = final_barrier_value
-                    self.logger.info(f"🧬 BARRIERA DINAMICA ATTIVA. Livello finale a scadenza: {effective_capital_barrier:.2%}")
                 except IndexError:
                     self.logger.warning("Schedule barriera dinamica generata ma vuota. Fallback a barriera fissa.")
-            else:
-                self.logger.info(f"🔒 BARRIERA FISSA ATTIVA. Livello: {effective_capital_barrier:.2%}")
 
-            # --- PASSO 4: APPLICA LOGICA AIRBAG USANDO LA BARRIERA EFFICACE ---
+            # Calcoliamo la maschera delle violazioni e la probabilità SEMPRE
+            final_prices_all_assets = percorsi[:, :, -1]
+            initial_prices = np.array(getattr(certificate, 'initial_prices', [100.0]))
+            from app.core.real_certificate_integration import UnderlyingEvaluationEngine
+            evaluation_type = getattr(certificate, 'underlying_evaluation', 'worst_of')
+
+            breached_mask = np.array([
+                UnderlyingEvaluationEngine.check_barrier_breach(final_prices_all_assets[i], initial_prices, effective_capital_barrier, evaluation_type)
+                for i in range(n_simulations)
+            ])
             
-            # L'Airbag si attiva solo se la feature è esplicitamente True
-            if getattr(certificate, 'airbag_feature', False):
-                self.logger.info(f"🛡️ AIRBAG ATTIVO. Verifico interazione con barriera a {effective_capital_barrier:.2%}.")
+            # --- NUOVO: CALCOLO PROBABILITA' DI ROTTURA ---
+            barrier_breach_probability = np.mean(breached_mask)
+            self.logger.info(f"📉 Prob. Rottura Barriera calcolata: {barrier_breach_probability:.2%}")
 
-                notional = getattr(certificate, 'notional', 1000.0)
-                initial_prices = np.array(getattr(certificate, 'initial_prices', [100.0]))
-                
-                # Identifichiamo le simulazioni in cui la barriera è violata a scadenza
-                final_prices_all_assets = percorsi[:, :, -1]
-                
-                # Usiamo il motore di valutazione per determinare la violazione
-                from app.core.real_certificate_integration import UnderlyingEvaluationEngine
-                evaluation_type = getattr(certificate, 'underlying_evaluation', 'worst_of')
-
-                breached_mask = np.array([
-                    UnderlyingEvaluationEngine.check_barrier_breach(final_prices_all_assets[i], initial_prices, effective_capital_barrier, evaluation_type)
-                    for i in range(n_simulations)
-                ])
-                num_breached = np.sum(breached_mask)
-
-                if num_breached > 0:
-                    self.logger.info(f"   L'Airbag si attiverà per {num_breached}/{n_simulations} simulazioni.")
-                    
-                    # Applichiamo la correzione del payoff solo a queste simulazioni
-                    final_prices_breached = final_prices_all_assets[breached_mask]
-
-                    # Recupera il livello corretto dell'airbag dall'oggetto certificato
-                    airbag_level = getattr(certificate, 'airbag_level', effective_capital_barrier) # Usa airbag_level, con fallback sulla barriera per sicurezza
-                    self.logger.info(f"   🛡️ Utilizzo Airbag Level: {airbag_level:.2%}")
-
-                    # Il prezzo di riferimento per l'airbag è la barriera efficace
-                    airbag_reference_prices = initial_prices * airbag_level
-                    
-                    # Calcoliamo il payoff corretto per ogni scenario violato
-                    for i, idx in enumerate(np.where(breached_mask)[0]):
-                        performance_airbag = UnderlyingEvaluationEngine.calculate_performance(
-                            final_prices_breached[i], airbag_reference_prices, evaluation_type
-                        )
-                        payoffs[idx] = notional * max(0, performance_airbag)
+            # --- PASSO 4: APPLICA OPZIONI DI PROTEZIONE (Airbag, etc.) SOLO SE RICHIESTO ---
+            if apply_protection: # <-- NUOVO BLOCCO CONDIZIONALE
+                self.logger.info("🛡️ Applicando opzioni di protezione (Airbag/Barriere).")
+                if dynamic_barrier_schedule:
+                    self.logger.info(f"🧬 BARRIERA DINAMICA ATTIVA. Livello finale a scadenza: {effective_capital_barrier:.2%}")
                 else:
-                    self.logger.info("   L'Airbag non si è attivato in nessuna simulazione.")
+                    self.logger.info(f"🔒 BARRIERA FISSA ATTIVA. Livello: {effective_capital_barrier:.2%}")
 
-            # ===================== FINE LOGICA CHIAVE =====================
+                if getattr(certificate, 'airbag_feature', False):
+                    self.logger.info(f"🛡️ AIRBAG ATTIVO. Verifico interazione con barriera a {effective_capital_barrier:.2%}.")
+                    notional = getattr(certificate, 'notional', 1000.0)
+                    num_breached = np.sum(breached_mask)
+
+                    if num_breached > 0:
+                        self.logger.info(f"   L'Airbag si attiverà per {num_breached}/{n_simulations} simulazioni.")
+                        final_prices_breached = final_prices_all_assets[breached_mask]
+                        airbag_level = getattr(certificate, 'airbag_level', effective_capital_barrier)
+                        self.logger.info(f"   🛡️ Utilizzo Airbag Level: {airbag_level:.2%}")
+                        airbag_reference_prices = initial_prices * airbag_level
+                        
+                        for i, idx in enumerate(np.where(breached_mask)[0]):
+                            performance_airbag = UnderlyingEvaluationEngine.calculate_performance(
+                                final_prices_breached[i], airbag_reference_prices, evaluation_type
+                            )
+                            payoffs[idx] = notional * max(0, performance_airbag)
+                    else:
+                        self.logger.info("   L'Airbag non si è attivato in nessuna simulazione.")
+            else:
+                self.logger.info("裸 Calcolo 'naked' senza opzioni di protezione.")
+                # Se la protezione non è applicata, i payoff rimangono quelli calcolati al Passo 2
+                # e la correzione dell'airbag viene saltata.
+
+            # ===================== FINE LOGICA CHIAVE MODIFICATA =====================
 
             # --- PASSO 5: CALCOLO METRICHE DI RISCHIO FINALI ---
+            
+            # --- NUOVO: CALCOLO FAIR VALUE ---
+            time_to_maturity = certificate.get_time_to_maturity()
+            risk_free_rate = getattr(certificate, 'risk_free_rate', self.risk_free_rate)
+            fair_value = np.mean(payoffs) * np.exp(-risk_free_rate * time_to_maturity)
+
             notional = getattr(certificate, 'notional', certificate.specs.strike)
             returns = (payoffs - notional) / notional
             
-            # ... il resto della funzione da qui in poi rimane invariato ...
             var_95 = self.calculate_var(returns, 0.95)
             var_99 = self.calculate_var(returns, 0.99)
             cvar_95 = self.calculate_cvar(returns, 0.95)
@@ -432,8 +436,6 @@ class UnifiedRiskAnalyzer:
             concentration_risk = 0.0
             if hasattr(certificate, 'underlying_assets') and len(certificate.underlying_assets) > 1:
                 n_assets = len(certificate.underlying_assets)
-                # Creiamo una matrice di rendimenti fittizia ma con la volatilità corretta
-                # per stimare il rischio di correlazione.
                 returns_matrix = np.random.normal(0, volatility, (n_simulations, n_assets))
                 correlation_risk = self.calculate_correlation_risk(returns_matrix)
                 weights = np.ones(n_assets) / n_assets
@@ -442,7 +444,9 @@ class UnifiedRiskAnalyzer:
             liquidity_risk = self._estimate_liquidity_risk(certificate)
             credit_risk = self._estimate_credit_risk(certificate)
             
-            risk_metrics = RiskMetrics(
+            risk_metrics = RiskMetrics(   # <-- MODIFICATO per usare la nuova dataclass
+                fair_value=fair_value,
+                barrier_breach_probability=barrier_breach_probability,
                 var_95=var_95, var_99=var_99, cvar_95=cvar_95, cvar_99=cvar_99,
                 max_drawdown=max_drawdown, volatility=volatility, skewness=skewness,
                 kurtosis=kurtosis, sharpe_ratio=sharpe_ratio, sortino_ratio=sortino_ratio,
@@ -458,7 +462,6 @@ class UnifiedRiskAnalyzer:
         except Exception as e:
             self.logger.error(f"Errore analisi rischio {certificate.specs.isin}: {e}", exc_info=True)
             raise
-
     def _simulate_certificate_payoffs(self, certificate: CertificateBase, 
                                     n_simulations: int) -> np.ndarray:
         """Simula payoffs per il certificato"""

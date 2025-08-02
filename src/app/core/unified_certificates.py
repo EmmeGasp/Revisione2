@@ -117,7 +117,13 @@ class ExpressCertificate(CertificateBase):
                  autocall_dates: List[datetime], barrier: Barrier,
                  memory_coupon: bool = True, notional: float = 100.0,
                  airbag_feature: bool = False, 
-                 airbag_level: Optional[float] = None):
+                 airbag_level: Optional[float] = None,
+                 dynamic_barrier_feature: bool = False,
+                 dynamic_barrier_start_level: Optional[float] = None,
+                 step_down_rate: Optional[float] = None,
+                 dynamic_barrier_end_level: Optional[float] = None,
+                 observation_delay_months: Optional[int] = None
+                ):
         
         
         # Aggiorna specs per Express
@@ -135,7 +141,11 @@ class ExpressCertificate(CertificateBase):
         self.airbag_feature = airbag_feature
         self.airbag_level = airbag_level
         self.capital_barrier = barrier.level # Aggiungiamo questo per coerenza con il risk analyzer
-        
+        self.dynamic_barrier_feature = dynamic_barrier_feature
+        self.dynamic_barrier_start_level = dynamic_barrier_start_level
+        self.step_down_rate = step_down_rate
+        self.dynamic_barrier_end_level = dynamic_barrier_end_level
+        self.observation_delay_months = observation_delay_months        
         # Parametri avanzati (da EsempioCompletoExpress)
         self.parametri_mercato = {}
         self.risultati_simulazione = {}
@@ -237,23 +247,21 @@ class ExpressCertificate(CertificateBase):
         logger.info("Simulazione Express completata")
         return percorsi
     
-
     def calculate_express_payoffs(self, percorsi: np.ndarray = None) -> Dict:
-
-        from app.core.enhanced_certificate_manager_fixed import DateCalculationUtils
+        """
+        Calcola i payoff per un Express Certificate.
+        *** VERSIONE CORRETTA: Utilizza la schedule dinamica anche per l'autocall. ***
+        """
+        from app.utils.date_utils import DateCalculationUtils  # Spostato import per evitare problemi
         from app.core.real_certificate_integration import UnderlyingEvaluationEngine
 
         dynamic_schedule = {}
-        if hasattr(self, 'base_config'):
+        if hasattr(self, 'base_config') and getattr(self, 'dynamic_barrier_feature', False):
             dynamic_schedule = DateCalculationUtils.generate_dynamic_barrier_schedule(self.base_config)
+            if dynamic_schedule:
+                print("🧬 Logica Autocall utilizzerà la schedule della barriera dinamica.")
 
         evaluation_type = getattr(self, 'underlying_evaluation', 'worst_of')
-        if hasattr(self, 'parametri_mercato') and 'underlying_evaluation' in self.parametri_mercato:
-            evaluation_type = self.parametri_mercato['underlying_evaluation']
-        elif hasattr(self, 'config_data') and 'underlying_evaluation' in self.config_data:
-            evaluation_type = self.config_data['underlying_evaluation']
-        
-        # print(f"🎯 Express payoffs con evaluation type: {evaluation_type}")
         
         if percorsi is None:
             if 'percorsi' not in self.risultati_simulazione:
@@ -263,7 +271,6 @@ class ExpressCertificate(CertificateBase):
         logger.info("Calcolo payoff Express...")
         
         n_sim, n_assets, n_steps = percorsi.shape
-        
         S0 = np.array(self.initial_prices)
         notional = self.notional
 
@@ -292,14 +299,18 @@ class ExpressCertificate(CertificateBase):
                 if step < n_steps and not autocalled:
                     perf_at_date = performance[step]
 
-                    # Recupera la data di osservazione corrente
+                    # --- INIZIO LOGICA CORRETTA PER LIVELLO AUTOCALL ---
                     current_obs_date = self.autocall_dates[i]
                     current_obs_date_str = current_obs_date.strftime('%Y-%m-%d')
                     
-                    # Determina il livello di autocall da usare: dinamico se disponibile, altrimenti fisso
-                    autocall_level_da_usare = self.autocall_levels[i] #Default fisso
+                    # Di default, usa il livello di autocall fisso definito
+                    autocall_level_da_usare = self.autocall_levels[i]
+                    
+                    # Se esiste una schedule dinamica E la data corrente è in essa,
+                    # SOVRASCRIVI il livello di autocall con quello dinamico.
                     if dynamic_schedule and current_obs_date_str in dynamic_schedule:
                         autocall_level_da_usare = dynamic_schedule[current_obs_date_str]
+                    # --- FINE LOGICA CORRETTA PER LIVELLO AUTOCALL ---
 
                     if perf_at_date >= autocall_level_da_usare:
                         anni_trascorsi = (self.autocall_dates[i] - self.specs.issue_date).days / 365.25
@@ -316,6 +327,7 @@ class ExpressCertificate(CertificateBase):
                         autocalled = True
                         break
             
+            # ... il resto del metodo (logica a scadenza con airbag etc.) rimane invariato ...
             if not autocalled:
                 final_prices = percorsi[sim, :, -1]
                 barrier_breached = UnderlyingEvaluationEngine.check_barrier_breach(
@@ -327,29 +339,19 @@ class ExpressCertificate(CertificateBase):
                     payoffs[sim] = notional * (1 + coupon_totale)
                     coupon_pagati[sim] = coupon_totale * notional
                 else:
-                    # ==================== INIZIO MODIFICA ====================
-                    # Se la barriera è violata, calcoliamo il payoff finale.
-                    
-                    # Di base, il prezzo di riferimento sono i prezzi iniziali (S0)
                     reference_prices = S0
-                    
-                    # CONDIZIONE AIRBAG: Se l'opzione è attiva, il riferimento cambia!
                     if self.airbag_feature:
-                        # Il nuovo riferimento non è lo strike, ma il livello della barriera.
-                        # Calcoliamo i prezzi di riferimento assoluti della barriera.
                         barrier_price_level = self.barrier.level
                         reference_prices = S0 * barrier_price_level
                         
-                    # Calcoliamo la performance finale rispetto al corretto prezzo di riferimento (strike o barriera)
                     final_performance = UnderlyingEvaluationEngine.calculate_performance(
                         final_prices, reference_prices, evaluation_type
                     )
                     
-                    # Il payoff è il nozionale moltiplicato per questa performance.
                     payoffs[sim] = notional * max(0, final_performance)
                     coupon_pagati[sim] = 0
-                    # ===================== FINE MODIFICA =====================
-
+        
+        # ... il resto del metodo (creazione dizionario risultati) rimane invariato ...
         risultati = {
             'payoffs': payoffs,
             'tempi_uscita': tempi_uscita,
@@ -358,7 +360,7 @@ class ExpressCertificate(CertificateBase):
             'prob_autocall': np.mean(autocall_flags),
             'tempo_medio_uscita': np.mean(tempi_uscita),
             'payoff_medio': np.mean(payoffs),
-            'perdita_massima': np.min(payoffs) / notional - 1,
+            'perdita_massima': (np.min(payoffs) / notional - 1) if notional > 0 else 0,
             'prob_perdita': np.mean(payoffs < notional)
         }
         
@@ -482,7 +484,13 @@ class PhoenixCertificate(CertificateBase):
                  barrier_capitale: float, memory_coupon: bool = True,
                  notional: float = 100.0,
                  airbag_feature: bool = False, 
-                 airbag_level: Optional[float] = None):
+                 airbag_level: Optional[float] = None,
+                 dynamic_barrier_feature: bool = False,
+                 dynamic_barrier_start_level: Optional[float] = None,
+                 step_down_rate: Optional[float] = None,
+                 dynamic_barrier_end_level: Optional[float] = None,
+                 observation_delay_months: Optional[int] = None
+                ):
         
         # Aggiorna specs per Phoenix
         specs.certificate_type = CertificateType.PHOENIX.value
@@ -498,8 +506,12 @@ class PhoenixCertificate(CertificateBase):
         self.airbag_feature = airbag_feature
         self.airbag_level = airbag_level
         self.capital_barrier = barrier_capitale # Aggiungiamo questo per coerenza con il risk analyzer
-         
-
+    
+        self.dynamic_barrier_feature = dynamic_barrier_feature
+        self.dynamic_barrier_start_level = dynamic_barrier_start_level
+        self.step_down_rate = step_down_rate
+        self.dynamic_barrier_end_level = dynamic_barrier_end_level
+        self.observation_delay_months = observation_delay_months
         
         # Parametri avanzati
         self.parametri_mercato = {}

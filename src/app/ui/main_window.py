@@ -88,9 +88,11 @@ try:
     try:
         from app.core.enhanced_certificate_manager_fixed import (
             EnhancedCertificateManagerV15,
-            CalculoDateAutoDialogV15,  # <-- RIMUOVI questa riga se la classe non esiste più in quel file
-            DateCalculationUtils
+            CalculoDateAutoDialogV15  # <-- RIMUOVI questa riga se la classe non esiste più in quel file
         )
+        # Import della classe di utilità dalla sua nuova posizione
+        from app.utils.date_utils import DateCalculationUtils
+
         print("✅ Import enhanced manager v15 OK")
         ENHANCED_MANAGER_AVAILABLE = True
     except ImportError as e:
@@ -1484,32 +1486,36 @@ DATI AVANZATI:
 Date Cedole: {len(get_attr(cert_data, 'coupon_dates', []))} date
 Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
 """
-        # --- INIZIO NUOVO BLOCCO: VISUALIZZAZIONE RISULTATI ANALISI ---
+            # --- INIZIO NUOVO BLOCCO: VISUALIZZAZIONE RISULTATI ANALISI ---
         if hasattr(enhanced_config, 'analysis_results') and enhanced_config.analysis_results:
             results = enhanced_config.analysis_results
-            metrics = results.get('metrics', {})
-            timestamp = results.get('timestamp', 'N/A')
-            is_valid = results.get('is_valid', True)
-
-            details += f"\n{'='*60}\n\nRISULTATI ULTIMA ANALISI (del {timestamp}):\n"
-
-            if not is_valid:
-                details += "⚠️ ATTENZIONE: I risultati potrebbero non essere aggiornati. Ricalcolare l'analisi.\n"
-
-            # Formattazione sicura dei valori
-            fv = metrics.get('fair_value', 'N/A')
-            ret = metrics.get('expected_return', 'N/A')
-            var95 = metrics.get('var_95', 'N/A')
+            timestamp = results.get('analysis_timestamp', 'N/A')
             
-            fv_str = f"€ {fv:,.2f}" if isinstance(fv, (int, float)) else "N/A"
-            ret_str = f"{ret:.2%}" if isinstance(ret, (int, float)) else "N/A"
-            var95_str = f"{var95:.2%}" if isinstance(var95, (int, float)) else "N/A"
+            # Formattazione sicura dei valori dal dizionario
+            fv = results.get('fair_value', 'N/A')
+            cost = results.get('protection_implicit_cost', 'N/A')
+            breach_prob = results.get('barrier_breach_probability', 'N/A')
+            var95 = results.get('var_95', 'N/A')
+            vol = results.get('volatility', 'N/A')
 
-            details += f"""  • Fair Value Stimato: {fv_str}
-  • Rendimento Atteso: {ret_str}
-  • VaR 95% (Max Perdita attesa): {var95_str}
-"""
-        # --- FINE NUOVO BLOCCO ---
+            # Trasforma i numeri in stringhe formattate
+            fv_str = f"€ {fv:,.2f}" if isinstance(fv, (int, float)) else "N/A"
+            cost_str = f"€ {cost:,.2f}" if isinstance(cost, (int, float)) else "N/A"
+            
+            details += f"""
+        {'='*60}
+        📊 RISULTATI ULTIMA ANALISI (del {timestamp.split('T')[0]}):
+
+        VALUTAZIONE:
+            • Fair Value Stimato:      {fv_str}
+            • Costo Impl. Protezione:  {cost_str}
+
+        METRICHE DI RISCHIO CHIAVE:
+            • Prob. Rottura Barriera:  {breach_prob}
+            • VaR 95% (Max Perdita):     {var95}
+            • Volatilità Stimata:      {vol}
+        """
+        #  --- FINE NUOVO BLOCCO ---
 
         self.details_text.delete(1.0, tk.END)
         self.details_text.insert(1.0, details)    
@@ -1669,185 +1675,73 @@ Autocall Levels: {len(get_attr(cert_data, 'autocall_levels', []))} livelli
     
     def _analyze_selected_certificate(self):
         """
-        *** VERSIONE COMPLETAMENTE RIVISTA E FUNZIONANTE ***
-        Esegue l'analisi completa:
-        1. Controlla la presenza dei dati necessari (date cedole).
-        2. Recupera i dati di mercato aggiornati.
-        3. Esegue l'analisi di rischio (VaR, Vol, etc.).
-        4. Esegue il calcolo del Fair Value.
-        5. Mostra un riepilogo completo dei risultati.
+        *** VERSIONE RIVISTA ***
+        Esegue l'analisi completa delegando l'intera operazione al manager,
+        che ora restituisce un dizionario con tutte le metriche.
         """
-
         selected_isin = self.get_selected_isin()
         if not selected_isin:
             messagebox.showwarning("Attenzione", "Seleziona un certificato da analizzare.")
             return
-        
-        # >>> INIZIO NUOVO BLOCCO DI VALIDAZIONE <<<
+
+        # --- VALIDAZIONE PREVENTIVA (invariata) ---
         cert_obj = self.enhanced_manager.configurations.get(selected_isin)
         if not cert_obj or not cert_obj.base_config:
             messagebox.showerror("Errore Interno", f"Impossibile recuperare i dati per il certificato {selected_isin}.")
             return
-
         base_conf = cert_obj.base_config
-        # Usiamo getattr per sicurezza, nel caso gli attributi non esistessero
-        num_underlyings = len(getattr(base_conf, 'underlying_assets', []))
         num_initial_prices = len(getattr(base_conf, 'prezzi_iniziali_sottostanti', []))
-
         if num_initial_prices == 0:
             messagebox.showwarning("Dati Obbligatori Mancanti",
                                 "Il campo 'Prezzi Iniziali/Strike' è obbligatorio per l'analisi.\n\n"
-                                "Per favore, modifica il certificato e inserisci i valori corretti prima di procedere.")
+                                "Per favore, modifica il certificato e inserisci i valori corretti.")
+            return
+        if not getattr(base_conf, 'coupon_dates'):
+            messagebox.showwarning("Dati Mancanti",
+                                f"Il certificato '{selected_isin}' non ha una schedulazione delle cedole.\n\n"
+                                "Usa 'Calc Date' per generarle prima di procedere.")
             return
 
-        if num_underlyings != num_initial_prices:
-            messagebox.showwarning("Dati Incoerenti",
-                                f"Il numero di sottostanti ({num_underlyings}) non corrisponde al numero di prezzi iniziali ({num_initial_prices}).\n\n"
-                                "Per favore, controlla i dati del certificato.")
-            return
-    
-        if not self.enhanced_manager:
-            messagebox.showerror("Errore", "Funzionalità di analisi non disponibile. Enhanced Manager non trovato.")
-            return
-
-       # --- MODIFICA 1: CONTROLLO PREVENTIVO SULLE DATE CEDOLA ---
-        try:
-            cert_data_dict = self.enhanced_manager.get_certificate_data_for_gui(selected_isin)
-            if not cert_data_dict.get('coupon_dates'):
-                messagebox.showwarning(
-                    "Dati Mancanti",
-                    f"Il certificato '{selected_isin}' non ha una schedulazione delle cedole.\n\n"
-                    "Per favore, usa il pulsante 'Calc Date' per generarle prima di avviare l'analisi."
-                )
-                return
-        except Exception as e:
-            messagebox.showerror("Errore", f"Impossibile verificare i dati del certificato: {e}")
-            return
-        # --- FINE MODIFICA 1 ---
-
-        self.status_var.set(f"Analisi in corso per {selected_isin}... (Recupero dati di mercato)")
+        self.status_var.set(f"📊 Analisi completa in corso per {selected_isin}...")
         self.root.update_idletasks()
 
         try:
-            # 1. DELEGA AL MANAGER: chiede di aggiornare i dati e restituire la config
-            config_pronta_per_analisi = self.enhanced_manager.refresh_and_get_certificate_for_analysis(selected_isin)
+            # --- LOGICA DI ANALISI SEMPLIFICATA ---
+            # Tutta la complessità è ora nel manager. La GUI fa una sola chiamata.
+            analysis_results = self.enhanced_manager.run_full_analysis(selected_isin)
 
-            if not config_pronta_per_analisi:
-                messagebox.showerror("Errore", f"Impossibile preparare il certificato {selected_isin} per l'analisi.")
-                self.status_var.set("Analisi fallita.")
-                return
+            if analysis_results:
+                self.logger.info(f"✅ Analisi completata per {selected_isin}. Risultati ricevuti dalla GUI.")
+                
+                # 1. Aggiorna la visualizzazione dei dettagli per mostrare i nuovi risultati
+                self._display_certificate_details(selected_isin)
+                
+                # 2. Mostra un dialog di riepilogo
+                summary_message = f"""
+    ANALISI COMPLETA - {selected_isin}
+    {'='*50}
 
-            # 2. Converti la configurazione aggiornata in un oggetto certificato "vivo"
-            importer = RealCertificateImporter()
-            certificate_object = importer.import_certificate(config_pronta_per_analisi)
-
-            # 3. Esegui l'analisi di rischio
-            analyzer = UnifiedRiskAnalyzer()
-            risk_metrics = analyzer.analyze_certificate_risk(certificate_object, n_simulations=1000)
-            self.logger.info(f"Analisi di rischio completata. VaR 95%: {risk_metrics.var_95:.2%}")
-
-            # --- MODIFICA 2: CALCOLO DEL FAIR VALUE ---
-            self.logger.info("💰 Calcolo del Fair Value in corso...")
-            fair_value_results = {}
-            try:
-                fv_analyzer = UnifiedCertificateAnalyzer(certificate_object)
-                fair_value_results = fv_analyzer.calculate_fair_value(n_simulations=5000)
-                self.logger.info(f"✅ Fair Value calcolato: {fair_value_results.get('fair_value'):.2f}")
-            except Exception as fv_error:
-                self.logger.error(f"⚠️ Errore nel calcolo del Fair Value: {fv_error}", exc_info=True)
-                fair_value_results = {'fair_value': 0, 'error': str(fv_error)}
-            # --- FINE MODIFICA 2 ---
-
-            self.logger.info(f"RISULTATI ANALISI per {selected_isin}: FV={fair_value_results.get('fair_value', 'N/A'):.2f}, VaR 95%={risk_metrics.var_95:.2%}, Volatilità={risk_metrics.volatility:.2%}") #Volatilità
-
-            # --- INIZIO NUOVO BLOCCO: SALVATAGGIO RISULTATI ---
-            enhanced_config_obj = self.enhanced_manager.configurations[selected_isin]
-            market_data = enhanced_config_obj.in_life_state.current_market_data
-
-            analysis_data = {
-                "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                "is_valid": True,
-                "metrics": {
-                    "fair_value": fair_value_results.get('fair_value', 'N/A'),
-                    "expected_return": fair_value_results.get('expected_return', 'N/A'),
-                    "market_price": market_data.get('certificate_market_price', 'N/A'),
-                    "var_95": risk_metrics.var_95,
-                    "volatility": risk_metrics.volatility,
-                    "sharpe_ratio": risk_metrics.sharpe_ratio
-                }
-            }
-            
-            # Imposta l'attributo sull'oggetto in memoria
-            enhanced_config_obj.analysis_results = analysis_data
-            
-            # Salva le modifiche su file
-            self._save_certificates()
-            # --- FINE NUOVO BLOCCO ---
-
-
-            # --- MODIFICA 3: VISUALIZZAZIONE COMPLETA DEI RISULTATI ---
-            # Prepara il messaggio formattato
-            fair_value = fair_value_results.get('fair_value', 'N/A')
-            exp_return = fair_value_results.get('expected_return', 'N/A')
-
-            # Recuperiamo l'intero oggetto aggiornato dal manager per accedere ai dati di mercato
-            enhanced_config_aggiornato = self.enhanced_manager.configurations[selected_isin]
-            market_data = enhanced_config_aggiornato.in_life_state.current_market_data
-            market_price = market_data.get('certificate_market_price', 'N/A')
-
-            """"
-            # 4. Mostra i risultati (questa funzione andrà creata o migliorata)
-            # self.update_analysis_results_display(risk_metrics.to_dict())
-            messagebox.showinfo("Analisi Completata",
-                                f"Analisi per {selected_isin} completata con successo.\n\n"
-                                f"VaR 95%: {risk_metrics.var_95:.2%}\n"
-                                f"VaR 99%: {risk_metrics.var_99:.2%}\n"
-                                f"Volatilità: {risk_metrics.volatility:.2%}\n"
-                                f"Sharpe Ratio: {risk_metrics.sharpe_ratio:.3f}")
-
-            """
-            # Formattazione sicura dei valori
-            mkt_price_str = f"€ {market_price:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") if isinstance(market_price, (int, float)) else "N/A"
-            fv_str = f"€ {fair_value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") if isinstance(fair_value, (int, float)) else "N/A"
-            ret_str = f"{exp_return:.2%}".replace(".", ",") if isinstance(exp_return, (int, float)) else "N/A"
-            var95_str = f"{risk_metrics.var_95:.2%}".replace(".", ",")
-            vol_str = f"{risk_metrics.volatility:.2%}".replace(".", ",")
-
-            summary_message = f"""
-ANALISI COMPLETA - {selected_isin}
-{'='*50}
-
-VALUTAZIONE:
-  • Prezzo di Mercato: {mkt_price_str}
-  • Fair Value Stimato: {fv_str}
-  • Rendimento Atteso: {ret_str}
-
-PRINCIPALI METRICHE DI RISCHIO:
-  • VaR 95% (Max Perdita attesa): {var95_str}
-  • Volatilità Annualizzata: {vol_str}
-  • Sharpe Ratio: {risk_metrics.sharpe_ratio:.3f}
-
-{'='*50}
-Analisi basata su {1000} simulazioni di rischio e {5000} per il fair value.
-"""
-
-            #messagebox.showinfo("Analisi Completata", summary_message)
-            from app.core.enhanced_certificate_manager_fixed import PreviewDialog 
-            PreviewDialog(self.root, f"Analisi Completa - {selected_isin}", summary_message)
-
-
-            self._display_certificate_details(selected_isin) 
-
-
-            self.status_var.set("Analisi completata con successo.")
-
-
+    VALUTAZIONE:
+    • Prezzo di Mercato:       € {analysis_results.get('certificate_market_price', 'N/A')}
+    • Fair Value Stimato: € {analysis_results.get('fair_value', 'N/A')}
+    • Costo Protezione: € {analysis_results.get('protection_implicit_cost', 'N/A')}
+    
+    PRINCIPALI METRICHE DI RISCHIO:
+    • Prob. Rottura Barriera: {analysis_results.get('barrier_breach_probability', 'N/A')}
+    • VaR 95% (Max Perdita): {analysis_results.get('var_95', 'N/A')}
+    • Volatilità Stimata: {analysis_results.get('volatility', 'N/A')}
+    """
+                from app.core.enhanced_certificate_manager_fixed import PreviewDialog
+                PreviewDialog(self.root, f"Risultati Analisi - {selected_isin}", summary_message)
+                self.status_var.set("Analisi completata con successo.")
+            else:
+                # Il manager gestisce già i messaggi di errore, quindi qui basta aggiornare lo stato.
+                self.status_var.set("Analisi fallita o annullata.")
 
         except Exception as e:
-            self.logger.error(f"Errore durante l'analisi del certificato {selected_isin}: {e}", exc_info=True)
-            messagebox.showerror("Errore di Analisi", f"Si è verificato un errore durante l'analisi:\n{e}")
+            self.logger.error(f"Errore imprevisto durante l'analisi in GUI per {selected_isin}: {e}", exc_info=True)
+            messagebox.showerror("Errore di Analisi", f"Si è verificato un errore imprevisto nella GUI:\n{e}")
             self.status_var.set("Analisi fallita.")
-
     def _export_analysis_excel(self):
         """Esporta analisi avanzata in Excel (versione corretta)."""
         selected_isin = self.get_selected_isin()

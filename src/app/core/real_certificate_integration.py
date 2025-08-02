@@ -1155,64 +1155,45 @@ class RealCertificateConfig:
 class UnderlyingEvaluationEngine:
     """*** NUOVO v14.11 *** - Engine per calcolo performance multi-asset basato su evaluation type"""
 
+
     @staticmethod
     def calculate_performance(spot_prices, initial_prices, evaluation_type='worst_of', weights=None):
         """
         Calcola performance basata su tipo di valutazione
-
-        Args:
-            spot_prices: Prezzi correnti [S1, S2, S3, ...]
-            initial_prices: Prezzi iniziali [S0_1, S0_2, S0_3, ...]
-            evaluation_type: 'worst_of', 'best_of', 'average', 'rainbow'
-            weights: Pesi per average (default equal weight)
-
-        Returns:
-            float: Performance calcolata secondo evaluation_type
+        *** VERSIONE DEFINITIVA: Normalizza trattini e underscore ed è case-insensitive. ***
         """
-
         if len(spot_prices) != len(initial_prices):
             raise ValueError("spot_prices e initial_prices devono avere stessa lunghezza")
 
-        # Calcola performance individuali
-        individual_performances = []
-        for i in range(len(spot_prices)):
-            if initial_prices[i] > 0:
-                performance = spot_prices[i] / initial_prices[i]
-            else:
-                performance = 1.0  # Neutral se prezzo iniziale zero
-            individual_performances.append(performance)
+        individual_performances = [sp / ip if ip > 0 else 1.0 for sp, ip in zip(spot_prices, initial_prices)]
 
-        # Applica logica basata su evaluation_type
-        if evaluation_type == 'worst_of':
-            # 🔻 Il peggiore determina (MASSIMO RISCHIO)
+        # --- INIZIO BLOCCO DI NORMALIZZAZIONE ---
+        # 1. Assicura che sia una stringa e converti in minuscolo.
+        eval_type_safe = str(evaluation_type).lower() if evaluation_type else 'worst_of'
+        # 2. Sostituisci gli underscore con i trattini per standardizzare.
+        eval_type_normalized = eval_type_safe.replace('_', '-')
+        # --- FINE BLOCCO DI NORMALIZZAZIONE ---
+
+        # Applica logica basata sul tipo normalizzato
+        if eval_type_normalized == 'worst-of':
             return min(individual_performances)
 
-        elif evaluation_type == 'best_of':
-            # 🔺 Il migliore determina (MINIMO RISCHIO)
+        elif eval_type_normalized == 'best-of':
             return max(individual_performances)
 
-        elif evaluation_type == 'average':
-            # 📈 Performance media ponderata
-            if weights is None:
+        elif eval_type_normalized == 'average':
+            if weights is None or len(weights) != len(individual_performances):
                 weights = [1.0 / len(individual_performances)] * len(individual_performances)
+            
+            return sum(perf * weight for perf, weight in zip(individual_performances, weights))
 
-            if len(weights) != len(individual_performances):
-                # Fallback equal weight
-                weights = [1.0 / len(individual_performances)] * len(individual_performances)
-
-            weighted_performance = sum(perf * weight for perf, weight in zip(individual_performances, weights))
-            return weighted_performance
-
-        elif evaluation_type == 'rainbow':
-            # 🌈 Individual contribution (per ora ritorna average, può essere esteso)
-            # Implementazione semplificata - può essere estesa per logiche più complesse
+        elif eval_type_normalized == 'rainbow':
             return sum(individual_performances) / len(individual_performances)
 
         else:
-            # Default fallback a worst_of
-            print(f"⚠️ Evaluation type '{evaluation_type}' non riconosciuto, uso worst_of")
-            return min(individual_performances)
-
+            # Questo blocco non dovrebbe più essere eseguito per i casi 'worst-of'
+            print(f"⚠️ Evaluation type '{evaluation_type}' non riconosciuto, uso worst_of di default")
+            return min(individual_performances)        
     @staticmethod
     def check_barrier_breach(spot_prices, initial_prices, barrier_level, evaluation_type='worst_of'):
         """
@@ -1293,10 +1274,20 @@ class RealCertificateImporter:
             if len(config.coupon_rates) != len(config.coupon_dates):
                 raise ValueError("Coupon rates e dates devono avere stessa lunghezza")
 
-    def _import_cash_collect(self, config: RealCertificateConfig) -> ExpressCertificate:
-        """Importa certificato Cash Collect come Express"""
 
-        # Crea specifiche
+    def _import_express(self, config: RealCertificateConfig) -> ExpressCertificate:
+        """Importa Express certificate standard"""
+        return self._import_cash_collect(config)  # Stesso processo
+
+# In real_certificate_integration.py, dentro la classe RealCertificateImporter
+
+    def _import_cash_collect(self, config: RealCertificateConfig) -> ExpressCertificate:
+        """
+        Importa certificato Cash Collect come Express.
+        *** VERSIONE CORRETTA: Aggiunge il supporto per la barriera dinamica. ***
+        """
+
+        # Crea specifiche (invariato)
         specs = CertificateSpecs(
             name=config.name,
             isin=config.isin,
@@ -1307,22 +1298,24 @@ class RealCertificateImporter:
             certificate_type="express"
         )
 
-        # Coupon schedule
+        # Coupon schedule (invariato)
         coupon_schedule = CouponSchedule(
             payment_dates=config.coupon_dates,
             rates=config.coupon_rates,
             memory_feature=config.memory_feature
         )
 
-        # Autocall levels (default = 100% se non specificati)
+        # Autocall levels (invariato)
         autocall_levels = config.autocall_levels or [1.0] * len(config.coupon_dates)
         autocall_dates = config.autocall_dates or config.coupon_dates
 
-        # Barrier (usa il campo corretto 'capital barrier' con un fallback)
+        # Barrier (invariato)
         barrier_level = config.capital_barrier if config.capital_barrier is not None else 0.65
         barrier = Barrier(level=barrier_level, type=BarrierType.EUROPEAN)
 
-        # Crea certificate
+        # --- INIZIO BLOCCO MODIFICATO ---
+
+        # Crea l'oggetto certificato passando TUTTI i parametri, inclusi quelli nuovi
         certificate = ExpressCertificate(
             specs=specs,
             underlying_assets=config.underlying_assets,
@@ -1334,27 +1327,35 @@ class RealCertificateImporter:
             memory_coupon=config.memory_feature,
             notional=config.notional,
             airbag_feature=config.airbag_feature,
-            airbag_level=config.airbag_level
-
+            airbag_level=config.airbag_level,
+            
+            # Aggiunta dei campi per la barriera dinamica
+            dynamic_barrier_feature=config.dynamic_barrier_feature,
+            dynamic_barrier_start_level=config.dynamic_barrier_start_level,
+            step_down_rate=config.step_down_rate,
+            dynamic_barrier_end_level=config.dynamic_barrier_end_level,
+            observation_delay_months=config.observation_delay_months
         )
 
-        # *** NUOVO v14.11 *** - Setup underlying evaluation type
-        evaluation_type = getattr(config, 'underlying_evaluation', 'worst_of')
+        # Copiamo anche l'oggetto di configurazione base per usi futuri (come la generazione della schedule)
+        certificate.base_config = config
+        
+        # --- FINE BLOCCO MODIFICATO ---
+
+        # Setup underlying evaluation type (invariato)
+        evaluation_type = getattr(config, 'underlying_dependency_type', 'worst_of') # MODIFICA: usa il nome campo corretto
         certificate.underlying_evaluation = evaluation_type
         certificate.config_data = {
             'underlying_evaluation': evaluation_type,
             'notional': config.notional,
             'isin': config.isin
         }
-
         print(f"🎯 Certificate {config.isin} configurato con evaluation: {evaluation_type}")
 
-
-        # Setup market data se disponibili
+        # Setup market data se disponibili (invariato)
         if config.current_spots and config.volatilities:
             correlations = config.correlations
             if correlations is None:
-                # Default correlation matrix
                 n = len(config.underlying_assets)
                 correlations = np.eye(n) * 0.7 + np.ones((n, n)) * 0.3
                 np.fill_diagonal(correlations, 1.0)
@@ -1370,15 +1371,10 @@ class RealCertificateImporter:
             )
 
         return certificate
-
-    def _import_express(self, config: RealCertificateConfig) -> ExpressCertificate:
-        """Importa Express certificate standard"""
-        return self._import_cash_collect(config)  # Stesso processo
-
     def _import_phoenix(self, config: RealCertificateConfig) -> PhoenixCertificate:
         """Importa Phoenix certificate"""
 
-        # Crea specifiche
+        # Crea specifiche (invariato)
         specs = CertificateSpecs(
             name=config.name,
             isin=config.isin,
@@ -1389,19 +1385,18 @@ class RealCertificateImporter:
             certificate_type="phoenix"
         )
 
-        # Coupon schedule
+        # Coupon schedule (invariato)
         coupon_schedule = CouponSchedule(
             payment_dates=config.coupon_dates,
             rates=config.coupon_rates,
             memory_feature=config.memory_feature
         )
 
-        # Barriers
-        barrier_coupon = config.barrier_levels.get('coupon', 0.70) if config.barrier_levels else 0.70
+        # Barriers (invariato)
+        barrier_coupon = config.coupon_barrier if config.coupon_barrier is not None else 0.70
         barrier_capitale = config.capital_barrier if config.capital_barrier is not None else 0.60
 
-
-        # Crea certificate
+        # Crea certificate con TUTTI i parametri
         certificate = PhoenixCertificate(
             specs=specs,
             underlying_assets=config.underlying_assets,
@@ -1412,12 +1407,22 @@ class RealCertificateImporter:
             memory_coupon=config.memory_feature,
             notional=config.notional,
             airbag_feature=config.airbag_feature,
-            airbag_level=config.airbag_level
-
+            airbag_level=config.airbag_level,
+            
+            # Aggiunta dei campi per la barriera dinamica
+            dynamic_barrier_feature=config.dynamic_barrier_feature,
+            dynamic_barrier_start_level=config.dynamic_barrier_start_level,
+            step_down_rate=config.step_down_rate,
+            dynamic_barrier_end_level=config.dynamic_barrier_end_level,
+            observation_delay_months=config.observation_delay_months
         )
 
-        # Setup market data
+        # Aggiungi la configurazione base per usi futuri
+        certificate.base_config = config
+
+        # Setup market data (invariato)
         if config.current_spots and config.volatilities:
+            # ... (il resto del metodo rimane esattamente come prima) ...
             correlations = config.correlations
             if correlations is None:
                 n = len(config.underlying_assets)
@@ -1435,7 +1440,6 @@ class RealCertificateImporter:
             )
 
         return certificate
-
     def _import_barrier(self, config: RealCertificateConfig):
         """Importa Barrier certificate"""
         from app.core.structural_cleanup import BarrierCertificate

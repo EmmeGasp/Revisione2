@@ -1,4 +1,4 @@
-# Diario di bordo Sistema Certificati. Data di riferimento 22/07/2025 (prima delle lavorazioni) 
+# Diario di bordo Sistema Certificati. Data di riferimento 02/08/2025 (prima delle lavorazioni) 
 
 # Link al repo github: https://github.com/EmmeGasp/Revisione2 (branch refactoring-struttura)
 
@@ -50,6 +50,8 @@
 * Intervento su main_windows.py per gestire la fase di controllo dei valori inseriti nei campi che regolano i parametri di una barriera dinamica. Sostanzialmente in base ai dati presenti in fase di inserimento/modifica viene effettuato un controllo di coerenza fra valore iniziale barriera, valore finale barriera, passo e durata del certificato. La durata viene stimata temporaneamente con funzione dedicata. Se il valore calcolato è diverso da quello inserito viene aperto un box che fa presente la situazione ma consente di forzare/accettare la modifica/inserimento con i valori digitati. 
 * Focalizzata l'attività sul calcolo 'statico' del payoff. Non senza fatica si è arrivati a costruire un test contenuto nel file 'test_airbag_dynamic_barrier.py'. La prova conclusiva ha confermato che il file di test alla fine è stato costruito bene e che il calcolo del payoff tiene conto della eventuale contemporanea presenza di airbag e barriera.
 * Effettuati interventi sulle routine di calcolo del payoff per strutture express e phoenix con raccordo alla routine di calcolo statico del payoff. Effettuati test sulla validità dell'approccio. L'esito è stato positivo.
+* C'è stato qualche giorno di sospensione dell'attività dovendo accordare priorità ad altro progetto. 
+* Avviato il percorso previsto dalla roadmap definita nella sessione precedente. In particolare modifica del motore di calcolo, modifica nell'attività di raccordo fra GUI e motore di calcolo, aggiornamento della GUI. Questo implica lavorare sul calcolo della probabilità di rottura barriere, calcolo del costo implicito della protezione ed altri interventi di raccordo.
 
 ## Stato attuale.
 
@@ -65,12 +67,13 @@
 * Motore di calcolo del payoff validato e verificato mediante test specifici (vedi file contenuti nella directory dedicata) sulla interazione fra barriere dinamiche e payoff
 * Fatti interventi per rendere effettiva l'applicazione dell'opzione airbag sui parametri valutatativi del certificato. In base al test effettuato, l'intervento è stato risolutivo
 * Fatti miglioramenti sulla GUI. I dati relativi all'analisi sul certificato sono resi disponibili nel finestra con i dati di dettaglio del certificato selezionato; i dati di analisi sono presenti solo se validi, cioè basati sui gli altri dati esposti nella stessa finestra. La modifica di uno dei parametri del certificato elimina l'informazione sul profilo di rischio dello stesso. In sostanza, in questa ipotesi il percoroso di analisi deve essere ripetuto.
+* Introdotti ulteriori analisi e valutazione di parametri quali ad esempio barriere dinamiche e valutazione del costo implicito dei feature. Ha richiesto diversi interventi (vedi descrizione nella sezione passi completati) e si è giunti ad un risultato solo parzialmente soddisfacente. Benchè sia stato condiviso che il FV, per tutta una serie di motivi, non può essere letto come una stima del valore di mercato, rimane il fatto che la distanza fra i due appare ancora solo parzialmente spiegata e dovrà essere perciò oggetto di ulteriore indagine.
+* 
  
 
 ## Obiettivo corrente
 
-  ** È stata ridefinita la road map (file allegato).  Arricchire le Metriche di Valutazione. Possiamo modificare la funzione di analisi per calcolare e restituire, insieme a FV e VaR, anche il "Costo Implicito della Protezione" e la "Probabilità di Rottura Barriera".
-  Una volta che avremo questo "cruscotto" più ricco per il singolo certificato, avremo una base solidissima per passare all'analisi di sensitività e, infine, a quella di portafoglio. Iniziamo a rendere ogni singola analisi più intelligente.
+  ** Allineamento modello e tuning volatilità (analisi sensitività). Replicare la logica di gestione della barriera dinamica appena implementata in calculate_express_payoffs anche all'interno del metodo calculate_phoenix_payoffs nel file unified_certificates.py, per garantire la coerenza tra le due tipologie di certificato. 
  
 
 ## Passi completati. Note  
@@ -132,3 +135,7 @@ Oltre alla sistemazione di alcuni dettagli (ad esempio l'inserimento nella fines
 
 ###  Data di riferimento 25/07/2025 (mattino, prima delle lavorazioni della giornata)
 ** Miglioramento calcolo payoff e miglioramento della GUI (arricchita la sezione sui dati disponibili per il certificato selezionato). Definita la roadmap.
+
+###  Data di riferimento 02/08/2025 (mattino, prima delle lavorazioni della giornata)
+** Molte le attività svolte. È opportuno fare un riepilogo.
+Effettuati interventi su consolidated_risk_system.py (class RiskMetrics e def analyze_certificate_risk); enhanced_certificate_manager_fixed.py  (orchestratore, class EnhancedCertificateManagerV15 con nuova def run_full_analysis), con i necessari interventi di raccordo, ad esempio sui main_window per gestire il corretto richiamo delle routine. La introduzione delle modifiche ha comportato anche diversi interventi di sistemazione e allineamento che ha occupato buona parte della lavorazione. Ad esempio è stata scoporata da enhanced... ed inserita in listato dedicato date_utils.py la intera classe DataCalculationUtils per evitare problemi di circolarità con necessità di interventi per far colluquiare correttamente le varie routine fra di loro, compresi i campi passati e come sono passati (interventi quindi anche su real_certificate_integration.py) Inserita la gestione delle barriere dinamiche con individuazione dei possibili autocall nel durante della vita del certificato con sistemazione della stringa utilizzata per la corretta individuazione e recupero della clausola Worst-of. Inoltre modificata la routine per non sovrascrivere i dati presenti ed inseriti dall'operatore sul DY con i valori recuperati da Yahoo. Questo si è reso necessario sia come logica di programma sia per necessità di verificare la validità del modello matematico sottostante. La presente di un titolo particoalre con DY elevato, giustificato tuttavia dalla situazione specifica dell'azienda, sembrava pesaro troppo sulla determinazione del FV. In effetti inserendo un DY più allineato il FV è aumentato confermando la validità del modello. L'incremento è rimasto contenuto da qui l'esigenze di ulteriori analisi per meglio comprendere il fenomeno. Migliorata la disponibilità di dati nel box sul dettaglio dei certificati.

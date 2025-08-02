@@ -42,13 +42,14 @@ import yfinance as yf
 import threading
 import calendar
 from dateutil.relativedelta import relativedelta
-
-
+from app.utils.date_utils import DateCalculationUtils
+from app.core.consolidated_risk_system import UnifiedRiskAnalyzer
 # Import dal sistema esistente
 from app.core.real_certificate_integration import (
     RealCertificateConfig, IntegratedCertificateSystem,
     RealCertificateImporter
 )
+from app.core.real_certificate_integration import RealCertificateImporter
 
 # ========================================
 # *** VERSIONE CORRETTA *** - ENHANCED CONFIG CON YAHOO_TICKER
@@ -383,271 +384,75 @@ class YahooFinanceDataProvider:
 
  
     def update_certificate_market_data(self, config: 'EnhancedCertificateConfig') -> bool:
-        """*** VERSIONE CORRETTA V16.1 *** - Update con debug tracciamento dati"""
-        
+        """
+        *** VERSIONE CORRETTA: Fa prevalere i dividendi inseriti manualmente. ***
+        """
         try:
- 
-            print(f"🔍 DEBUG v16.1 - PRIMA del fetch Yahoo:")
-            if hasattr(config.base_config, 'current_spots') and config.base_config.current_spots:
-                print(f"   Current spots esistenti: {config.base_config.current_spots}")
-            else:
-                print(f"   Current spots: Non definiti")
-    
-            # La chiamata ora passa l'intero oggetto 'config', risolvendo il NameError
+            # 1. Recupera i dividendi manuali GIA' salvati nella configurazione
+            manual_dividends = getattr(config.base_config, 'dividend_yields', [])
+            assets = config.base_config.underlying_assets
+
+            print("🔍 Controllo dividendi manuali pre-fetch...")
+            if manual_dividends and len(manual_dividends) == len(assets):
+                for i, asset in enumerate(assets):
+                    if manual_dividends[i] > 0:
+                        print(f"   -> Trovato dividendo manuale per {asset}: {manual_dividends[i]:.2%}")
             
-            market_data = self.fetch_market_data_safe(config)
- 
-            print(f"🔍 DEBUG v16.1 - DOPO il fetch Yahoo:")
-            print(f"   Dati scaricati spots: {market_data.get('spots', {})}")
+            # 2. Esegui il fetch da Yahoo per avere dati freschi (spots, vol, e i dividendi di Yahoo)
+            yahoo_market_data = self.fetch_market_data_safe(config)
 
-
-            # Aggiorna config con dati disponibili
-            if market_data['spots']:
+            # 3. Aggiorna la configurazione con i dati di mercato, applicando la logica di override per i dividendi
+            if yahoo_market_data['spots']:
                 
-                # --- AGGIUNTA PER CORRELAZIONE ---
-                if market_data['correlation_matrix'] is not None:
-                    config.base_config.correlations = market_data['correlation_matrix']
+                if yahoo_market_data['correlation_matrix'] is not None:
+                    config.base_config.correlations = yahoo_market_data['correlation_matrix']
 
                 config.base_config.current_spots = []
                 config.base_config.volatilities = []
+                final_dividend_yields = [] # Lista per i dividendi finali
 
-                for asset in config.base_config.underlying_assets:
-                    if asset in market_data['spots']:
-                        config.base_config.current_spots.append(market_data['spots'][asset])
-                        config.base_config.volatilities.append(market_data['volatilities'][asset])
+                # --- LOGICA DI OVERRIDE: Itera su ogni asset per decidere quale dividendo usare ---
+                for i, asset in enumerate(assets):
+                    # Aggiorna spot e volatilità da Yahoo
+                    if asset in yahoo_market_data['spots']:
+                        config.base_config.current_spots.append(yahoo_market_data['spots'][asset])
+                        config.base_config.volatilities.append(yahoo_market_data['volatilities'][asset])
                     else:
-                        # Fallback defaults
                         config.base_config.current_spots.append(100.0)
                         config.base_config.volatilities.append(0.25)
-                        print(f"   ⚠️  Usando default per {asset}")
-                
-                # --- MODIFICA AGGIORNAMENTO DIVIDENDI (incondizionato) ---
-                # Sovrascrive sempre i dividend yields con i valori appena scaricati e corretti.
-                config.base_config.dividend_yields = []
-                for asset in config.base_config.underlying_assets:
-                    # Aggiungi il dividend yield recuperato o 0.0 come fallback
-                    yield_value = market_data.get('dividend_yields', {}).get(asset, 0.0)
-                    config.base_config.dividend_yields.append(yield_value)
+                    
+                    # Ora, decidi quale dividendo usare per questo asset
+                    yahoo_yield = yahoo_market_data.get('dividend_yields', {}).get(asset, 0.0)
+                    manual_yield = manual_dividends[i] if manual_dividends and i < len(manual_dividends) else 0.0
 
+                    # Se l'utente ha inserito un valore manuale valido (>0), usiamo quello
+                    if manual_yield > 0:
+                        final_dividend_yields.append(manual_yield)
+                        print(f"   -> ✅ Usando dividendo MANUALE per {asset}: {manual_yield:.2%}")
+                    else:
+                        # Altrimenti, usiamo il valore di fallback scaricato da Yahoo
+                        final_dividend_yields.append(yahoo_yield)
+                        print(f"   -> 🔄 Usando dividendo YAHOO per {asset}: {yahoo_yield:.2%}")
+
+                # Assegna la lista finale dei dividendi alla configurazione
+                config.base_config.dividend_yields = final_dividend_yields
                 
-                # Aggiorna metadata
-                config.in_life_state.current_market_data = market_data
-                config.metadata['data_source'] = 'yahoo'
+                # Aggiorna i metadati
+                config.in_life_state.current_market_data = yahoo_market_data
+                config.metadata['data_source'] = 'yahoo_with_manual_override'
                 config.metadata['last_updated'] = datetime.now()
                 
-                # Statistiche finali
-                #errors = len(market_data['error_assets'])
-                #warnings = len(market_data['warnings'])
-                
-                # *** DEBUG v16.1 *** - Stato FINALE
-                print(f"🔍 DEBUG v16.1 - STATO FINALE:")
-                print(f"   Current spots finali: {config.base_config.current_spots}")                
-                
-                errors = len(market_data['error_assets'])
-                if errors == 0:
-                    return True
-                elif errors < len(config.base_config.underlying_assets):
-                    return True
-                else:
-                    return False
+                errors = len(yahoo_market_data['error_assets'])
+                return errors < len(assets)
             else:
                 print("❌ Nessun dato market recuperato")
                 return False
-    
+
         except Exception as e:
             print(f"❌ Errore update market data: {e}")
             import traceback
             traceback.print_exc()
             return False
-
-# ========================================
-# *** VERSIONE CORRETTA *** - CALCOLO DATE ROBUSTO
-# ========================================
-
-class DateCalculationUtils:
-    """*** VERSIONE CORRETTA *** - Utility per calcolo date senza errori"""
-    
-    @staticmethod
-    def calculate_coupon_dates_robust(start_date: datetime, end_date: datetime, 
-                                    frequency: str) -> List[datetime]:
-        """*** VERSIONE ROBUSTA *** - Calcolo date senza errore 'day out of range'"""
-        
-        print(f"📅 Calcolo date robusto v15:")
-        print(f"   Start: {start_date.strftime('%Y-%m-%d')}")
-        print(f"   End: {end_date.strftime('%Y-%m-%d')}")
-        print(f"   Frequency: {frequency}")
-        
-        # Mapping frequenze
-        interval_months = {
-            "Mensile": 1, "M": 1,
-            "Bimestrale": 2, "B": 2, # Aggiunto Bimestrale
-            "Trimestrale": 3, "Q": 3,
-            "Quadrimestrale": 4, "R": 4, # Aggiunto Quadrimestrale
-            "Semestrale": 6, "S": 6,
-            "Annuale": 12, "A": 12
-        }
-        
-        if frequency not in interval_months:
-            raise ValueError(f"Frequenza non supportata: {frequency}")
-        
-        months_interval = interval_months[frequency]
-        coupon_dates = []
-        
-        # Inizia dal primo periodo
-        current_year = start_date.year
-        current_month = start_date.month + months_interval
-        target_day = start_date.day
-        
-        # Aggiusta anno se necessario
-        while current_month > 12:
-            current_month -= 12
-            current_year += 1
-        
-        print(f"   Primo periodo: {current_year}-{current_month:02d}-{target_day:02d}")
-        
-        # Genera tutte le date
-        iteration = 0
-        while iteration < 500:  # Safety limit aumentato
-            
-            # *** FIX CRITICO *** - Gestisce giorni inesistenti nel mese
-            try:
-                # Verifica se il giorno esiste nel mese
-                last_day_of_month = calendar.monthrange(current_year, current_month)[1]
-                actual_day = min(target_day, last_day_of_month)
-                
-                current_date = datetime(current_year, current_month, actual_day)
-                
-                # Rimuovo la stampa per non affollare il log
-                # print(f"   Data generata: {current_date.strftime('%Y-%m-%d')}")
-                
-                # Verifica se supera la data di fine
-                if current_date > end_date:
-                    # print(f"   Fermato: data supera end_date")
-                    break
-                
-                coupon_dates.append(current_date)
-                
-            except ValueError as date_error:
-                print(f"   ❌ Errore creazione data {current_year}-{current_month:02d}-{actual_day:02d}: {date_error}")
-                
-                # Fallback: usa ultimo giorno del mese
-                try:
-                    last_day = calendar.monthrange(current_year, current_month)[1]
-                    current_date = datetime(current_year, current_month, last_day)
-                    
-                    if current_date <= end_date:
-                        coupon_dates.append(current_date)
-                        print(f"   🔧 Fallback data: {current_date.strftime('%Y-%m-%d')}")
-                    else:
-                        break
-                        
-                except Exception as fallback_error:
-                    print(f"   ❌ Anche fallback fallito: {fallback_error}")
-                    break
-            
-            # Incrementa al prossimo periodo
-            current_month += months_interval
-            while current_month > 12:
-                current_month -= 12
-                current_year += 1
-            
-            iteration += 1
-        
-        # *** VERIFICA FINALE *** - Assicura che maturity sia inclusa
-        if coupon_dates and coupon_dates[-1] != end_date:
-            # Solo se maturity è dopo l'ultima cedola
-            if end_date > coupon_dates[-1]:
-                coupon_dates.append(end_date)
-                print(f"   📌 Maturity aggiunta: {end_date.strftime('%Y-%m-%d')}")
-        elif not coupon_dates:
-            # Caso estremo: almeno maturity
-            coupon_dates.append(end_date)
-            print(f"   🚨 Solo maturity: {end_date.strftime('%Y-%m-%d')}")
-        
-        print(f"📊 Totale {len(coupon_dates)} date cedole generate (robusto v15)")
-        
-        # Verifica ordine cronologico
-        for i in range(1, len(coupon_dates)):
-            if coupon_dates[i] <= coupon_dates[i-1]:
-                print(f"   ⚠️  Warning: date non in ordine cronologico")
-                break
-        
-        return coupon_dates
-    
-    @staticmethod
-    def validate_coupon_schedule(coupon_dates: List[datetime], 
-                               coupon_rates: List[float]) -> Tuple[bool, str]:
-        """Valida coerenza schedule cedole"""
-        
-        if not coupon_dates:
-            return False, "Nessuna data cedola specificata"
-        
-        if not coupon_rates:
-            return False, "Nessun tasso cedola specificato"
-        
-        if len(coupon_dates) != len(coupon_rates):
-            return False, f"Mismatch: {len(coupon_dates)} date vs {len(coupon_rates)} tassi"
-        
-        # Verifica ordine cronologico
-        for i in range(1, len(coupon_dates)):
-            if coupon_dates[i] <= coupon_dates[i-1]:
-                return False, f"Date non in ordine cronologico: {coupon_dates[i-1]} >= {coupon_dates[i]}"
-        
-        # Verifica tassi validi
-        for i, rate in enumerate(coupon_rates):
-            if not (0 <= rate <= 1):
-                return False, f"Tasso {i+1} fuori range [0,1]: {rate}"
-        
-        return True, "Schedule valida"
-
-    @staticmethod
-    def generate_dynamic_barrier_schedule(cert_config: RealCertificateConfig) -> dict:
-        """
-        Genera una schedule di barriere dinamiche basata sulla configurazione del certificato.
-        Restituisce un dizionario { 'YYYY-MM-DD': livello_barriera_decimale }.
-        """
-        # 1. Controlla se la funzionalità è attiva
-        if not getattr(cert_config, 'dynamic_barrier_feature', False):
-            return {}
-
-        # 2. Recupera i parametri necessari in modo sicuro
-        try:
-            issue_date = cert_config.issue_date
-            coupon_dates = cert_config.coupon_dates
-            start_level = cert_config.dynamic_barrier_start_level
-            step_rate = cert_config.step_down_rate
-            final_level = cert_config.dynamic_barrier_end_level
-            delay_months = cert_config.observation_delay_months or 0 # Default a 0 se None
-
-            if not all([issue_date, coupon_dates, start_level is not None, step_rate is not None, final_level is not None]):
-                raise ValueError("Parametri per barriera dinamica mancanti o incompleti.")
-
-        except (AttributeError, ValueError) as e:
-            print(f"⚠️  Impossibile generare schedule barriera dinamica: {e}")
-            return {}
-
-        # 3. Calcola la data di inizio per lo step-down
-        first_observation_date = issue_date + relativedelta(months=delay_months)
-        
-        schedule = {}
-        steps_taken = 0
-
-        # 4. Itera sulle date di osservazione (cedole) per costruire la schedule
-        for obs_date in sorted(coupon_dates):
-            current_level = start_level # La barriera di partenza è sempre il livello iniziale
-
-            # Lo step-down si applica solo a partire dalla data di osservazione valida
-            if obs_date >= first_observation_date:
-                # Calcola il livello corrente in base ai passi già effettuati
-                calculated_level = start_level - (steps_taken * step_rate)
-                current_level = max(calculated_level, final_level) # Assicura di non scendere sotto il livello finale
-                steps_taken += 1
-            
-            # Formatta la data come stringa 'YYYY-MM-DD' per la chiave del dizionario
-            schedule[obs_date.strftime('%Y-%m-%d')] = round(current_level, 5) # Arrotonda per precisione
-
-        print(f"✅ Schedule barriera dinamica generata con {len(schedule)} date.")
-        return schedule
 
 
 # ========================================
@@ -656,7 +461,8 @@ class DateCalculationUtils:
 
 class EnhancedCertificateManagerV15:
     """*** VERSIONE CORRETTA v15 *** - Manager completo con tutte le correzioni"""
-    
+
+    from app.core.consolidated_risk_system import UnifiedRiskAnalyzer # <-- Aggiungere questo import in cima al file
     def __init__(self, config_dir="src/app/data"):
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(exist_ok=True, parents=True)
@@ -1224,7 +1030,83 @@ class EnhancedCertificateManagerV15:
         
         return updated, warnings, failed
 
-# ========================================
+    def run_full_analysis(self, cert_id: str) -> Optional[Dict]:
+        """
+        Esegue un'analisi completa del certificato, calcolando FV, VaR,
+        Costo della Protezione e Probabilità di Rottura Barriera.
+        *** VERSIONE CORRETTA: Crea l'oggetto certificato corretto prima dell'analisi. ***
+        """
+        if cert_id not in self.configurations:
+            messagebox.showerror("Errore", f"Certificato {cert_id} non trovato per l'analisi.")
+            return None
+
+        print(f"🚀 Avvio analisi completa per: {cert_id}")
+        enhanced_config = self.configurations[cert_id]
+
+        real_cert_config = self.refresh_and_get_certificate_for_analysis(cert_id)
+        if not real_cert_config:
+            messagebox.showerror("Errore", f"Impossibile ottenere i dati di mercato per {cert_id}.")
+            return None
+
+        try:
+            # --- PASSAGGIO CHIAVE MANCANTE ---
+            # Convertiamo l'oggetto di configurazione (RealCertificateConfig)
+            # nell'oggetto di calcolo che l'analizzatore si aspetta (es. ExpressCertificate).
+            print("   -> Creazione oggetto certificato per l'analisi...")
+            importer = RealCertificateImporter()
+            certificate_object = importer.import_certificate(real_cert_config)
+            # --- FINE PASSAGGIO CHIAVE ---
+
+            risk_analyzer = UnifiedRiskAnalyzer()
+
+            # Esegui l'analisi CON le opzioni, usando il nuovo 'certificate_object'
+            print("   -> Calcolo con protezione...")
+            results_protected = risk_analyzer.analyze_certificate_risk(
+                certificate_object,  # <-- MODIFICATO: Usiamo l'oggetto corretto
+                n_simulations=10000,
+                apply_protection=True
+            )
+            fv_con_opzioni = results_protected.fair_value
+            prob_rottura_barriera = results_protected.barrier_breach_probability
+
+            # Esegui l'analisi SENZA le opzioni, usando sempre 'certificate_object'
+            print("   -> Calcolo 'naked' (senza protezione)...")
+            results_naked = risk_analyzer.analyze_certificate_risk(
+                certificate_object,  # <-- MODIFICATO: Usiamo l'oggetto corretto
+                n_simulations=10000,
+                apply_protection=False
+            )
+            fv_senza_opzioni = results_naked.fair_value
+
+            # ... il resto della funzione (calcolo costo, assemblaggio output, salvataggio) rimane invariato ...
+            costo_protezione = fv_senza_opzioni - fv_con_opzioni
+            print(f"   -> Costo Protezione: {costo_protezione:.2f} EUR")
+            market_price = enhanced_config.in_life_state.current_market_data.get('certificate_market_price', 'N/A')
+            
+            analysis_output = {
+                "certificate_market_price": market_price, # <-- AGGIUNGI QUESTA RIGA
+                "fair_value": round(fv_con_opzioni, 2),
+                "var_95": f"{results_protected.var_95:.2%}",
+                "barrier_breach_probability": f"{prob_rottura_barriera:.2%}",
+                "protection_implicit_cost": round(costo_protezione, 2),
+                "fair_value_naked": round(fv_senza_opzioni, 2),
+                "volatility": f"{results_protected.volatility:.2%}",
+                "analysis_timestamp": datetime.now().isoformat()
+            }
+
+            enhanced_config.analysis_results = analysis_output
+            self._save_configurations()
+            
+            print(f"✅ Analisi completata e salvata per {cert_id}.")
+            return analysis_output
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            messagebox.showerror("Errore di Analisi", f"Si è verificato un errore durante l'analisi:\n{e}")
+            return None
+        
+ # ========================================
 # *** VERSIONE CORRETTA *** - GUI INTEGRATION
 # ========================================
 
