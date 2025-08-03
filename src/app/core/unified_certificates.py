@@ -608,6 +608,7 @@ class PhoenixCertificate(CertificateBase):
         logger.info("Simulazione Phoenix completata")
         return percorsi
     
+
     def calculate_phoenix_payoffs(self, percorsi: np.ndarray = None) -> Dict:
         from app.core.enhanced_certificate_manager_fixed import DateCalculationUtils
         from app.core.real_certificate_integration import UnderlyingEvaluationEngine
@@ -615,6 +616,9 @@ class PhoenixCertificate(CertificateBase):
         dynamic_schedule = {}
         if hasattr(self, 'base_config'):
             dynamic_schedule = DateCalculationUtils.generate_dynamic_barrier_schedule(self.base_config)
+            # Aggiungiamo un log per chiarezza
+            if dynamic_schedule:
+                print("🧬 Logica Phoenix utilizzerà la schedule della barriera dinamica.")
 
         evaluation_type = getattr(self, 'underlying_evaluation', 'worst_of')
         if hasattr(self, 'parametri_mercato') and 'underlying_evaluation' in self.parametri_mercato:
@@ -622,8 +626,6 @@ class PhoenixCertificate(CertificateBase):
         elif hasattr(self, 'config_data') and 'underlying_evaluation' in self.config_data:
             evaluation_type = self.config_data['underlying_evaluation']
         
-        # print(f"🎯 Phoenix payoffs con evaluation type: {evaluation_type}")
-
         if percorsi is None:
             if 'percorsi' not in self.risultati_simulazione:
                 raise ValueError("Nessun percorso disponibile")
@@ -649,7 +651,8 @@ class PhoenixCertificate(CertificateBase):
 
             coupon_sim = 0
             memoria_sim = 0
-            # --- INIZIO LOGICA CEDOLE CON BARRIERE DINAMICA ---
+            
+            # --- INIZIO LOGICA CEDOLE CON BARRIERA DINAMICA (MODIFICATA) ---
             for i, rate in enumerate(self.coupon_schedule.rates):
                 if i + 1 < n_steps:
                     current_prices = percorsi[sim, :, i + 1]
@@ -658,7 +661,7 @@ class PhoenixCertificate(CertificateBase):
                     current_obs_date = self.coupon_schedule.payment_dates[i]
                     current_obs_date_str = current_obs_date.strftime('%Y-%m-%d')
                     
-                    # Determina la barriera cedola efficace: dinamica se disponibile, altrimenti fissa
+                    # <<< MODIFICA >>>: Determina la barriera cedola efficace: dinamica se disponibile, altrimenti fissa
                     effective_coupon_barrier = self.barrier_coupon
                     if dynamic_schedule and current_obs_date_str in dynamic_schedule:
                         effective_coupon_barrier = dynamic_schedule[current_obs_date_str]
@@ -676,16 +679,18 @@ class PhoenixCertificate(CertificateBase):
                         if self.memory_coupon:
                             memoria_sim += rate * notional
             # --- FINE LOGICA CEDOLE ---
-              
+            
             final_prices = percorsi[sim, :, -1]
 
-            # --- INIZIO LOGICA CAPITALE CON BARRIERA DINAMICA ---
-            # Determina la barriera capitale efficace a scadenza
+            # --- INIZIO LOGICA CAPITALE CON BARRIERA DINAMICA (MODIFICATA) ---
+            # <<< MODIFICA >>>: Determina la barriera capitale efficace a scadenza
             effective_capital_barrier = self.barrier_capitale
             if dynamic_schedule:
                 try:
+                    # Usa l'ultimo valore della schedule dinamica come barriera capitale finale
                     effective_capital_barrier = list(dynamic_schedule.values())[-1]
                 except IndexError:
+                    # Fallback se la schedule fosse vuota per qualche motivo
                     pass
 
             capital_barrier_met = not UnderlyingEvaluationEngine.check_barrier_breach(
@@ -695,26 +700,19 @@ class PhoenixCertificate(CertificateBase):
             if capital_barrier_met:
                 payoffs[sim] = notional + coupon_sim
             else:
-                # ==================== INIZIO MODIFICA ====================
-                # Se la barriera capitale è violata, la perdita dipende dall'Airbag.
-                
-                # Di base, il prezzo di riferimento sono i prezzi iniziali (S0)
+                # La logica dell'Airbag ora utilizza la barriera capitale *efficace*
                 reference_prices = S0
-
-                # CONDIZIONE AIRBAG: Se l'opzione è attiva, il riferimento cambia!
                 if self.airbag_feature:
-                    # Il nuovo riferimento è il livello della barriera capitale.
                     barrier_price_level = effective_capital_barrier
                     reference_prices = S0 * barrier_price_level
                 
-                # Calcoliamo la performance finale rispetto al corretto prezzo di riferimento
                 final_performance = UnderlyingEvaluationEngine.calculate_performance(
                     final_prices, reference_prices, evaluation_type
                 )
                 
                 capitale_finale = notional * max(0, final_performance)
                 payoffs[sim] = capitale_finale + coupon_sim
-                # ===================== FINE MODIFICA =====================
+            # --- FINE LOGICA CAPITALE ---
 
             coupon_totali[sim] = coupon_sim
             memoria_coupon[sim] = memoria_sim
@@ -733,7 +731,7 @@ class PhoenixCertificate(CertificateBase):
         
         self.risultati_simulazione['payoffs'] = risultati
         logger.info(f"Payoff Phoenix calcolati - Efficacia memoria: {risultati['efficacia_memoria']:.2%}")
-        return risultati    
+        return risultati 
 
     def calculate_payoff(self, spot_prices: Union[float, List[float]]) -> Union[float, List[float]]:
         """
@@ -1105,7 +1103,70 @@ class UnifiedCertificateAnalyzer:
                 results[scenario_name] = {'error': str(e)}
         
         return results
-    
+
+
+    def analyze_parameter_sensitivity(self, parameter_name: str, value_range: List[float], n_simulations: int = 5000) -> Dict:
+        """
+        Analizza la sensitività del Fair Value con un numero di simulazioni personalizzato.
+        """
+        self.logger.info(f"Avvio analisi di sensitività per il parametro: {parameter_name}")
+        
+        if not isinstance(self.certificate, (ExpressCertificate, PhoenixCertificate)) or not self.certificate.parametri_mercato:
+            raise ValueError("L'analisi di sensitività è supportata solo per certificati con parametri di mercato configurati.")
+        
+        original_params = self.certificate.parametri_mercato.copy()
+        try:
+            base_result = self.calculate_fair_value(n_simulations=n_simulations)
+            base_fair_value = base_result['fair_value']
+            self.logger.info(f"Fair Value di base per sensitività: €{base_fair_value:.2f}")
+        except Exception as e:
+            self.logger.error(f"Impossibile calcolare il Fair Value di base: {e}")
+            self.certificate.parametri_mercato = original_params
+            raise
+
+        sensitivity_results = {'base_fair_value': base_fair_value, 'results': []}
+        
+        for value in value_range:
+            try:
+                temp_params = original_params.copy()
+                if parameter_name == 'volatilita':
+                    original_vols = np.array(original_params['volatilita'])
+                    temp_params['volatilita'] = (original_vols * value).tolist()
+                    self.certificate.parametri_mercato = temp_params
+                    param_label = f"{value:.0%}"
+                else:
+                    self.logger.warning(f"Parametro '{parameter_name}' non supportato. Analisi interrotta.")
+                    break
+
+                self.logger.info(f"Test sensitività {parameter_name} con valore/moltiplicatore: {value}")
+                
+                if 'payoffs' in self.certificate.risultati_simulazione:
+                    del self.certificate.risultati_simulazione['payoffs']
+                
+                fv_result = self.calculate_fair_value(n_simulations=n_simulations)
+                fair_value = fv_result['fair_value']
+                
+                change_pct = (fair_value / base_fair_value - 1) if base_fair_value != 0 else 0
+
+                sensitivity_results['results'].append({
+                    'parameter_value': value,
+                    'label': param_label,
+                    'fair_value': fair_value,
+                    'change_pct': change_pct
+                })
+
+            except Exception as e:
+                self.logger.error(f"Errore durante l'analisi per {parameter_name}={value}: {e}")
+                sensitivity_results['results'].append({
+                    'parameter_value': value,
+                    'error': str(e)
+                })
+
+        self.certificate.parametri_mercato = original_params
+        self.logger.info("Analisi di sensitività completata. Parametri originali ripristinati.")
+        
+        return sensitivity_results
+
     def generate_performance_report(self) -> str:
         """Genera report di performance dettagliato"""
         

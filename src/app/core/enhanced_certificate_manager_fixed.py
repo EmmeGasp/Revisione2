@@ -501,7 +501,43 @@ class EnhancedCertificateManagerV15:
     # ========================================
     # NUOVI METODI DI GESTIONE CENTRALE v16   
     # ========================================
-    
+
+ 
+    def create_certificate_instance_from_config(self, isin: str) -> Optional[object]:
+        """
+        Crea un'istanza calcolabile (es. ExpressCertificate) a partire dalla
+        configurazione salvata, senza eseguire l'intera analisi.
+        Questo metodo è fondamentale per le analisi "what-if" come la sensitività.
+        """
+        if isin not in self.configurations:
+            self.logger.error(f"Configurazione non trovata per ISIN {isin}")
+            return None
+
+        print(f"🔧 Creazione istanza calcolabile per {isin}...")
+        
+        try:
+            # 1. Recupera la configurazione di base aggiornata con i dati di mercato
+            real_cert_config = self.refresh_and_get_certificate_for_analysis(isin)
+            if not real_cert_config:
+                self.logger.error(f"Impossibile ottenere i dati di mercato per {isin}. Creazione istanza fallita.")
+                return None
+
+            # 2. Utilizza RealCertificateImporter per creare l'oggetto di calcolo (Express, Phoenix, etc.)
+            #    Questa è la stessa logica usata in run_full_analysis e garantisce coerenza.
+            importer = RealCertificateImporter()
+            certificate_instance = importer.import_certificate(real_cert_config)
+
+            if certificate_instance:
+                print(f"   ✅ Istanza di tipo '{type(certificate_instance).__name__}' creata con successo.")
+                return certificate_instance
+            else:
+                self.logger.error(f"L'importer non ha restituito un'istanza valida per {isin}.")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Errore critico durante la creazione dell'istanza per {isin}: {e}", exc_info=True)
+            return None
+
     def get_certificate_data_for_gui(self, cert_id: str) -> Optional[Dict]:
         """Restituisce i dati di un certificato in formato dizionario, pronto per la GUI."""
         if cert_id in self.configurations:
@@ -1105,10 +1141,69 @@ class EnhancedCertificateManagerV15:
             traceback.print_exc()
             messagebox.showerror("Errore di Analisi", f"Si è verificato un errore durante l'analisi:\n{e}")
             return None
+
+
+
+    def run_full_analysis_with_overrides(self, cert_id: str, overrides: Dict, n_simulations: int = 10000) -> Optional[Dict]:
+        """
+        Esegue un'analisi completa utilizzando parametri di mercato forniti manualmente (override)
+        e un numero di simulazioni personalizzato.
+        """
+        if cert_id not in self.configurations:
+            messagebox.showerror("Errore", f"Certificato {cert_id} non trovato.")
+            return None
+
+        print(f"🚀 Avvio analisi completa per: {cert_id} con parametri manuali.")
+        enhanced_config = self.configurations[cert_id]
         
- # ========================================
-# *** VERSIONE CORRETTA *** - GUI INTEGRATION
-# ========================================
+        certificate_object = self.create_certificate_instance_from_config(cert_id)
+        if not certificate_object:
+            return None
+
+        try:
+            if overrides:
+                print("   -> Applicazione parametri manuali...")
+                if 'volatilita' in overrides:
+                    certificate_object.parametri_mercato['volatilita'] = overrides['volatilita']
+                    print(f"      Volatilità manuale: {[f'{v:.2%}' for v in overrides['volatilita']]}")
+                if 'dividendi' in overrides:
+                    certificate_object.parametri_mercato['dividendi'] = overrides['dividendi']
+                    print(f"      Dividendi manuali: {[f'{d:.2%}' for d in overrides['dividendi']]}")
+            
+            risk_analyzer = UnifiedRiskAnalyzer()
+
+            print(f"   -> Calcolo con protezione ({n_simulations} simulazioni)...")
+            results_protected = risk_analyzer.analyze_certificate_risk(
+                certificate_object, n_simulations=n_simulations, apply_protection=True
+            )
+
+            print(f"   -> Calcolo 'naked' ({n_simulations} simulazioni)...")
+            results_naked = risk_analyzer.analyze_certificate_risk(
+                certificate_object, n_simulations=n_simulations, apply_protection=False
+            )
+
+            costo_protezione = results_naked.fair_value - results_protected.fair_value
+            market_price = enhanced_config.in_life_state.current_market_data.get('certificate_market_price', 'N/A')
+
+            analysis_output = {
+                "certificate_market_price": market_price,
+                "fair_value": round(results_protected.fair_value, 2),
+                "var_95": f"{results_protected.var_95:.2%}",
+                "barrier_breach_probability": f"{results_protected.barrier_breach_probability:.2%}",
+                "protection_implicit_cost": round(costo_protezione, 2),
+                "fair_value_naked": round(results_naked.fair_value, 2),
+                "volatility": f"{results_protected.volatility:.2%}",
+                "analysis_timestamp": datetime.now().isoformat()
+            }
+            
+            print(f"✅ Analisi 'what-if' completata per {cert_id}.")
+            return analysis_output
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            messagebox.showerror("Errore di Analisi", f"Si è verificato un errore durante l'analisi con override:\n{e}")
+            return None
 
 class CalculoDateAutoDialogV15:
     """*** VERSIONE CORRETTA v15 *** - Dialog calcolo date con tutte le correzioni"""

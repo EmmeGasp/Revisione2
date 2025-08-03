@@ -1,4 +1,4 @@
-# Diario di bordo Sistema Certificati. Data di riferimento 02/08/2025 (prima delle lavorazioni) 
+# Diario di bordo Sistema Certificati. Data di riferimento 03/08/2025 (prima delle lavorazioni) 
 
 # Link al repo github: https://github.com/EmmeGasp/Revisione2 (branch refactoring-struttura)
 
@@ -52,6 +52,7 @@
 * Effettuati interventi sulle routine di calcolo del payoff per strutture express e phoenix con raccordo alla routine di calcolo statico del payoff. Effettuati test sulla validità dell'approccio. L'esito è stato positivo.
 * C'è stato qualche giorno di sospensione dell'attività dovendo accordare priorità ad altro progetto. 
 * Avviato il percorso previsto dalla roadmap definita nella sessione precedente. In particolare modifica del motore di calcolo, modifica nell'attività di raccordo fra GUI e motore di calcolo, aggiornamento della GUI. Questo implica lavorare sul calcolo della probabilità di rottura barriere, calcolo del costo implicito della protezione ed altri interventi di raccordo.
+* Attività sostanzialmente completata. Ora è possibile: stabilire il numero delle simulazioni che si vogliono utilizzare, distinte per analisi di sensitività e analisi dei dati; effettuare un'analisi di sensitività per individuare i migliorari parametri da utilizzare rispetto a quelli determinati sulla base dei soli dati di mercato. Il what-if, che coincide con lo standard se non si inseriscono personalizzazioni nei parametri, e l'analisi di sensitivity sono salvati nella finestra con i dati di dettaglio dei singoli certificati. 
 
 ## Stato attuale.
 
@@ -68,13 +69,13 @@
 * Fatti interventi per rendere effettiva l'applicazione dell'opzione airbag sui parametri valutatativi del certificato. In base al test effettuato, l'intervento è stato risolutivo
 * Fatti miglioramenti sulla GUI. I dati relativi all'analisi sul certificato sono resi disponibili nel finestra con i dati di dettaglio del certificato selezionato; i dati di analisi sono presenti solo se validi, cioè basati sui gli altri dati esposti nella stessa finestra. La modifica di uno dei parametri del certificato elimina l'informazione sul profilo di rischio dello stesso. In sostanza, in questa ipotesi il percoroso di analisi deve essere ripetuto.
 * Introdotti ulteriori analisi e valutazione di parametri quali ad esempio barriere dinamiche e valutazione del costo implicito dei feature. Ha richiesto diversi interventi (vedi descrizione nella sezione passi completati) e si è giunti ad un risultato solo parzialmente soddisfacente. Benchè sia stato condiviso che il FV, per tutta una serie di motivi, non può essere letto come una stima del valore di mercato, rimane il fatto che la distanza fra i due appare ancora solo parzialmente spiegata e dovrà essere perciò oggetto di ulteriore indagine.
+* Superati i problemi di acquisizione della versione aggiornata di main_window.py dovuti alla difficoltà di trasmissione di un listato completa alla fine di una giornata di lavoro, la versione è operativa ed quindi possibile andare avanti nel progetto.
 * 
  
 
 ## Obiettivo corrente
 
-  ** Allineamento modello e tuning volatilità (analisi sensitività). Replicare la logica di gestione della barriera dinamica appena implementata in calculate_express_payoffs anche all'interno del metodo calculate_phoenix_payoffs nel file unified_certificates.py, per garantire la coerenza tra le due tipologie di certificato. 
- 
+  ** Decidere su quali aspetti lavorare per estendere il progetto sulla basi dell'analisi iniziale, ora resa disponibile in tre formati: docx, txt ed md nella cartella dedicata a contenere le risore.
 
 ## Passi completati. Note  
 
@@ -139,3 +140,7 @@ Oltre alla sistemazione di alcuni dettagli (ad esempio l'inserimento nella fines
 ###  Data di riferimento 02/08/2025 (mattino, prima delle lavorazioni della giornata)
 ** Molte le attività svolte. È opportuno fare un riepilogo.
 Effettuati interventi su consolidated_risk_system.py (class RiskMetrics e def analyze_certificate_risk); enhanced_certificate_manager_fixed.py  (orchestratore, class EnhancedCertificateManagerV15 con nuova def run_full_analysis), con i necessari interventi di raccordo, ad esempio sui main_window per gestire il corretto richiamo delle routine. La introduzione delle modifiche ha comportato anche diversi interventi di sistemazione e allineamento che ha occupato buona parte della lavorazione. Ad esempio è stata scoporata da enhanced... ed inserita in listato dedicato date_utils.py la intera classe DataCalculationUtils per evitare problemi di circolarità con necessità di interventi per far colluquiare correttamente le varie routine fra di loro, compresi i campi passati e come sono passati (interventi quindi anche su real_certificate_integration.py) Inserita la gestione delle barriere dinamiche con individuazione dei possibili autocall nel durante della vita del certificato con sistemazione della stringa utilizzata per la corretta individuazione e recupero della clausola Worst-of. Inoltre modificata la routine per non sovrascrivere i dati presenti ed inseriti dall'operatore sul DY con i valori recuperati da Yahoo. Questo si è reso necessario sia come logica di programma sia per necessità di verificare la validità del modello matematico sottostante. La presente di un titolo particoalre con DY elevato, giustificato tuttavia dalla situazione specifica dell'azienda, sembrava pesaro troppo sulla determinazione del FV. In effetti inserendo un DY più allineato il FV è aumentato confermando la validità del modello. L'incremento è rimasto contenuto da qui l'esigenze di ulteriori analisi per meglio comprendere il fenomeno. Migliorata la disponibilità di dati nel box sul dettaglio dei certificati.
+
+###  Data di riferimento 03/08/2025 (mattino, prima delle lavorazioni della giornata)
+** Allineato il codice già inserito per i certificati express anche al caso phoenix (unifed_certificates.py)
+Inserita l'analisi di sensitività sulla volalità con la necessaria aggiunta di metodi e classi nel motore di calcolo (unifed_certificates.py) con l'inserimento delle modifiche necessarie nella GUI (main_windows.py) e nel file cui spetta la gestione centralizzata (enhanced_certificate_manager_fixed.py). Introdotta la possibilità di personalizzazione dei parametri e quindi di override, temporanea, sui valori recuperati e proposti da sistema. Introdotto lo stesso principio anche per il numero di simulazioni da effettuare. Output arricchito: le varie analisi sono inserite nel box che illustra le caratteristiche principali del certificato, senza necessità quindi di entrare in modifica e rieseguire le elaborazioni per recuperare i dati che interessano.
