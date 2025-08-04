@@ -53,6 +53,7 @@
 * C'è stato qualche giorno di sospensione dell'attività dovendo accordare priorità ad altro progetto. 
 * Avviato il percorso previsto dalla roadmap definita nella sessione precedente. In particolare modifica del motore di calcolo, modifica nell'attività di raccordo fra GUI e motore di calcolo, aggiornamento della GUI. Questo implica lavorare sul calcolo della probabilità di rottura barriere, calcolo del costo implicito della protezione ed altri interventi di raccordo.
 * Attività sostanzialmente completata. Ora è possibile: stabilire il numero delle simulazioni che si vogliono utilizzare, distinte per analisi di sensitività e analisi dei dati; effettuare un'analisi di sensitività per individuare i migliorari parametri da utilizzare rispetto a quelli determinati sulla base dei soli dati di mercato. Il what-if, che coincide con lo standard se non si inseriscono personalizzazioni nei parametri, e l'analisi di sensitivity sono salvati nella finestra con i dati di dettaglio dei singoli certificati. 
+* Tentativo di passaggio da gemini code web a gemini code da Vscode. Fallito. Il beneficio della scrittura diretta del codice è del tutto ipotetico in quanto gestito in modo molto sommario e confusionario e quindi in grado di produrre danni certamenti recuperali visto l'utilizzo di git e github ma forieri di notevole perdita di tempo. Alla fine l'attività, ancora non conclusa riguarda l'intervento sulla modalità di esposizione dei dati di sensititività e what-if, secondo la interpretazione già indicata al punto precedente, nella finestra di dettaglio dei certificati finanziari 
 
 ## Stato attuale.
 
@@ -70,12 +71,13 @@
 * Fatti miglioramenti sulla GUI. I dati relativi all'analisi sul certificato sono resi disponibili nel finestra con i dati di dettaglio del certificato selezionato; i dati di analisi sono presenti solo se validi, cioè basati sui gli altri dati esposti nella stessa finestra. La modifica di uno dei parametri del certificato elimina l'informazione sul profilo di rischio dello stesso. In sostanza, in questa ipotesi il percoroso di analisi deve essere ripetuto.
 * Introdotti ulteriori analisi e valutazione di parametri quali ad esempio barriere dinamiche e valutazione del costo implicito dei feature. Ha richiesto diversi interventi (vedi descrizione nella sezione passi completati) e si è giunti ad un risultato solo parzialmente soddisfacente. Benchè sia stato condiviso che il FV, per tutta una serie di motivi, non può essere letto come una stima del valore di mercato, rimane il fatto che la distanza fra i due appare ancora solo parzialmente spiegata e dovrà essere perciò oggetto di ulteriore indagine.
 * Superati i problemi di acquisizione della versione aggiornata di main_window.py dovuti alla difficoltà di trasmissione di un listato completa alla fine di una giornata di lavoro, la versione è operativa ed quindi possibile andare avanti nel progetto.
-* 
+Dopo il tentativo di passaggio di ambiente è necessario recuperare le versioni corrette e aggiornate nella gestione della vista dei dati sensitività/mercato/what-if dei 3 dei file principali main_window.py, enhanced_certificate_manager_fixed.py e unified_certificates.py. Le problematiche di acquisizione dei listati sono legati probabilmente anche alla lunghezza degli stessi. Nonostante le esplicite richieste non viene fornito il dato sui limiti delle chat, anche per la versione a pagamento. Quel che è peggio è che non c'è neanche nessun warning tempestivo. Ho inserito una direttiva di spezzare gl invii in blocchi da max 500/600 righe. Provvederò io all'assemblaggio. Da verificare se sarà rispettata
+I file di progetto (diario di bordo, analisi iniziale, file di supporto, etc) sono stati spostati nella cartella resources.
  
 
 ## Obiettivo corrente
 
-  ** Decidere su quali aspetti lavorare per estendere il progetto sulla basi dell'analisi iniziale, ora resa disponibile in tre formati: docx, txt ed md nella cartella dedicata a contenere le risore.
+  ** Recuperare le versioni aggiornate e corrette dei tre dei file principali del progetto. Vedi ultimo punto di stato attuale 
 
 ## Passi completati. Note  
 
@@ -144,3 +146,6 @@ Effettuati interventi su consolidated_risk_system.py (class RiskMetrics e def an
 ###  Data di riferimento 03/08/2025 (mattino, prima delle lavorazioni della giornata)
 ** Allineato il codice già inserito per i certificati express anche al caso phoenix (unifed_certificates.py)
 Inserita l'analisi di sensitività sulla volalità con la necessaria aggiunta di metodi e classi nel motore di calcolo (unifed_certificates.py) con l'inserimento delle modifiche necessarie nella GUI (main_windows.py) e nel file cui spetta la gestione centralizzata (enhanced_certificate_manager_fixed.py). Introdotta la possibilità di personalizzazione dei parametri e quindi di override, temporanea, sui valori recuperati e proposti da sistema. Introdotto lo stesso principio anche per il numero di simulazioni da effettuare. Output arricchito: le varie analisi sono inserite nel box che illustra le caratteristiche principali del certificato, senza necessità quindi di entrare in modifica e rieseguire le elaborazioni per recuperare i dati che interessano.
+
+###  Data di riferimento 04/08/2025 (mattino, prima delle lavorazioni della giornata)
+Quella di ieri è stata una giornata disastrosa ed una perdita di tempo. Di nuovo ho valutato la possibilità di abbandonare il progetto. Certamente fosse successo poco prima della scadenza del termine per il rinnovo dell'abbonamento, non avrei avuto dubbi. Visto che il rinnovo è, a questo punto purtroppo, del 2/8 u.s. andrò avanti per qualche giorno. In assenza di un deciso miglioramento sarà da valutare o l'abbandono o il passaggio ad altro modello di LLM.

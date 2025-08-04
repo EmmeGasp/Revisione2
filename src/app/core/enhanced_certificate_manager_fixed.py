@@ -1205,6 +1205,56 @@ class EnhancedCertificateManagerV15:
             messagebox.showerror("Errore di Analisi", f"Si è verificato un errore durante l'analisi con override:\n{e}")
             return None
 
+    def run_and_save_standard_analysis(self, cert_id: str, n_simulations: int = 10000) -> Optional[Dict]:
+        """
+        Esegue un'analisi standard (senza override) e salva i risultati
+        direttamente nella configurazione del certificato.
+        """
+        if cert_id not in self.configurations:
+            self.logger.error(f"Certificato {cert_id} non trovato per l'analisi standard.")
+            return None
+
+        self.logger.info(f"🚀 Avvio analisi standard PERMANENTE per: {cert_id}")
+        enhanced_config = self.configurations[cert_id]
+
+        certificate_object = self.create_certificate_instance_from_config(cert_id)
+        if not certificate_object:
+            return None
+
+        try:
+            risk_analyzer = UnifiedRiskAnalyzer()
+
+            self.logger.info(f"   -> Calcolo standard con protezione ({n_simulations} simulazioni)...")
+            results_protected = risk_analyzer.analyze_certificate_risk(certificate_object, n_simulations=n_simulations, apply_protection=True)
+
+            self.logger.info(f"   -> Calcolo standard 'naked' ({n_simulations} simulazioni)...")
+            results_naked = risk_analyzer.analyze_certificate_risk(certificate_object, n_simulations=n_simulations, apply_protection=False)
+
+            costo_protezione = results_naked.fair_value - results_protected.fair_value
+            market_price = enhanced_config.in_life_state.current_market_data.get('certificate_market_price', 'N/A')
+
+            analysis_output = {
+                "is_valid": True,
+                "certificate_market_price": market_price,
+                "fair_value": round(results_protected.fair_value, 2),
+                "var_95": f"{results_protected.var_95:.2%}",
+                "barrier_breach_probability": f"{results_protected.barrier_breach_probability:.2%}",
+                "protection_implicit_cost": round(costo_protezione, 2),
+                "fair_value_naked": round(results_naked.fair_value, 2),
+                "volatility": f"{results_protected.volatility:.2%}",
+                "analysis_timestamp": datetime.now().isoformat()
+            }
+
+            enhanced_config.analysis_results = analysis_output
+            self._save_configurations()
+            
+            self.logger.info(f"✅ Analisi standard completata e SALVATA per {cert_id}.")
+            return analysis_output
+
+        except Exception as e:
+            self.logger.error(f"Errore durante l'analisi standard per {cert_id}: {e}", exc_info=True)
+            return None
+
 class CalculoDateAutoDialogV15:
     """*** VERSIONE CORRETTA v15 *** - Dialog calcolo date con tutte le correzioni"""
     

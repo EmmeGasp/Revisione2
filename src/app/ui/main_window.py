@@ -1,29 +1,24 @@
 # ==========================================================
 # NOME FILE: main_window.py
-# ULTIMA MODIFICA: 2025-08-03 (Refactoring UI dettagli e fix)
-# VERSIONE: 1.8
+# ULTIMA MODIFICA: 2025-08-03 (Logica Analisi Standard/What-If)
+# VERSIONE: 1.9
 # ==========================================================
 #
 # DESCRIZIONE:
 # Modulo principale per la gestione grafica (Tkinter) dei certificati finanziari.
-# Permette inserimento, modifica, validazione e visualizzazione dettagliata dei certificati,
-# con supporto a tutti i nuovi campi v15.1, gestione barriere dinamiche, note, e integrazione
-# con sistemi di calcolo date, portfolio manager e analisi di sensitività.
 #
-# CHANGELOG v1.8:
-# - FIX: Corretto un refuso (apice extra) in _on_capital_barrier_type_changed che causava un errore.
-#        (Grazie per la segnalazione!)
-# - REFACTOR (UI): Rimosso il box "Analisi Standard" dalla vista dettagliata per ridurre la ridondanza
-#   con l'analisi "What-If".
-# - FEATURE (UI): Aggiunto il conteggio delle simulazioni anche all'intestazione dei risultati
-#   dell'analisi di sensitività per maggiore chiarezza.
+# CHANGELOG v1.9:
+# - REFACTOR (Logica Analisi): Il pulsante "Analizza" ora distingue tra:
+#   - Analisi Standard: Se i parametri non vengono modificati, i risultati vengono salvati permanentemente.
+#   - Analisi What-If: Se i parametri vengono modificati, i risultati sono temporanei per la sessione.
+# - REFACTOR (UI): La vista dettagliata è stata riorganizzata per mostrare in modo chiaro
+#   l'analisi di base salvata e, separatamente, l'eventuale analisi what-if temporanea.
+# - FIX: Il dialog di override ora rileva correttamente se i parametri sono stati modificati dall'utente.
 #
 # PRINCIPALI CLASSI/FUNZIONI:
 # - EnhancedCertificateDialogV15_1_Corrected: Dialog avanzato per inserimento/modifica certificato
+# - ParameterOverrideDialog: Dialog per l'override dei parametri, ora con logica di rilevamento modifiche.
 # - SimpleCertificateGUIManagerV15_1_Corrected: Gestione GUI principale e interazione utente
-#
-# DIPENDENZE:
-# - tkinter, json, pathlib, moduli interni (real_certificate_integration, enhanced_certificate_manager_fixed, ecc.)
 # ==========================================================
 
 import tkinter as tk
@@ -108,7 +103,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
 
         if self.existing_data:
             if hasattr(self.existing_data, 'isin'):
-                print(f"� Dati esistenti per l'oggetto con ISIN: {self.existing_data.get('isin')}")
+                print(f"📝 Dati esistenti per l'oggetto con ISIN: {self.existing_data.get('isin')}")
             else:
                 print(f"📝 Dati esistenti (dict): {list(self.existing_data.keys())}")
         else:
@@ -763,10 +758,7 @@ class EnhancedCertificateDialogV15_1_Corrected:
                 for field_name in ['dynamic_barrier_start_level', 'step_down_rate', 'dynamic_barrier_end_level']:
                     if field_name in self.fields:
                         self.fields[field_name].config(state=tk.DISABLED)
-                        ### FIX ###
-                        # Corretto il refuso segnalato dall'utente: rimosso l'apice extra.
                         self.fields[field_name].delete(0, tk.END)
-                        ### FINE FIX ###
 
     def _update_dependency_description(self, event=None):
         """Aggiorna la descrizione del tipo di dipendenza sottostante."""
@@ -777,15 +769,26 @@ class EnhancedCertificateDialogV15_1_Corrected:
             self.dependency_description_label.config(text=formatted_description)
 
 class ParameterOverrideDialog:
-    """Dialog avanzato per l'override dei parametri, con memoria e colonne separate."""
+    """
+    ### MODIFICATO v1.9 ###
+    Dialog per l'override dei parametri. Ora rileva se i valori sono stati
+    effettivamente modificati dall'utente e restituisce un dizionario
+    con lo stato dell'operazione.
+    """
     def __init__(self, parent, certificate_instance, last_overrides=None):
-        self.result = None
+        # Il risultato è un dizionario per contenere più informazioni
+        self.result = {'cancelled': True, 'was_changed': False, 'overrides': None}
         self.parent = parent
         self.instance = certificate_instance
         self.last_overrides = last_overrides if last_overrides else {}
 
+        # Memorizziamo i valori iniziali per rilevare le modifiche
+        self.initial_values_numeric = {
+            'volatilita': self.instance.parametri_mercato.get('volatilita', []),
+            'dividendi': self.instance.parametri_mercato.get('dividendi', [])
+        }
         self.dialog = tk.Toplevel(parent)
-        self.dialog.title("Override Parametri Analisi 'What-If'")
+        self.dialog.title("Override Parametri Analisi")
         self.dialog.geometry("750x400")
         self.dialog.transient(parent)
         self.dialog.grab_set()
@@ -800,7 +803,7 @@ class ParameterOverrideDialog:
         main_frame = ttk.Frame(self.dialog, padding="10")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        info_label = "Modifica i parametri per la simulazione 'What-If'. Lascia un campo vuoto per usare il valore attuale."
+        info_label = "Modifica i parametri per una simulazione 'What-If'. Lascia un campo vuoto per usare il valore attuale. Se non modifichi nulla, verrà eseguita e salvata un'analisi standard."
         ttk.Label(main_frame, text=info_label, wraplength=730, font=("Arial", 9, "italic")).pack(pady=(0, 15))
 
         grid_frame = ttk.Frame(main_frame)
@@ -820,14 +823,15 @@ class ParameterOverrideDialog:
 
         for i, asset in enumerate(self.underlyings):
             vol_entry = ttk.Entry(grid_frame, width=12, justify='right')
-            if i < len(last_vols):
-                vol_entry.insert(0, f"{(last_vols[i] * 100):.2f}")
+            # Popola con l'ultimo override, se esiste, altrimenti con il valore attuale
+            val_to_show = last_vols[i] if i < len(last_vols) else self.initial_values_numeric['volatilita'][i]
+            vol_entry.insert(0, f"{(val_to_show * 100):.2f}")
             self.entries['volatilita'].append(vol_entry)
 
         for i, asset in enumerate(self.underlyings):
             div_entry = ttk.Entry(grid_frame, width=12, justify='right')
-            if i < len(last_divs):
-                div_entry.insert(0, f"{(last_divs[i] * 100):.2f}")
+            val_to_show = last_divs[i] if i < len(last_divs) else self.initial_values_numeric['dividendi'][i]
+            div_entry.insert(0, f"{(val_to_show * 100):.2f}")
             self.entries['dividendi'].append(div_entry)
 
         for i, asset in enumerate(self.underlyings):
@@ -846,24 +850,28 @@ class ParameterOverrideDialog:
         ttk.Button(button_frame, text="Esegui Analisi", command=self._apply_and_close).pack(side=tk.RIGHT)
 
     def _apply_and_close(self):
-        """Valida gli input, usa i default se i campi sono vuoti, e imposta i risultati."""
-        overrides = {'volatilita': [], 'dividendi': []}
+        """Valida gli input, rileva se sono cambiati, e imposta il risultato."""
+        final_overrides = {'volatilita': [], 'dividendi': []}
+        was_changed = False
+
         try:
             params = self.instance.parametri_mercato
             for i in range(len(self.underlyings)):
+                # Gestione Volatilità
                 vol_str = self.entries['volatilita'][i].get().strip()
-                if vol_str:
-                    overrides['volatilita'].append(float(vol_str.replace(',', '.')) / 100.0)
-                else:
-                    overrides['volatilita'].append(params['volatilita'][i])
+                current_vol = float(vol_str.replace(',', '.')) / 100.0 if vol_str else params['volatilita'][i]
+                final_overrides['volatilita'].append(current_vol)
+                if not math.isclose(current_vol, self.initial_values_numeric['volatilita'][i], rel_tol=1e-5):
+                    was_changed = True
 
+                # Gestione Dividendi
                 div_str = self.entries['dividendi'][i].get().strip()
-                if div_str:
-                    overrides['dividendi'].append(float(div_str.replace(',', '.')) / 100.0)
-                else:
-                    overrides['dividendi'].append(params['dividendi'][i])
+                current_div = float(div_str.replace(',', '.')) / 100.0 if div_str else params['dividendi'][i]
+                final_overrides['dividendi'].append(current_div)
+                if not math.isclose(current_div, self.initial_values_numeric['dividendi'][i], rel_tol=1e-5):
+                    was_changed = True
 
-            self.result = overrides
+            self.result = {'cancelled': False, 'was_changed': was_changed, 'overrides': final_overrides}
             self.dialog.destroy()
         except ValueError:
             messagebox.showerror("Errore di Input", "Assicurati che tutti i valori inseriti siano numeri validi (es. 10 o 35.5).", parent=self.dialog)
@@ -892,7 +900,7 @@ class SimulationSettingsDialog:
         settings_frame = ttk.Frame(main_frame)
         settings_frame.pack(fill=tk.X, pady=5)
 
-        ttk.Label(settings_frame, text="Simulazioni Analisi 'What-If' (Pulsante Analizza):", width=40).grid(row=0, column=0, sticky=tk.W, pady=5)
+        ttk.Label(settings_frame, text="Simulazioni Analisi Standard / What-If:", width=40).grid(row=0, column=0, sticky=tk.W, pady=5)
         ttk.Entry(settings_frame, textvariable=self.main_analysis_var, width=15).grid(row=0, column=1, sticky=tk.E, pady=5)
 
         ttk.Label(settings_frame, text="Simulazioni Analisi Sensitività:", width=40).grid(row=1, column=0, sticky=tk.W, pady=5)
@@ -923,7 +931,7 @@ class SimulationSettingsDialog:
             messagebox.showerror("Errore di Input", f"Inserire solo numeri interi positivi.\n{e}", parent=self.dialog)
 
 class SimpleCertificateGUIManagerV15_1_Corrected:
-    """*** GUI MANAGER v15.1 CORRECTED *** - Con calc date integrata e correzioni complete"""
+    """*** GUI MANAGER v1.9 *** - Logica analisi Standard/What-If"""
 
     _dependency_descriptions = {
         'Worst-Of': "🔻 WORST-OF: Il peggiore tra tutti determina il payoff (MASSIMO RISCHIO). Performance = MIN(asset1, asset2, asset3, ...) - Basta che uno crolli!",
@@ -935,7 +943,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
 
     def __init__(self):
             self.root = tk.Tk()
-            self.root.title("Sistema Certificati v1.8 - Stabile")
+            self.root.title("Sistema Certificati v1.9 - Logica Analisi Unificata")
             self.root.geometry("1400x900")
 
             self.logger = logging.getLogger(__name__)
@@ -970,7 +978,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
 
             self._setup_gui_v15_1_corrected()
             self._refresh_certificate_list()
-            print("🚀 === GUI MANAGER v1.8 INIZIALIZZATO ===")
+            print("🚀 === GUI MANAGER v1.9 INIZIALIZZATO ===")
 
     def _open_simulation_settings(self):
         """Apre il dialog per modificare le impostazioni di simulazione."""
@@ -984,7 +992,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
             return None
 
     def _setup_gui_v15_1_corrected(self):
-        """Setup GUI completa v15.1 CORRECTED"""
+        """Setup GUI completa v1.9"""
 
         toolbar = ttk.Frame(self.root)
         toolbar.pack(fill=tk.X, padx=10, pady=5)
@@ -996,20 +1004,18 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         ttk.Button(toolbar, text="🗑️ Elimina",
                   command=self._delete_selected).pack(side=tk.LEFT, padx=(0, 5))
 
+        ttk.Separator(toolbar, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=10)
+
         if self.enhanced_manager:
-            ttk.Button(toolbar, text="📅 Calc Date v15.1",
+            ttk.Button(toolbar, text="📅 Calc Date",
                       command=self._calculate_dates_integrated).pack(side=tk.LEFT, padx=(0, 5))
-        else:
-            ttk.Button(toolbar, text="📅 Calc Date (non disponibile)",
-                      state="disabled").pack(side=tk.LEFT, padx=(0, 5))
-
-        ttk.Button(toolbar, text="📊 Analizza",
-                  command=self._analyze_selected_certificate).pack(side=tk.LEFT, padx=(0, 5))
-
-        self.analyze_sensitivity_button = ttk.Button(toolbar, text="🔬 Sensitivity Analysis", command=self.run_sensitivity_analysis)
+        
+        ### NUOVA CONFIGURAZIONE CON PULSANTE UNICO ###
+        ttk.Button(toolbar, text="🔬 Analizza...", command=self._analyze_selected_certificate).pack(side=tk.LEFT, padx=(0, 5))
+        self.analyze_sensitivity_button = ttk.Button(toolbar, text="📈 Sensitivity Analysis", command=self.run_sensitivity_analysis)
         self.analyze_sensitivity_button.pack(side=tk.LEFT, padx=(0,5))
 
-        ttk.Button(toolbar, text="📈 Esporta Analisi Excel",
+        ttk.Button(toolbar, text="📊 Esporta Analisi Excel",
                   command=self._export_analysis_excel).pack(side=tk.LEFT, padx=(0, 5))
 
         ttk.Separator(toolbar, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=10)
@@ -1072,23 +1078,19 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         details_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         self.status_var = tk.StringVar()
-        self.status_var.set("Sistema Certificati v1.8 - Pronto")
+        self.status_var.set("Sistema Certificati v1.9 - Pronto")
         status_bar = ttk.Label(self.root, textvariable=self.status_var, relief=tk.SUNKEN)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
     def run_sensitivity_analysis(self):
-        """
-        Esegue l'analisi di sensitività sulla volatilità per il certificato selezionato.
-        VERSZONE CORRETTA: Delega la creazione dell'istanza al manager, salva i risultati
-        e non chiama due volte il popup.
-        """
+        """Esegue l'analisi di sensitività sulla volatilità per il certificato selezionato."""
         selected_id = self.get_selected_certificate_id()
         if not selected_id:
             messagebox.showwarning("Nessuna Selezione", "Selezionare un certificato da analizzare.")
             return
 
         try:
-            messagebox.showinfo("Preparazione Analisi", "Recupero dati di mercato e preparazione del certificato...")
+            self.status_var.set(f"🔬 Preparazione analisi di sensitività per {selected_id}...")
             self.root.update_idletasks()
 
             certificate_instance = self.enhanced_manager.create_certificate_instance_from_config(selected_id)
@@ -1100,7 +1102,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
             volatility_multipliers = [0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
             analyzer = UnifiedCertificateAnalyzer(certificate_instance)
 
-            messagebox.showinfo("Analisi in Corso", "Avvio dell'analisi di sensitività sulla volatilità. Il processo potrebbe richiedere alcuni istanti...")
+            self.status_var.set(f"🔬 Analisi di sensitività in corso...")
             self.root.update_idletasks()
 
             results = analyzer.analyze_parameter_sensitivity('volatilita', volatility_multipliers, n_simulations=self.n_sim_sensitivity)
@@ -1112,11 +1114,11 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         except Exception as e:
             messagebox.showerror("Errore Analisi", f"Si è verificato un errore durante l'analisi di sensitività:\n{e}")
             self.logger.error(f"Errore durante l'analisi di sensitività: {e}", exc_info=True)
+        finally:
+            self.status_var.set("Pronto.")
 
     def show_sensitivity_results(self, results_data: dict):
-        """
-        Mostra i risultati dell'analisi di sensitività in una finestra di dialogo.
-        """
+        """Mostra i risultati dell'analisi di sensitività in una finestra di dialogo."""
         report_text = "Analisi di Sensitività - Impatto della Volatilità\n"
         report_text += "="*60 + "\n\n"
         report_text += f"Fair Value di Base (Volatilità 100%): €{results_data['base_fair_value']:.2f}\n\n"
@@ -1225,8 +1227,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
 
     def _edit_selected(self, event=None):
         """
-        Modifica il certificato selezionato, accedendo correttamente ai dati
-        dall'oggetto EnhancedCertificateConfig e usando il nome corretto del Dialog.
+        Modifica il certificato selezionato, invalidando i risultati delle analisi.
         """
         selection = self.tree.selection()
         if not selection:
@@ -1245,12 +1246,17 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
             if hasattr(dialog, 'result') and dialog.result:
                 updated_data = dialog.result
                 cert_id = updated_data['isin']
+                
+                # Invalida i risultati dell'analisi di base
                 enhanced_config_obj = self.enhanced_manager.configurations.get(cert_id)
                 if enhanced_config_obj and hasattr(enhanced_config_obj, 'analysis_results') and enhanced_config_obj.analysis_results:
                     print(f"✏️ Invalidazione risultati analisi per {cert_id} a seguito di modifica.")
                     enhanced_config_obj.analysis_results['is_valid'] = False
                 
-                # Invalida anche i risultati di sensitività
+                # Invalida i risultati temporanei
+                if cert_id in self.last_what_if_results:
+                    del self.last_what_if_results[cert_id]
+                    print(f"✏️ Invalidazione risultati what-if per {cert_id}.")
                 if cert_id in self.last_sensitivity_results:
                     del self.last_sensitivity_results[cert_id]
                     print(f"✏️ Invalidazione risultati sensitività per {cert_id}.")
@@ -1286,7 +1292,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
                     getattr(cert_data, 'maturity_date', 'N/A'),
                     status
                 ))
-        self.status_var.set(f"Sistema Certificati v1.8 - {len(self.certificates)} certificati caricati")
+        self.status_var.set(f"Sistema Certificati v1.9 - {len(self.certificates)} certificati caricati")
 
     def _reselect_tree_item(self, cert_id_to_select: str):
         """Scorre il treeview e riseleziona la riga corrispondente all'ISIN fornito."""
@@ -1307,7 +1313,13 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
             self._display_certificate_details(cert_id)
 
     def _display_certificate_details(self, cert_id):
-        """Visualizza dettagli completi, inclusa l'analisi 'what-if' e dettagli sottostanti."""
+        """
+        ### MODIFICATO v1.9 ###
+        Visualizza i dettagli con la nuova logica:
+        1. Mostra sempre l'analisi di base salvata.
+        2. Mostra l'analisi 'what-if' solo se presente nella sessione corrente.
+        3. Mostra l'analisi di sensitività solo se presente nella sessione corrente.
+        """
         if cert_id not in self.certificates:
             return
         
@@ -1335,7 +1347,7 @@ class SimpleCertificateGUIManagerV15_1_Corrected:
         airbag_notes = get_attr(cert_data, 'airbag_notes', '') or ''
         note_barriere = get_attr(cert_data, 'note_barriere', '') or ''
         
-        details = f"""DETTAGLI CERTIFICATO v1.8
+        details = f"""DETTAGLI CERTIFICATO v1.9
 {'='*60}
 
 INFORMAZIONI BASE:
@@ -1396,28 +1408,63 @@ Mesi di Ritardo Osservazione: {get_attr(cert_data, 'observation_delay_months')}
         
         details += f"Tipo Dipendenza: {get_attr(cert_data, 'underlying_dependency_type')}\n"
 
-        ### REFACTOR (UI) ###
-        # Rimosso il box "Analisi Standard" perché ridondante.
-        # if hasattr(enhanced_config, 'analysis_results') and enhanced_config.analysis_results and enhanced_config.analysis_results.get('is_valid', True):
-        #    ... (codice rimosso) ...
-        ### FINE REFACTOR ###
+        # --- INIZIO BLOCCO VISUALIZZAZIONE ANALISI (Logica Definitiva v1.9) ---
+        
+        # 1. Mostra l'analisi di base salvata (se valida)
+        saved_analysis = getattr(enhanced_config, 'analysis_results', None)
+        if saved_analysis and saved_analysis.get('is_valid', True):
+            timestamp_str = "N/A"
+            if 'analysis_timestamp' in saved_analysis:
+                try:
+                    timestamp_str = datetime.fromisoformat(saved_analysis['analysis_timestamp']).strftime('%d/%m/%Y %H:%M')
+                except (ValueError, TypeError):
+                    timestamp_str = "Data non valida"
 
-        if cert_id in self.last_what_if_results:
-            what_if_data = self.last_what_if_results[cert_id]
+            details += f"""
+{'='*60}
+📊 ANALISI DI BASE (salvata il {timestamp_str})
+
+Prezzo di Mercato:       € {saved_analysis.get('certificate_market_price', 'N/A')}
+Fair Value Stimato:      € {saved_analysis.get('fair_value', 'N/A')}
+Fair Value (Naked):      € {saved_analysis.get('fair_value_naked', 'N/A')}
+Costo Implicito Protez.: € {saved_analysis.get('protection_implicit_cost', 'N/A')}
+
+Volatilità Stimata:      {saved_analysis.get('volatility', 'N/A')}
+Prob. Rottura Barriera:  {saved_analysis.get('barrier_breach_probability', 'N/A')}
+VaR 95%:                 {saved_analysis.get('var_95', 'N/A')}
+"""
+        else:
+            details += f"""
+{'='*60}
+📊 ANALISI DI BASE
+Nessuna analisi valida salvata per questo certificato.
+Premere 'Analizza' per eseguire una nuova valutazione.
+"""
+
+        # 2. Mostra l'ultima analisi "What-If" (se esiste per la sessione corrente)
+        what_if_data = self.last_what_if_results.get(cert_id)
+        if what_if_data:
             results = what_if_data['results']
             overrides = what_if_data['overrides']
             base_params = what_if_data['base_params_for_comparison']
             sims_used = what_if_data.get('simulations_used', self.n_sim_main_analysis)
             
+            timestamp_str = "N/A"
+            if 'analysis_timestamp' in results:
+                try:
+                    timestamp_str = datetime.fromisoformat(results['analysis_timestamp']).strftime('%d/%m/%Y %H:%M:%S')
+                except (ValueError, TypeError):
+                    timestamp_str = "Data non valida"
+            
             details += f"""
 {'='*60}
-🔬 RISULTATI ULTIMA ANALISI 'WHAT-IF' ({sims_used:,} simulazioni):
+🔬 ANALISI 'WHAT-IF' (Temporanea - del {timestamp_str})
+Simulazioni: {sims_used:,}
 
 Fair Value Stimato:      € {results.get('fair_value', 'N/A')}
-Volatilità Stimata:      {results.get('volatility', 'N/A')}
 Prob. Rottura Barriera:  {results.get('barrier_breach_probability', 'N/A')}
 
-Parametri Manuali Utilizzati:"""
+Parametri Manuali Applicati:"""
 
             changed_params_text = ""
             base_vols = base_params.get('volatilita', [])
@@ -1427,7 +1474,7 @@ Parametri Manuali Utilizzati:"""
 
             for i, asset in enumerate(get_attr(cert_data, 'yahoo_ticker', [])):
                 param_changed = False
-                asset_text = f"     • {asset}:"
+                asset_text = f"\n     • {asset}:"
                 if i < len(base_vols) and i < len(override_vols) and not math.isclose(base_vols[i], override_vols[i]):
                     asset_text += f" Vol={override_vols[i]:.2%}"
                     param_changed = True
@@ -1435,21 +1482,28 @@ Parametri Manuali Utilizzati:"""
                     asset_text += f" Div={override_divs[i]:.2%}"
                     param_changed = True
                 if param_changed:
-                    changed_params_text += asset_text + "\n"
+                    changed_params_text += asset_text
 
             if not changed_params_text:
-                details += "     Nessun override applicato (usati valori di base).\n"
+                details += " Nessun override applicato (usati valori di base)."
             else:
                 details += changed_params_text
 
-        if cert_id in self.last_sensitivity_results:
-            sensitivity_data = self.last_sensitivity_results[cert_id]
-            ### FEATURE (UI) ###
-            # Aggiunto il numero di simulazioni all'intestazione.
+        # 3. Mostra l'analisi di sensitività (se presente nella sessione corrente)
+        sensitivity_data = self.last_sensitivity_results.get(cert_id)
+        if sensitivity_data:
             sims_used_sensitivity = self.n_sim_sensitivity
+            timestamp_str = "N/A"
+            if 'analysis_timestamp' in sensitivity_data:
+                try:
+                    timestamp_str = datetime.fromisoformat(sensitivity_data['analysis_timestamp']).strftime('%d/%m/%Y %H:%M:%S')
+                except (ValueError, TypeError):
+                    timestamp_str = "Data non valida"
+            
             details += f"""
 {'='*60}
-🔬 RISULTATI ANALISI DI SENSITIVITÀ ({sims_used_sensitivity:,} simulazioni):
+📈 ANALISI DI SENSITIVITÀ (Temporanea - del {timestamp_str})
+Simulazioni: {sims_used_sensitivity:,}
 Fair Value di Base (Volatilità 100%): €{sensitivity_data['base_fair_value']:.2f}
 
 {'Moltiplicatore':<15} {'Fair Value':>15} {'Variazione':>15}
@@ -1459,7 +1513,8 @@ Fair Value di Base (Volatilità 100%): €{sensitivity_data['base_fair_value']:.
                 fv_str = f"€{res['fair_value']:.2f}"
                 change_str = f"{res['change_pct']:.2%}"
                 details += f"{res['label']:<15} {fv_str:>15} {change_str:>15}\n"
-            ### FINE FEATURE ###
+        
+        # --- FINE BLOCCO VISUALIZZAZIONE ANALISI ---
 
         self.details_text.delete(1.0, tk.END)
         self.details_text.insert(1.0, details)
@@ -1526,21 +1581,14 @@ Fair Value di Base (Volatilità 100%): €{sensitivity_data['base_fair_value']:.
 
     def _analyze_selected_certificate(self):
         """
-        Avvia l'analisi, permette l'override, salva il risultato what-if
-        e aggiorna la vista dettagliata.
+        ### NUOVA LOGICA v1.9 ###
+        Avvia l'analisi con un singolo pulsante.
+        - Se l'utente non modifica i parametri, esegue e salva un'analisi standard.
+        - Se l'utente modifica i parametri, esegue un'analisi "what-if" temporanea.
         """
         selected_isin = self.get_selected_certificate_id()
         if not selected_isin:
             messagebox.showwarning("Attenzione", "Seleziona un certificato da analizzare.")
-            return
-
-        cert_obj = self.enhanced_manager.configurations.get(selected_isin)
-        if not cert_obj or not cert_obj.base_config: return
-        if len(getattr(cert_obj.base_config, 'prezzi_iniziali_sottostanti', [])) == 0:
-            messagebox.showwarning("Dati Obbligatori Mancanti", "Il campo 'Prezzi Iniziali/Strike' è obbligatorio per l'analisi.")
-            return
-        if not getattr(cert_obj.base_config, 'coupon_dates'):
-            messagebox.showwarning("Dati Mancanti", "Il certificato non ha una schedulazione delle cedole. Usa 'Calc Date'.")
             return
 
         self.status_var.set(f"📊 Preparazione analisi per {selected_isin}...")
@@ -1549,41 +1597,46 @@ Fair Value di Base (Volatilità 100%): €{sensitivity_data['base_fair_value']:.
         try:
             certificate_instance = self.enhanced_manager.create_certificate_instance_from_config(selected_isin)
             if not certificate_instance:
-                messagebox.showerror("Errore Preparazione", f"Impossibile preparare il certificato {selected_isin}. Controllare i log.")
+                messagebox.showerror("Errore Preparazione", f"Impossibile preparare il certificato {selected_isin} per l'analisi. Controllare i log.")
                 self.status_var.set("Pronto.")
                 return
 
             previous_overrides = self.last_overrides.get(selected_isin)
             override_dialog = ParameterOverrideDialog(self.root, certificate_instance, previous_overrides)
             
-            if override_dialog.result is None:
+            dialog_result = override_dialog.result
+            if dialog_result.get('cancelled', True):
                 print("ℹ️ Analisi annullata dall'utente.")
                 self.status_var.set("Pronto.")
                 return
                 
-            override_params = override_dialog.result
-            self.last_overrides[selected_isin] = override_params
-
-            self.status_var.set(f"📊 Analisi what-if in corso per {selected_isin}...")
-            self.root.update_idletasks()
-            
-            analysis_results = self.enhanced_manager.run_full_analysis_with_overrides(
-                selected_isin, override_params, n_simulations=self.n_sim_main_analysis
-            )
-
-            if analysis_results:
-                self.logger.info(f"✅ Analisi what-if completata per {selected_isin}. Risultati ricevuti.")
-                self.last_what_if_results[selected_isin] = {
-                    'results': analysis_results,
-                    'overrides': override_params,
-                    'base_params_for_comparison': certificate_instance.parametri_mercato,
-                    'simulations_used': self.n_sim_main_analysis
-                }
-                PreviewDialog(self.root, f"Risultati Analisi 'What-If' - {selected_isin}", "Risultati calcolati con successo. Controlla il pannello Dettagli Certificato.")
-                self.status_var.set("Analisi 'what-if' completata con successo.")
-                self._display_certificate_details(selected_isin)
+            # --- NUOVA LOGICA DECISIONALE ---
+            if dialog_result['was_changed']:
+                # Scenario B: Parametri modificati -> Esegui analisi "What-If"
+                self.status_var.set(f"🔬 Analisi 'What-If' in corso per {selected_isin}...")
+                self.root.update_idletasks()
+                override_params = dialog_result['overrides']
+                self.last_overrides[selected_isin] = override_params
+                
+                analysis_results = self.enhanced_manager.run_full_analysis_with_overrides(
+                    selected_isin, override_params, n_simulations=self.n_sim_main_analysis
+                )
+                if analysis_results:
+                    self.last_what_if_results[selected_isin] = {'results': analysis_results, 'overrides': override_params, 'base_params_for_comparison': certificate_instance.parametri_mercato, 'simulations_used': self.n_sim_main_analysis}
+                    messagebox.showinfo("Analisi 'What-If' Completata", "Risultati temporanei calcolati. Controlla il pannello Dettagli.")
+                    self.status_var.set("Analisi 'what-if' completata.")
             else:
-                self.status_var.set("Analisi 'what-if' fallita o annullata.")
+                # Scenario A: Parametri non modificati -> Esegui analisi Standard
+                self.status_var.set(f"📊 Analisi Standard in corso per {selected_isin}...")
+                self.root.update_idletasks()
+                analysis_results = self.enhanced_manager.run_and_save_standard_analysis(selected_isin, self.n_sim_main_analysis)
+                if analysis_results:
+                    messagebox.showinfo("Analisi Standard Completata", f"Analisi standard per {selected_isin} completata e salvata con successo.")
+                    if selected_isin in self.last_what_if_results: del self.last_what_if_results[selected_isin]
+                    self.status_var.set("Analisi standard completata.")
+            
+            # In ogni caso, aggiorna la vista
+            self._display_certificate_details(selected_isin)
 
         except Exception as e:
             self.logger.error(f"Errore imprevisto durante l'analisi in GUI per {selected_isin}: {e}", exc_info=True)
@@ -1630,7 +1683,7 @@ Fair Value di Base (Volatilità 100%): €{sensitivity_data['base_fair_value']:.
     def close(self):
         """Chiusura applicazione"""
         if messagebox.askyesno("Chiusura", "Chiudere il Sistema Certificati?"):
-            print("🚪 Chiusura GUI Certificate Manager v1.8")
+            print("🚪 Chiusura GUI Certificate Manager v1.9")
             self.root.destroy()
 
     def run(self):
@@ -1639,7 +1692,7 @@ Fair Value di Base (Volatilità 100%): €{sensitivity_data['base_fair_value']:.
         self.root.mainloop()
 
 if __name__ == "__main__":
-    print("🚀 === SISTEMA CERTIFICATI v1.8 - AVVIO ===")
+    print("🚀 === SISTEMA CERTIFICATI v1.9 - AVVIO ===")
     try:
         manager = SimpleCertificateGUIManagerV15_1_Corrected()
         manager.run()
@@ -1647,4 +1700,4 @@ if __name__ == "__main__":
         print(f"❌ Errore avvio Sistema: {e}")
         import traceback
         traceback.print_exc()
-        messagebox.showerror("Errore Sistema", f"Errore critico avvio Sistema:\n{e}")
+        messagebox.showerror("Errore Critico", f"Errore critico avvio Sistema:\n{e}")
